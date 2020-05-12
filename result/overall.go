@@ -3,7 +3,7 @@ package result
 
 import (
 	"fmt"
-	"github.com/NETWAYS/go-check/status"
+	"github.com/NETWAYS/go-check"
 	"strings"
 )
 
@@ -18,30 +18,30 @@ type Overall struct {
 
 func (o *Overall) Add(state int, output string) {
 	switch state {
-	case status.OK:
+	case check.OK:
 		o.OKs++
-	case status.Warning:
+	case check.Warning:
 		o.Warnings++
-	case status.Critical:
+	case check.Critical:
 		o.Criticals++
 	default:
 		o.Unknowns++
 	}
 
-	o.Outputs = append(o.Outputs, fmt.Sprintf("[%s] %s", status.String(state), output))
+	o.Outputs = append(o.Outputs, fmt.Sprintf("[%s] %s", check.StatusText(state), output))
 }
 
 func (o *Overall) GetStatus() int {
 	if o.Criticals > 0 {
-		return status.Critical
+		return check.Critical
 	} else if o.Unknowns > 0 {
-		return status.Unknown
+		return check.Unknown
 	} else if o.Warnings > 0 {
-		return status.Warning
+		return check.Warning
 	} else if o.OKs > 0 {
-		return status.OK
+		return check.OK
 	} else {
-		return status.Unknown
+		return check.Unknown
 	}
 }
 

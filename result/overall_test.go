@@ -2,7 +2,7 @@ package result
 
 import (
 	"fmt"
-	"github.com/NETWAYS/go-check/status"
+	"github.com/NETWAYS/go-check"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -86,8 +86,8 @@ func TestOverall_GetOutput(t *testing.T) {
 
 func ExampleOverall_Add() {
 	overall := Overall{}
-	overall.Add(status.OK, "One element is good")
-	overall.Add(status.Critical, "The other is critical")
+	overall.Add(check.OK, "One element is good")
+	overall.Add(check.Critical, "The other is critical")
 
 	fmt.Println(overall)
 	// Output: {1 0 1 0  [[OK] One element is good [CRITICAL] The other is critical]}
@@ -95,8 +95,8 @@ func ExampleOverall_Add() {
 
 func ExampleOverall_GetOutput() {
 	overall := Overall{}
-	overall.Add(status.OK, "One element is good")
-	overall.Add(status.Critical, "The other is critical")
+	overall.Add(check.OK, "One element is good")
+	overall.Add(check.Critical, "The other is critical")
 
 	fmt.Println(overall.GetOutput())
 	// Output:
@@ -107,8 +107,8 @@ func ExampleOverall_GetOutput() {
 
 func ExampleOverall_GetStatus() {
 	overall := Overall{}
-	overall.Add(status.OK, "One element is good")
-	overall.Add(status.Critical, "The other is critical")
+	overall.Add(check.OK, "One element is good")
+	overall.Add(check.Critical, "The other is critical")
 
 	fmt.Println(overall.GetStatus())
 	// Output: 2
