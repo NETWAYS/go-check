@@ -2,9 +2,10 @@ package check
 
 import (
 	"fmt"
-	"github.com/mitchellh/go-ps"
 	"os"
 	"runtime/debug"
+
+	"github.com/mitchellh/go-ps"
 )
 
 // AllowExit lets you disable the call to os.Exit() in ExitXxx() functions of this package.
@@ -18,7 +19,10 @@ var PrintStack = true
 // Exit prints the plugin output and exits the program
 func Exit(rc int, output string, args ...interface{}) {
 	fmt.Println(StatusText(rc), "-", fmt.Sprintf(output, args...))
+	BaseExit(rc)
+}
 
+func BaseExit(rc int) {
 	if AllowExit {
 		os.Exit(rc)
 	} else {
