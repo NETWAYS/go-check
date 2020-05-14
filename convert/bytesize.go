@@ -1,11 +1,11 @@
 package convert
 
-import(
+import (
 	"fmt"
+	"math"
 	"regexp"
 	"strconv"
 	"strings"
-	"math"
 )
 
 type Bytesize struct {
@@ -13,34 +13,34 @@ type Bytesize struct {
 	Unit string
 }
 type Unit struct {
-	symbol string
-	name string
-	base int
+	symbol      string
+	name        string
+	base        int
 	exponential int
 }
 
 var ByteUnits = []Unit{
 	// https://de.wikipedia.org/wiki/Byte#SI-Präfixe
 	// SI + Byte
-	{ "B",	"Byte",			1, 1, },
-	{ "kB",	"Kilobyte",		10,	3, },
-	{ "MB",	"Megabyte",		10, 6, },
-	{ "GB",	"Gigabyte",		10,	9, },
-	{ "TB",	"Terrabyte",	10,	12, },
-	{ "PB", "Petabyte",		10,	15, },
-	{ "EB", "Exabyte",		10,	18, },
-	{ "ZB", "Zettabyte",	10,	21,	},
-	{ "YB", "Yottabyte",	10,	24,	},
+	{"B", "Byte", 1, 1},
+	{"kB", "Kilobyte", 10, 3},
+	{"MB", "Megabyte", 10, 6},
+	{"GB", "Gigabyte", 10, 9},
+	{"TB", "Terrabyte", 10, 12},
+	{"PB", "Petabyte", 10, 15},
+	{"EB", "Exabyte", 10, 18},
+	{"ZB", "Zettabyte", 10, 21},
+	{"YB", "Yottabyte", 10, 24},
 
 	// IEC
-	{ "KiB", "Kibibyte",	2, 10, },
-	{ "MiB", "Mebibyte",	2, 20, },
-	{ "GiB", "Gibibyte",	2, 30, },
-	{ "TiB", "Tebibyte",	2, 40, },
-	{ "PiB", "Pebibyte",	2, 50, },
-	{ "EiB", "Exbibyte",	2, 60, },
-	{ "ZiB", "Zebibyte",	2, 70, },
-	{ "YiB", "Yobibyte",	2, 80, },
+	{"KiB", "Kibibyte", 2, 10},
+	{"MiB", "Mebibyte", 2, 20},
+	{"GiB", "Gibibyte", 2, 30},
+	{"TiB", "Tebibyte", 2, 40},
+	{"PiB", "Pebibyte", 2, 50},
+	{"EiB", "Exbibyte", 2, 60},
+	{"ZiB", "Zebibyte", 2, 70},
+	{"YiB", "Yobibyte", 2, 80},
 }
 
 var ByteUnitMap map[string]Unit
@@ -69,7 +69,7 @@ func (b *Bytesize) cleanUnits(input string) string {
 			input = value.symbol
 		}
 	}
-	
+
 	return input
 }
 
@@ -111,7 +111,7 @@ func (b *Bytesize) calc(targetUnit string) float64 {
 		float64(ByteUnitMap[b.Unit].base),
 		float64(ByteUnitMap[b.Unit].exponential),
 	)
-	
+
 	// calculate from bytes to target unit
 	// example: Bytes -> Gigabytes
 	// x := 1.000.000.000 / (match.Pow(10, 9))
@@ -124,23 +124,23 @@ func (b *Bytesize) calc(targetUnit string) float64 {
 	return float64(x)
 }
 
-func (b *Bytesize) ToKilobyte() float64		{ return b.calc("kB")	}
-func (b *Bytesize) ToMegabyte() float64		{ return b.calc("MB")	}
-func (b *Bytesize) ToGigabyte() float64		{ return b.calc("GB")	}
-func (b *Bytesize) ToTerrabyte() float64	{ return b.calc("TB")	}
-func (b *Bytesize) ToPetabyte() float64		{ return b.calc("PB")	}
-func (b *Bytesize) ToExabyte() float64		{ return b.calc("EB")	}
-func (b *Bytesize) ToZettabyte() float64	{ return b.calc("ZB")	}
-func (b *Bytesize) ToYottabyte() float64	{ return b.calc("YB")	}
+func (b *Bytesize) ToKilobyte() float64  { return b.calc("kB") }
+func (b *Bytesize) ToMegabyte() float64  { return b.calc("MB") }
+func (b *Bytesize) ToGigabyte() float64  { return b.calc("GB") }
+func (b *Bytesize) ToTerrabyte() float64 { return b.calc("TB") }
+func (b *Bytesize) ToPetabyte() float64  { return b.calc("PB") }
+func (b *Bytesize) ToExabyte() float64   { return b.calc("EB") }
+func (b *Bytesize) ToZettabyte() float64 { return b.calc("ZB") }
+func (b *Bytesize) ToYottabyte() float64 { return b.calc("YB") }
 
-func (b *Bytesize) ToKibibyte() float64		{ return b.calc("KiB") }
-func (b *Bytesize) ToMebibyte() float64		{ return b.calc("MiB") }
-func (b *Bytesize) ToGibibyte() float64		{ return b.calc("GiB") }
-func (b *Bytesize) ToTebibyte() float64		{ return b.calc("TiB") }
-func (b *Bytesize) ToPebibyte() float64		{ return b.calc("PiB") }
-func (b *Bytesize) ToExbibyte() float64		{ return b.calc("EiB") }
-func (b *Bytesize) ToZebibyte() float64		{ return b.calc("ZiB") }
-func (b *Bytesize) ToYobibyte() float64		{ return b.calc("YiB") }
+func (b *Bytesize) ToKibibyte() float64 { return b.calc("KiB") }
+func (b *Bytesize) ToMebibyte() float64 { return b.calc("MiB") }
+func (b *Bytesize) ToGibibyte() float64 { return b.calc("GiB") }
+func (b *Bytesize) ToTebibyte() float64 { return b.calc("TiB") }
+func (b *Bytesize) ToPebibyte() float64 { return b.calc("PiB") }
+func (b *Bytesize) ToExbibyte() float64 { return b.calc("EiB") }
+func (b *Bytesize) ToZebibyte() float64 { return b.calc("ZiB") }
+func (b *Bytesize) ToYobibyte() float64 { return b.calc("YiB") }
 
 func (b *Bytesize) ToHumanReadable() string {
 	// clean units
@@ -155,9 +155,9 @@ func (b *Bytesize) ToHumanReadable() string {
 	// calc logarithm
 	log10 := math.Log10(c)
 	log10tollerant := log10 - 2
-	
+
 	// search ByteUnitMap for the right exponential
-	var newUnit  = b.Unit
+	var newUnit = b.Unit
 	for key, value := range ByteUnitMap {
 		if float64(value.exponential) <= log10 && float64(value.exponential) >= log10tollerant {
 			newUnit = key
