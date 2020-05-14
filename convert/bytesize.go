@@ -74,30 +74,30 @@ func (b *Bytesize) cleanUnits(input string) string {
 	return input
 }
 
-func ParseBytes(data interface{}) *Bytesize {
+func ParseBytes(data interface{}) (error, *Bytesize) {
 	b := &Bytesize{}
 
 	// given data is int; set it directly
 	if s, ok := data.(int); ok {
 		b.Data = s
 		b.Unit = "B"
-	}
-
-	// given data is string; we have to correct
-	if s, ok := data.(string); ok {
-		matched, _ := regexp.MatchString(`^(\d+)$`, s)
-		if matched == true {
-			b.Data, _ = strconv.Atoi(s)
+	} else if s, ok := data.(string); ok { // given data is string; we have to correct
+		i, err := strconv.Atoi(s)
+		if err == nil {
+			b.Data = i
 			b.Unit = "B"
 		} else {
-			rx, _ := regexp.Compile(`^(\d+)\s*(\w+)$`)
-			found := rx.FindAllStringSubmatch(s, -1)
-			b.Data, _ = strconv.Atoi(found[0][1])
-			b.Unit = b.cleanUnits(found[0][2])
+			re := regexp.MustCompile(`^(\d+)\s*(\w+)$`)
+			found := re.FindStringSubmatch(s)
+			if len(found) == 0 {
+				return fmt.Errorf("could not parse input into number and optional unit"), nil
+			}
+			b.Data, _ = strconv.Atoi(found[1])
+			b.Unit = b.cleanUnits(found[2])
 		}
 	}
 
-	return b
+	return nil, b
 }
 
 func (b *Bytesize) calc(targetUnit string) float64 {

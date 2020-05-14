@@ -7,7 +7,10 @@ import (
 )
 
 func ExampleParseBytes() {
-	b := ParseBytes("100MB")
+	err, b := ParseBytes("100MB")
+	if err != nil {
+		panic(err)
+	}
 
 	fmt.Println(b)
 	fmt.Println(b.ToHumanReadable())
@@ -21,32 +24,44 @@ func ExampleParseBytes() {
 
 func TestParseBytes(t *testing.T) {
 	var b *Bytesize
+	var err error
 
-	b = ParseBytes(1)
+	err, b = ParseBytes(1)
+	assert.NoError(t, err)
 	assert.Equal(t, 1, b.Data)
 	assert.Equal(t, "B", b.Unit)
 
-	b = ParseBytes("1")
+	err, b = ParseBytes("1")
+	assert.NoError(t, err)
 	assert.Equal(t, 1, b.Data)
 	assert.Equal(t, "B", b.Unit)
 
-	b = ParseBytes("1mb")
+	err, b = ParseBytes("1mb")
+	assert.NoError(t, err)
 	assert.Equal(t, 1, b.Data)
 	assert.Equal(t, "MB", b.Unit)
 
-	t.Skip("missing error handling")
-	b = ParseBytes("foobar")
-	assert.Equal(t, 1, b.Data)
-	assert.Equal(t, "MB", b.Unit)
+	// t.Skip("missing error handling")
+	err, b = ParseBytes("foobar")
+	assert.Error(t, err)
 }
 
 func TestBytesize_String(t *testing.T) {
-	assert.Equal(t, "100 MB", ParseBytes("100mb").String())
-	assert.Equal(t, "100 MB", fmt.Sprint(ParseBytes("100mb")))
+	err, b := ParseBytes("100mb")
+	assert.NoError(t, err)
+	assert.Equal(t, "100 MB", b.String())
+
+	err, b = ParseBytes("100mb")
+	assert.NoError(t, err)
+	assert.Equal(t, "100 MB", fmt.Sprint(b))
 }
 
 func TestBytesize_ToHumanReadable(t *testing.T) {
-	assert.Equal(t, "900 MB", ParseBytes("900MB").ToHumanReadable())
-	assert.Equal(t, "1 GB", ParseBytes("1000MB").ToHumanReadable())
-	assert.Equal(t, "1.2 GB", ParseBytes("1200MB").ToHumanReadable())
+	err, b := ParseBytes("900MB")
+	assert.NoError(t, err)
+	assert.Equal(t, "900 MB", b.ToHumanReadable())
+
+	err, b = ParseBytes("1000mb")
+	assert.NoError(t, err)
+	assert.Equal(t, "1 GB", b.ToHumanReadable())
 }
