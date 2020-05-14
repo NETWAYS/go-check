@@ -9,14 +9,15 @@ import (
 )
 
 type Bytesize struct {
-	Data int
+	Data uint64
 	Unit string
 }
+
 type Unit struct {
 	symbol      string
 	name        string
-	base        int
-	exponential int
+	base        uint
+	exponential uint
 }
 
 var ByteUnits = []Unit{
@@ -78,23 +79,38 @@ func ParseBytes(data interface{}) (error, *Bytesize) {
 	b := &Bytesize{}
 
 	// given data is int; set it directly
-	if s, ok := data.(int); ok {
-		b.Data = s
-		b.Unit = "B"
-	} else if s, ok := data.(string); ok { // given data is string; we have to correct
-		i, err := strconv.Atoi(s)
+	switch d := data.(type) {
+	case string:
+		i, err := strconv.ParseUint(d, 10, 64)
 		if err == nil {
 			b.Data = i
 			b.Unit = "B"
 		} else {
 			re := regexp.MustCompile(`^(\d+)\s*(\w+)$`)
-			found := re.FindStringSubmatch(s)
+			found := re.FindStringSubmatch(d)
 			if len(found) == 0 {
-				return fmt.Errorf("could not parse input into number and optional unit"), nil
+				return fmt.Errorf("could not parse input into number and optional unit: %s", d), nil
 			}
-			b.Data, _ = strconv.Atoi(found[1])
+
+			i, err = strconv.ParseUint(found[1], 10, 16)
+			if err != nil {
+				return fmt.Errorf("could not convert input to uint64: %s", d), nil
+			}
+
+			b.Data = i
 			b.Unit = b.cleanUnits(found[2])
 		}
+	case uint64:
+		b.Data = d
+		b.Unit = "B"
+	case uint:
+		b.Data = uint64(d)
+		b.Unit = "B"
+	case int:
+		b.Data = uint64(d)
+		b.Unit = "B"
+	default:
+		return fmt.Errorf("can not handle type %T", d), nil
 	}
 
 	return nil, b
