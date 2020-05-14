@@ -13,7 +13,7 @@ func initRand() int {
 	rand.Seed(time.Now().UnixNano())
 	min := 1
 	max := 100
-	return (rand.Intn(max-min+1) + min)
+	return rand.Intn(max-min+1) + min
 }
 
 func main() {
@@ -23,7 +23,7 @@ func main() {
 	flags.Version = "1.0.0"
 
 	warning := flags.Set.IntP("warning", "w", 20, "warning threshold")
-	critical := flags.Set.IntP("critical", "c", 50, "cricitcal threshold")
+	critical := flags.Set.IntP("critical", "c", 50, "critical threshold")
 
 	ranNum := initRand()
 

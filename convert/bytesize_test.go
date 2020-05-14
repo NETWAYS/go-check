@@ -41,7 +41,6 @@ func TestParseBytes(t *testing.T) {
 	assert.Equal(t, 1, b.Data)
 	assert.Equal(t, "MB", b.Unit)
 
-	// t.Skip("missing error handling")
 	err, b = ParseBytes("foobar")
 	assert.Error(t, err)
 }
