@@ -20,13 +20,14 @@ type Unit struct {
 }
 
 var ByteUnits = []Unit{
-	// https://de.wikipedia.org/wiki/Byte#SI-Präfixe
+	// https://en.wikipedia.org/wiki/Byte#Unit_symbol
+
 	// SI + Byte
 	{"B", "Byte", 1, 1},
 	{"kB", "Kilobyte", 10, 3},
 	{"MB", "Megabyte", 10, 6},
 	{"GB", "Gigabyte", 10, 9},
-	{"TB", "Terrabyte", 10, 12},
+	{"TB", "Terabyte", 10, 12},
 	{"PB", "Petabyte", 10, 15},
 	{"EB", "Exabyte", 10, 18},
 	{"ZB", "Zettabyte", 10, 21},
@@ -121,13 +122,13 @@ func (b *Bytesize) calc(targetUnit string) float64 {
 		float64(ByteUnitMap[targetUnit].exponential),
 	))
 
-	return float64(x)
+	return x
 }
 
 func (b *Bytesize) ToKilobyte() float64  { return b.calc("kB") }
 func (b *Bytesize) ToMegabyte() float64  { return b.calc("MB") }
 func (b *Bytesize) ToGigabyte() float64  { return b.calc("GB") }
-func (b *Bytesize) ToTerrabyte() float64 { return b.calc("TB") }
+func (b *Bytesize) ToTerabyte() float64  { return b.calc("TB") }
 func (b *Bytesize) ToPetabyte() float64  { return b.calc("PB") }
 func (b *Bytesize) ToExabyte() float64   { return b.calc("EB") }
 func (b *Bytesize) ToZettabyte() float64 { return b.calc("ZB") }
@@ -154,17 +155,18 @@ func (b *Bytesize) ToHumanReadable() string {
 
 	// calc logarithm
 	log10 := math.Log10(c)
-	log10tollerant := log10 - 2
+	log10tolerant := log10 - 2
 
 	// search ByteUnitMap for the right exponential
 	var newUnit = b.Unit
+	// TODO: limit to SI units?
 	for key, value := range ByteUnitMap {
-		if float64(value.exponential) <= log10 && float64(value.exponential) >= log10tollerant {
+		if float64(value.exponential) <= log10 && float64(value.exponential) >= log10tolerant {
 			newUnit = key
+			break
 		}
 	}
 
 	// re-calculate
-	newVal := b.calc(newUnit)
-	return fmt.Sprintf("%g "+newUnit, newVal)
+	return fmt.Sprintf("%g %s", b.calc(newUnit), newUnit)
 }
