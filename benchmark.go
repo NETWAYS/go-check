@@ -22,11 +22,35 @@ type BenchmarkEvent struct {
 	HeapAlloc  uint64
 }
 
+var ActiveBenchmark *Benchmark
+
 // NewBenchmark starts a new benchmark and records the message as event
 func NewBenchmark(message string) *Benchmark {
 	b := &Benchmark{}
 	b.Record(message)
 	return b
+}
+
+// Initialize a Benchmark for the running program as static instance
+func InitBenchmark(message string) {
+	ActiveBenchmark = NewBenchmark(message)
+}
+
+// Recording timing and memory for the current program
+func RecordBenchmark(message string) {
+	if ActiveBenchmark != nil {
+		ActiveBenchmark.Record(message)
+	}
+}
+
+// Dump the Benchmark to stdout
+func DumpBenchmark() {
+	ActiveBenchmark.Dump()
+}
+
+// Dump the Benchmark when criteria is met, to be used with defer and a boolean variable
+func DumpBenchmarkWhen(criteria bool) {
+	ActiveBenchmark.DumpWhen(criteria)
 }
 
 // Record the current step of execution
