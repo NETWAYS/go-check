@@ -11,14 +11,16 @@ import (
 )
 
 type Flags struct {
-	Name         string
-	Readme       string
-	Version      string
-	Timeout      int
-	Verbose      bool
-	Debug        bool
-	PrintVersion bool
-	Set          *flag.FlagSet
+	Name          string
+	Readme        string
+	Version       string
+	Timeout       int
+	Verbose       bool
+	Debug         bool
+	PrintVersion  bool
+	DefaultFlags  bool
+	DefaultHelper bool
+	Set           *flag.FlagSet
 }
 
 func NewFlags() *Flags {
@@ -39,17 +41,25 @@ func NewFlags() *Flags {
 		flagSet.PrintDefaults()
 	}
 
-	flagSet.IntVarP(&flags.Timeout, "timeout", "t", 30, "Abort the check after n seconds")
-	flagSet.BoolVarP(&flags.Debug, "debug", "d", false, "Enable debug mode")
-	flagSet.BoolVarP(&flags.Verbose, "verbose", "v", false, "Enable verbose mode")
-	flagSet.BoolVarP(&flags.PrintVersion, "version", "V", false, "Print version and exit")
-
 	flags.Set = flagSet
+
+	// set some defaults
+	flags.DefaultFlags = true
+	flags.Timeout = 30
+	flags.DefaultHelper = true
 
 	return flags
 }
 
-func (f *Flags) Parse(arguments []string) {
+func (f *Flags) ParseArguments() {
+	f.ParseArray(os.Args[1:])
+}
+
+func (f *Flags) ParseArray(arguments []string) {
+	if f.DefaultFlags {
+		f.addDefaultFlags()
+	}
+
 	err := f.Set.Parse(arguments)
 	if err != nil {
 		if err != flag.ErrHelp {
@@ -62,6 +72,20 @@ func (f *Flags) Parse(arguments []string) {
 		fmt.Println(f.Name, "version", f.Version)
 		BaseExit(3)
 	}
+
+	if f.DefaultHelper {
+		f.SetupLogging()
+		f.EnableTimeoutHandler()
+	}
+}
+
+func (f *Flags) addDefaultFlags() {
+	f.Set.IntVarP(&f.Timeout, "timeout", "t", f.Timeout, "Abort the check after n seconds")
+	f.Set.BoolVarP(&f.Debug, "debug", "d", false, "Enable debug mode")
+	f.Set.BoolVarP(&f.Verbose, "verbose", "v", false, "Enable verbose mode")
+	f.Set.BoolVarP(&f.PrintVersion, "version", "V", false, "Print version and exit")
+
+	f.DefaultFlags = false
 }
 
 func (f *Flags) SetupLogging() {

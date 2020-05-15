@@ -12,8 +12,8 @@ func ExampleFlags() {
 
 	_ = flags.Set.StringP("hostname", "H", "localhost", "Hostname to check")
 
-	// flags.Parse(os.Args[1:])
-	flags.Parse([]string{"--help"})
+	// flags.ParseArray(os.Args[1:])
+	flags.ParseArray([]string{"--help"})
 	flags.SetupLogging()
 
 	log.Info("test")

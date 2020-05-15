@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/NETWAYS/go-check"
 	log "github.com/sirupsen/logrus"
-	"os"
 	"time"
 )
 
@@ -13,16 +12,13 @@ func main() {
 	flags.Name = "check_test"
 	flags.Readme = `Test Plugin`
 	flags.Version = "1.0.0"
+	flags.Timeout = 10
 
 	value := flags.Set.IntP("value", "", 10, "test value")
 	warning := flags.Set.IntP("warning", "w", 20, "warning threshold")
 	critical := flags.Set.IntP("critical", "c", 50, "critical threshold")
 
-	// value should be calculated
-
-	flags.Parse(os.Args[1:])
-	flags.SetupLogging()
-	flags.EnableTimeoutHandler()
+	flags.ParseArguments()
 
 	log.Info("Start logging")
 
