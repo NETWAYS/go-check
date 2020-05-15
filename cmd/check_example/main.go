@@ -1,42 +1,34 @@
 package main
 
 import (
-	"math/rand"
-	"os"
-	"time"
-
 	"github.com/NETWAYS/go-check"
 	log "github.com/sirupsen/logrus"
+	"os"
 )
 
-func initRand() int {
-	rand.Seed(time.Now().UnixNano())
-	min := 1
-	max := 100
-	return rand.Intn(max-min+1) + min
-}
-
 func main() {
+	defer check.CatchPanic()
 	flags := check.NewFlags()
 	flags.Name = "check_test"
 	flags.Readme = `Test Plugin`
 	flags.Version = "1.0.0"
 
+	value := flags.Set.IntP("value", "t", 10, "test value")
 	warning := flags.Set.IntP("warning", "w", 20, "warning threshold")
 	critical := flags.Set.IntP("critical", "c", 50, "critical threshold")
 
-	ranNum := initRand()
+	// value should be calculated
 
 	flags.Parse(os.Args[1:])
 	flags.SetupLogging()
 
 	log.Info("Start logging")
 
-	if *critical < ranNum {
-		check.Exit(check.Critical, "value is %d", ranNum)
-	} else if *warning < ranNum {
-		check.Exit(check.Warning, "value is %d", ranNum)
+	if *value > *critical {
+		check.Exit(check.Critical, "value is %d", *value)
+	} else if *value > *warning {
+		check.Exit(check.Warning, "value is %d", *value)
 	} else {
-		check.Exit(check.OK, "value is %d", ranNum)
+		check.Exit(check.OK, "value is %d", *value)
 	}
 }
