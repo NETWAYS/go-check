@@ -10,8 +10,8 @@ import (
 var timeoutEnabled bool
 
 // Start the timeout and signal handler in a goroutine
-func (f *Flags) EnableTimeoutHandler() {
-	go HandleTimeout(f.Timeout)
+func (c *Config) EnableTimeoutHandler() {
+	go HandleTimeout(c.Timeout)
 }
 
 // Helper for a goroutine, to wait for signals and timeout, and exit with a proper code
