@@ -91,8 +91,8 @@ func (b *Benchmark) Dump() {
 	fmt.Println("---------|--------|-------|------|--------")
 
 	for _, event := range b.Events {
-		total := &convert.Bytesize{Data: event.TotalAlloc, Unit: "B"}
-		heap := &convert.Bytesize{Data: event.HeapAlloc, Unit: "B"}
+		_, total := convert.ParseBytes(event.TotalAlloc)
+		_, heap := convert.ParseBytes(event.HeapAlloc)
 
 		fmt.Printf("%s | %.03f | %0.2f MB | %0.2f MB | %s\n",
 			event.Time.Format("15:04:05"),

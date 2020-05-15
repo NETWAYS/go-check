@@ -28,22 +28,37 @@ func TestParseBytes(t *testing.T) {
 
 	err, b = ParseBytes(uint64(1))
 	assert.NoError(t, err)
-	assert.Equal(t, uint64(1), b.Data)
+	assert.Equal(t, float64(1), b.Data)
+	assert.Equal(t, "B", b.Unit)
+
+	err, b = ParseBytes(-1234)
+	assert.NoError(t, err)
+	assert.Equal(t, float64(-1234), b.Data)
+	assert.Equal(t, "B", b.Unit)
+
+	err, b = ParseBytes(-1234.56)
+	assert.NoError(t, err)
+	assert.Equal(t, -1234.56, b.Data)
 	assert.Equal(t, "B", b.Unit)
 
 	err, b = ParseBytes(1)
 	assert.NoError(t, err)
-	assert.Equal(t, uint64(1), b.Data)
+	assert.Equal(t, float64(1), b.Data)
 	assert.Equal(t, "B", b.Unit)
 
 	err, b = ParseBytes("1")
 	assert.NoError(t, err)
-	assert.Equal(t, uint64(1), b.Data)
+	assert.Equal(t, float64(1), b.Data)
 	assert.Equal(t, "B", b.Unit)
 
 	err, b = ParseBytes("1mb")
 	assert.NoError(t, err)
-	assert.Equal(t, uint64(1), b.Data)
+	assert.Equal(t, float64(1), b.Data)
+	assert.Equal(t, "MB", b.Unit)
+
+	err, b = ParseBytes(" - 1.123 mb")
+	assert.NoError(t, err)
+	assert.Equal(t, -1.123, b.Data)
 	assert.Equal(t, "MB", b.Unit)
 
 	err, b = ParseBytes("foobar")

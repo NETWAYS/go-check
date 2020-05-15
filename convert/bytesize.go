@@ -9,7 +9,7 @@ import (
 )
 
 type Bytesize struct {
-	Data uint64
+	Data float64
 	Unit string
 }
 
@@ -81,33 +81,39 @@ func ParseBytes(data interface{}) (error, *Bytesize) {
 	// given data is int; set it directly
 	switch d := data.(type) {
 	case string:
-		i, err := strconv.ParseUint(d, 10, 64)
+		i, err := strconv.ParseFloat(d, 64)
 		if err == nil {
 			b.Data = i
 			b.Unit = "B"
 		} else {
-			re := regexp.MustCompile(`^(\d+)\s*(\w+)$`)
+			re := regexp.MustCompile(`^\s*(-)?\s*(\d+(?:\.\d+)?)\s*(\w+)\s*$`)
 			found := re.FindStringSubmatch(d)
 			if len(found) == 0 {
 				return fmt.Errorf("could not parse input into number and optional unit: %s", d), nil
 			}
 
-			i, err = strconv.ParseUint(found[1], 10, 16)
+			i, err = strconv.ParseFloat(found[1]+found[2], 64)
 			if err != nil {
-				return fmt.Errorf("could not convert input to uint64: %s", d), nil
+				return fmt.Errorf("could not convert input to float64: %s", d), nil
 			}
 
 			b.Data = i
-			b.Unit = b.cleanUnits(found[2])
+			b.Unit = b.cleanUnits(found[3])
 		}
-	case uint64:
+	case float64:
 		b.Data = d
 		b.Unit = "B"
+	case uint64:
+		b.Data = float64(d)
+		b.Unit = "B"
 	case uint:
-		b.Data = uint64(d)
+		b.Data = float64(d)
+		b.Unit = "B"
+	case int64:
+		b.Data = float64(d)
 		b.Unit = "B"
 	case int:
-		b.Data = uint64(d)
+		b.Data = float64(d)
 		b.Unit = "B"
 	default:
 		return fmt.Errorf("can not handle type %T", d), nil
@@ -124,7 +130,7 @@ func (b *Bytesize) calc(targetUnit string) float64 {
 	// example: 1000 MB -> Bytes
 	// c := 1000 * match.Pow(10, 6)
 	// Result: 1.000.000.000
-	c := float64(b.Data) * math.Pow(
+	c := b.Data * math.Pow(
 		float64(ByteUnitMap[b.Unit].base),
 		float64(ByteUnitMap[b.Unit].exponential),
 	)
@@ -164,7 +170,7 @@ func (b *Bytesize) ToHumanReadable() string {
 	b.Unit = b.cleanUnits(b.Unit)
 
 	// convert given values to bytes
-	c := float64(b.Data) * math.Pow(
+	c := b.Data * math.Pow(
 		float64(ByteUnitMap[b.Unit].base),
 		float64(ByteUnitMap[b.Unit].exponential),
 	)
