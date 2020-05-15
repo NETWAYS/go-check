@@ -14,6 +14,7 @@ type Flags struct {
 	Name         string
 	Readme       string
 	Version      string
+	Timeout      int
 	Verbose      bool
 	Debug        bool
 	PrintVersion bool
@@ -38,6 +39,7 @@ func NewFlags() *Flags {
 		flagSet.PrintDefaults()
 	}
 
+	flagSet.IntVarP(&flags.Timeout, "timeout", "t", 30, "Abort the check after n seconds")
 	flagSet.BoolVarP(&flags.Debug, "debug", "d", false, "Enable debug mode")
 	flagSet.BoolVarP(&flags.Verbose, "verbose", "v", false, "Enable verbose mode")
 	flagSet.BoolVarP(&flags.PrintVersion, "version", "V", false, "Print version and exit")
