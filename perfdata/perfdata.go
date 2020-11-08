@@ -8,6 +8,93 @@ import (
 	"strconv"
 )
 
+type rangeType struct {
+	outside	bool
+	lowerBound	string
+	upperBound	string
+}
+
+const (
+	None int = iota
+	Int
+	Uint
+	Float
+)
+
+type valueType struct {
+	Type int
+	valInt int64
+	valUint uint64
+	valFloat float64
+}
+
+type nagiosPerfdata struct {
+	label string
+	value valueType
+	uom	string
+	warn rangeType
+	crit rangeType
+	min valueType
+	max valueType
+}
+
+func (val valueType) String() string {
+	switch (val.Type) {
+		case Int : {
+			return strconv.FormatInt(val.valInt, 10)
+		}
+		case Uint : {
+			return strconv.FormatUint(val.valUint, 10)
+		}
+		case Float: {
+			return strconv.FormatFloat(val.valFloat, 'f', 2, 64)
+		}
+		default : {
+			return ""
+		}
+	}
+}
+
+func (data nagiosPerfdata) String() string {
+
+	// Label
+	label := ""
+	if strings.ContainsAny(data.label, " \t") {
+		label = "'" + data.label + "'"
+	}
+
+	// Value
+	value := data.value.String()
+
+	// UOM
+	uom := data.uom
+
+	// warn
+	var warn string
+	if data.warn.outside {
+		warn = "@" + data.warn.lowerBound + ":" + data.warn.upperBound
+	} else {
+		warn = data.warn.lowerBound + ":" + data.warn.upperBound
+	}
+
+	// crit
+	var crit string
+	if data.crit.outside {
+		crit = "@" + data.crit.lowerBound + ":" + data.crit.upperBound
+	} else {
+		crit = data.crit.lowerBound + ":" + data.crit.upperBound
+	}
+
+	// min
+	min := data.min.String()
+
+	// max
+	max := data.max.String()
+
+	return label + "=" + value + uom + ";" + warn + ";" + crit + ";" + min + ";" + max
+}
+
+
 // return a correctly formatted perfdata string
 func FormatDataPoint(label string, value string, unitOfMeasurement string, warn string, crit string, min string, max string) (string, error) {
 	// Uncomment this for validating the format
