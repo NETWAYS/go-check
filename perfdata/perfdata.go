@@ -3,10 +3,24 @@ package check
 import (
 	"strings"
 	"errors"
-	"fmt"
 	"regexp"
 	"strconv"
 )
+
+const (
+	uomNone = iota
+	uomByte
+	uomPercent
+	uomTime
+	uomError
+)
+
+type uomType uint
+
+type Perfdata interface {
+	SanityCheck() error
+	String() string
+}
 
 type rangeType struct {
 	outside	bool
@@ -14,99 +28,27 @@ type rangeType struct {
 	upperBound	string
 }
 
-const (
-	None int = iota
-	Int
-	Uint
-	Float
-)
 
-type valueType struct {
-	Type int
-	valInt int64
-	valUint uint64
-	valFloat float64
-}
 
-type nagiosPerfdata struct {
-	label string
-	value valueType
-	uom	string
-	warn rangeType
-	crit rangeType
-	min valueType
-	max valueType
-}
-
-func (val valueType) String() string {
-	switch (val.Type) {
-		case Int : {
-			return strconv.FormatInt(val.valInt, 10)
-		}
-		case Uint : {
-			return strconv.FormatUint(val.valUint, 10)
-		}
-		case Float: {
-			return strconv.FormatFloat(val.valFloat, 'f', 2, 64)
-		}
-		default : {
-			return ""
-		}
-	}
-}
-
-func (data nagiosPerfdata) String() string {
-
+func formatLabel(label *string) string {
 	// Label
-	label := ""
-	if strings.ContainsAny(data.label, " \t") {
-		label = "'" + data.label + "'"
-	}
-
-	// Value
-	value := data.value.String()
-
-	// UOM
-	uom := data.uom
-
-	// warn
-	var warn string
-	if data.warn.outside {
-		warn = "@" + data.warn.lowerBound + ":" + data.warn.upperBound
+	var result string
+	if strings.ContainsAny(*label, " \t") {
+		result = "'" + *label + "'"
 	} else {
-		warn = data.warn.lowerBound + ":" + data.warn.upperBound
+		result = *label
 	}
-
-	// crit
-	var crit string
-	if data.crit.outside {
-		crit = "@" + data.crit.lowerBound + ":" + data.crit.upperBound
-	} else {
-		crit = data.crit.lowerBound + ":" + data.crit.upperBound
-	}
-
-	// min
-	min := data.min.String()
-
-	// max
-	max := data.max.String()
-
-	return label + "=" + value + uom + ";" + warn + ";" + crit + ";" + min + ";" + max
+	return result
 }
 
-
-// return a correctly formatted perfdata string
-func FormatDataPoint(label string, value string, unitOfMeasurement string, warn string, crit string, min string, max string) (string, error) {
-	// Uncomment this for validating the format
-	// if debug {
-	// 		SanityCheckPerfData(label, value, unitOfMeasurement, warn, crit, min, max)
-	// }
-	if strings.ContainsAny(label, " \t") {
-		label = "'" + label + "'"
+func formatRange(someRange rangeType) string {
+	var result string
+	if someRange.outside {
+		result = "@" + someRange.lowerBound + ":" + someRange.upperBound
+	} else {
+		result = someRange.lowerBound + ":" + someRange.upperBound
 	}
-
-	result := fmt.Sprintf("%v=%v%v;%v;%v;%v;%v", label, value, unitOfMeasurement, warn, crit, min, max)
-	return result, nil
+	return result
 }
 
 // --- Try to specify Perfdata format
@@ -132,122 +74,119 @@ func FormatDataPoint(label string, value string, unitOfMeasurement string, warn 
 // if the range starts with @ the alert is inside the range (inclusive endpoints), otherwise outside (inclusive endpoints)
 // ---
 // Check input according to https://www.monitoring-plugins.org/doc/guidelines.html#AEN201
-func SanityCheckPerfData(label string, value string, unitOfMeasurement string, warn string, crit string, min string, max string) error {
+// or https://nagios-plugins.org/doc/guidelines.html
 
+func sanityCheckLabel(label *string) error {
 	// label
-	if strings.ContainsAny(label, "'=\n") {
+	if strings.ContainsAny(*label, "'=\n") {
 		// Restricted character in label!
-		return errors.New("Illegal character in perfdata label: " + label)
+		return errors.New("Illegal character in perfdata label: " + *label)
 	}
-	if len(label) == 0 {
+	if len(*label) == 0 {
 		return errors.New("No label given")
 	}
-
-	// value
-	match, err := regexp.MatchString("-*[0-9]+", value)
-	if err != nil {
-		return err
-	}
-	if !match && value != "U" {
-		return errors.New("Non digit symbols in value")
-	}
-
-	// UOM
-	if unitOfMeasurement  != "" {
-		if unitOfMeasurement == "%" {
-			i, err := strconv.ParseInt(value, 10, 64)
-			if err != nil {
-				return err
-			}
-			if i < 0 || i > 100 {
-				return errors.New("value not in percent range")
-			}
-		}
-
-		match, err := regexp.MatchString("^(s|us|ms|B|KB|MB|TB)$", unitOfMeasurement)
-		if err != nil {
-			return err
-		}
-
-		if !match {
-			return errors.New("No matching unit of Measurement")
-		}
-	}
-
-	// warn
-	err = validateRange(warn)
-	if err != nil {
-		return err
-	}
-
-	// crit
-	err = validateRange(crit)
-	if err != nil {
-		return err
-	}
-
-	// min
-	match, err = regexp.MatchString("|(-*[0-9]+)", min)
-	if err != nil {
-		return err
-	}
-
-	// max
-	match, err = regexp.MatchString("|(-*[0-9]+)", max)
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
-func validateRange(rangeString string) error {
-	if rangeString[0] == '@' {
-		// Don't care if alert is inside range or not
-		rangeString = rangeString[1:]
+func sanityCheckUom(uom *string) (error, uomType) {
+	if *uom == "" {
+		return nil, uomNone
+	}
+	if *uom == "%" {
+		return nil, uomPercent
 	}
 
-	if !strings.Contains(rangeString, ":") {
-		// no colon in string, so start was omitted
-		match, err := regexp.MatchString("-*[0-9]+", rangeString)
-		if err != nil {
-			return err
-		}
-		if !match {
-			return errors.New("Range value contains wrong characters: " + rangeString)
-		}
-	}
-
-	match, err := regexp.MatchString("(~|[0-9]+):(~|[0-9]+)", rangeString)
+	match, err := regexp.MatchString("^(s|us|ms)$", *uom)
 	if err != nil {
-		return err
+		return err, uomError
 	}
 	if !match {
-		return errors.New("Range format was invalid: " + rangeString)
+	} else {
+		return nil, uomTime
 	}
 
-	parts := strings.Split(rangeString, ":")
+	match, err = regexp.MatchString("^(B|KB|MB|TB)$", *uom)
+	if err != nil {
+		return err, uomByte
+	}
+	if !match {
+		return errors.New("No matching unit of Measurement"), uomError
+	} else {
+		return nil, uomError
+	}
+}
 
-	// start
-	if parts[0] != "~" {
-		match, err := regexp.MatchString("-*[0-9]+", parts[0])
-		if err != nil {
-			return err
+
+func sanityCheckRange(rangeValue rangeType) error {
+	if rangeValue.lowerBound == "~" {
+		// this is ok
+		if rangeValue.upperBound != "~" {
+			// Since start <= end this can only be wrong
+			return errors.New("Range Error: Start > End! This is wrong")
+		} else {
+			// This is valid, although useless
+			// Warning: Mathematicans might disagree with that
+			return nil
 		}
-		if !match {
-			return errors.New("Range start does not match format specification: " + parts[0])
+	} else if rangeValue.lowerBound == "" {
+		// This is equivalent to lowerBound = 0
+		// So, upperBound must be >0
+		// this be infinity or a number value
+		if rangeValue.upperBound == "" {
+			// infty, this is fine
+			return nil
+		}
+		if num, err := strconv.ParseInt(rangeValue.upperBound, 10, 64); err == nil {
+			if num < 0 {
+				return errors.New("Range Error: End < Start")
+			}
+		}
+		if num, err := strconv.ParseFloat(rangeValue.upperBound, 64); err == nil {
+			if num < 0 {
+				return errors.New("Range Error: End < Start")
+			}
+		} else {
+			return  errors.New("Range Error: Could not parse upper Bound")
 		}
 	}
-	// end
-	if parts[1] != "~" {
-		match, err := regexp.MatchString("-*[0-9]+", parts[1])
-		if err != nil {
-			return err
+
+	// At this point there has to a number in lowerBound
+	if lower, err := strconv.ParseInt(rangeValue.lowerBound, 10, 64); err == nil {
+		if upper, err := strconv.ParseInt(rangeValue.upperBound, 10, 64); err == nil {
+			if upper < lower  {
+				return errors.New("Range Error: End < Start")
+			} else {
+				return nil
+			}
 		}
-		if !match {
-			return errors.New("Range start does not match format specification: " + parts[1])
+		if upper, err := strconv.ParseFloat(rangeValue.upperBound, 64); err == nil {
+			if upper < float64(lower) {
+				return errors.New("Range Error: End < Start")
+			} else {
+				return nil
+			}
+		} else {
+			return  errors.New("Range Error: Could not parse upper Bound")
 		}
 	}
-
-	return nil
+	if lower, err := strconv.ParseFloat(rangeValue.lowerBound, 64); err == nil {
+		if upper, err := strconv.ParseInt(rangeValue.upperBound, 10, 64); err == nil {
+			if float64(upper) < lower  {
+				return errors.New("Range Error: End < Start")
+			} else {
+				return nil
+			}
+		}
+		if upper, err := strconv.ParseFloat(rangeValue.upperBound, 64); err == nil {
+			if upper < float64(lower) {
+				return errors.New("Range Error: End < Start")
+			} else {
+				return nil
+			}
+		} else {
+			return  errors.New("Range Error: Could not parse upper Bound")
+		}
+	} else {
+		return  errors.New("Range Error: Could not parse lower Bound")
+	}
 }
