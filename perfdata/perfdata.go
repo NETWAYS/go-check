@@ -29,7 +29,6 @@ type rangeType struct {
 }
 
 
-
 func formatLabel(label *string) string {
 	// Label
 	var result string
