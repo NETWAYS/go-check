@@ -1,72 +1,83 @@
-package check
+package perfdata
 
 import (
 	"errors"
 	"strconv"
 )
 
-type nagiosPerfdataUint struct {
-	label string
-	value uint64
-	uom	string
-	warn rangeType
-	crit rangeType
-	min uint64
-	max uint64
+type NagiosPerfdataUint struct {
+	Label string
+	Value uint64
+	Uom	string
+	Warn rangeType
+	Crit rangeType
+	Min uint64
+	Max uint64
 }
 
-func (data nagiosPerfdataUint) String() string {
+func (data NagiosPerfdataUint) String() string {
 
 	// Label
-	label := formatLabel(&data.label)
+	label := formatLabel(&data.Label)
 
 	// Value
-	value := strconv.FormatUint(data.value, 10)
+	value := strconv.FormatUint(data.Value, 10)
 
 	// UOM
-	uom := data.uom
+	uom := data.Uom
 
 	// warn
-	warn := formatRange(data.warn)
+	warn := formatRange(data.Warn)
 
 	// crit
-	crit := formatRange(data.crit)
+	crit := formatRange(data.Crit)
 
-	// min + max
-	min := strconv.FormatUint(data.min, 10)
-	max := strconv.FormatUint(data.max, 10)
+	result := label + "=" + value + uom + ";" + warn + ";" + crit + ";"
 
-	return label + "=" + value + uom + ";" + warn + ";" + crit + ";" + min + ";" + max
+	// Min + Max
+	if data.Min != 0 {
+		Min := strconv.FormatUint(data.Min, 10)
+		result += Min + ";"
+	} else {
+		result += ";"
+	}
+
+	if data.Max != 0 {
+		Max := strconv.FormatUint(data.Max, 10)
+		result += Max
+	}
+
+	return result
 }
 
-func (perfdata nagiosPerfdataUint)SanityCheck() error {
+func (perfdata NagiosPerfdataUint)SanityCheck() error {
 	// Label
-	err := sanityCheckLabel(&perfdata.label)
+	err := sanityCheckLabel(&perfdata.Label)
 
 	// UOM
-	err, uom := sanityCheckUom(&perfdata.uom)
+	err, uom := sanityCheckUom(&perfdata.Uom)
 
 	// value
 	if uom == uomPercent {
-		if perfdata.value < 0 || perfdata.value > 100 {
+		if perfdata.Value < 0 || perfdata.Value > 100 {
 			return errors.New("Value not in percentage range")
 		}
 	}
 
 	// warn
-	err = sanityCheckRange(perfdata.warn)
+	err = sanityCheckRange(perfdata.Warn)
 	if err != nil {
 		return err
 	}
 
 	// crit
-	err = sanityCheckRange(perfdata.crit)
+	err = sanityCheckRange(perfdata.Crit)
 	if err != nil {
 		return err
 	}
 
-	// min
-	// max
+	// Min
+	// Max
 
 	return nil
 }
