@@ -3,7 +3,8 @@ package result
 
 import (
 	"fmt"
-	"github.com/NETWAYS/go-check"
+	check "go-check"
+	"go-check/perfdata"
 	"strings"
 )
 
@@ -14,6 +15,9 @@ type Overall struct {
 	Unknowns  int
 	Summary   string
 	Outputs   []string
+	PerfdataUint []perfdata.NagiosPerfdataUint
+	PerfdataInt []perfdata.NagiosPerfdataInt
+	PerfdataFloat []perfdata.NagiosPerfdataFloat
 }
 
 func (o *Overall) AddOK(output string) {
@@ -92,5 +96,34 @@ func (o *Overall) GetOutput() string {
 		output += extra + "\n"
 	}
 
+	output += o.formatPerfdata()
+
 	return output
+}
+
+func (o *Overall) formatPerfdata() string {
+	if (len(o.PerfdataInt) == 0) && (len(o.PerfdataUint) == 0) && (len(o.PerfdataFloat) == 0) {
+		return ""
+	}
+	result := "|"
+	for _, pdInt := range o.PerfdataInt {
+		result += pdInt.String() + " "
+	}
+	for _, pdUint := range o.PerfdataUint {
+		result += pdUint.String() + " "
+	}
+	for _, pdFloat := range o.PerfdataFloat {
+		result += pdFloat.String() + " "
+	}
+	return result
+}
+
+func (o *Overall) AddNagiosPerfdataInt(data perfdata.NagiosPerfdataInt) {
+	o.PerfdataInt = append(o.PerfdataInt, data)
+}
+func (o *Overall) AddNagiosPerfdataUint(data perfdata.NagiosPerfdataUint) {
+	o.PerfdataUint = append(o.PerfdataUint, data)
+}
+func (o *Overall) AddNagiosPerfdataFloat(data perfdata.NagiosPerfdataFloat) {
+	o.PerfdataFloat = append(o.PerfdataFloat, data)
 }

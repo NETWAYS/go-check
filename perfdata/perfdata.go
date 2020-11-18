@@ -1,4 +1,4 @@
-package check
+package perfdata
 
 import (
 	"strings"
@@ -43,10 +43,12 @@ func formatLabel(label *string) string {
 func formatRange(someRange rangeType) string {
 	var result string
 	if someRange.outside {
-		result = "@" + someRange.lowerBound + ":" + someRange.upperBound
-	} else {
-		result = someRange.lowerBound + ":" + someRange.upperBound
+		result += "@"
 	}
+	if someRange.lowerBound != "" {
+		result += ":" + someRange.lowerBound
+	}
+	result += someRange.upperBound
 	return result
 }
 
