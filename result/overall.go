@@ -16,6 +16,22 @@ type Overall struct {
 	Outputs   []string
 }
 
+func (o *Overall) AddOK(output string) {
+	o.Add(check.OK, output)
+}
+
+func (o *Overall) AddWarning(output string) {
+	o.Add(check.Warning, output)
+}
+
+func (o *Overall) AddCritical(output string) {
+	o.Add(check.Critical, output)
+}
+
+func (o *Overall) AddUnknown(output string) {
+	o.Add(check.Unknown, output)
+}
+
 func (o *Overall) Add(state int, output string) {
 	switch state {
 	case check.OK:
