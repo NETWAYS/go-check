@@ -3,7 +3,7 @@ package result
 
 import (
 	"fmt"
-	"github.com/NETWAYS/go-check"
+	"go-check"
 	"strings"
 )
 
