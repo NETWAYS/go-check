@@ -7,6 +7,12 @@ import (
 	"strconv"
 )
 
+type Perfdata struct {
+	PerfdataUint []NagiosPerfdataUint
+	PerfdataInt []NagiosPerfdataInt
+	PerfdataFloat []NagiosPerfdataFloat
+}
+
 const (
 	uomNone = iota
 	uomByte
@@ -17,7 +23,7 @@ const (
 
 type uomType uint
 
-type Perfdata interface {
+type perfdata interface {
 	SanityCheck() error
 	String() string
 }
@@ -190,4 +196,31 @@ func sanityCheckRange(rangeValue rangeType) error {
 	} else {
 		return  errors.New("Range Error: Could not parse lower Bound")
 	}
+}
+
+func (o *Perfdata) formatPerfdata() string {
+	if (len(o.PerfdataInt) == 0) && (len(o.PerfdataUint) == 0) && (len(o.PerfdataFloat) == 0) {
+		return ""
+	}
+	result := "|"
+	for _, pdInt := range o.PerfdataInt {
+		result += pdInt.String() + " "
+	}
+	for _, pdUint := range o.PerfdataUint {
+		result += pdUint.String() + " "
+	}
+	for _, pdFloat := range o.PerfdataFloat {
+		result += pdFloat.String() + " "
+	}
+	return result
+}
+
+func (o *Perfdata) AddNagiosPerfdataInt(data NagiosPerfdataInt) {
+	o.PerfdataInt = append(o.PerfdataInt, data)
+}
+func (o *Perfdata) AddNagiosPerfdataUint(data NagiosPerfdataUint) {
+	o.PerfdataUint = append(o.PerfdataUint, data)
+}
+func (o *Perfdata) AddNagiosPerfdataFloat(data NagiosPerfdataFloat) {
+	o.PerfdataFloat = append(o.PerfdataFloat, data)
 }
