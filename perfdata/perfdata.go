@@ -6,12 +6,6 @@ import (
 	"strings"
 )
 
-type Collection struct {
-	PerfdataUint  []NagiosPerfdataUint
-	PerfdataInt   []NagiosPerfdataInt
-	PerfdataFloat []NagiosPerfdataFloat
-}
-
 const (
 	uomNone = iota
 	uomByte
@@ -178,30 +172,3 @@ func sanityCheckRange(rangeValue Threshold) error {
 	}
 }
 */
-
-func (o *Collection) formatPerfdata() string {
-	if (len(o.PerfdataInt) == 0) && (len(o.PerfdataUint) == 0) && (len(o.PerfdataFloat) == 0) {
-		return ""
-	}
-	result := "|"
-	for _, pdInt := range o.PerfdataInt {
-		result += pdInt.String() + " "
-	}
-	for _, pdUint := range o.PerfdataUint {
-		result += pdUint.String() + " "
-	}
-	for _, pdFloat := range o.PerfdataFloat {
-		result += pdFloat.String() + " "
-	}
-	return result
-}
-
-func (o *Collection) AddNagiosPerfdataInt(data NagiosPerfdataInt) {
-	o.PerfdataInt = append(o.PerfdataInt, data)
-}
-func (o *Collection) AddNagiosPerfdataUint(data NagiosPerfdataUint) {
-	o.PerfdataUint = append(o.PerfdataUint, data)
-}
-func (o *Collection) AddNagiosPerfdataFloat(data NagiosPerfdataFloat) {
-	o.PerfdataFloat = append(o.PerfdataFloat, data)
-}
