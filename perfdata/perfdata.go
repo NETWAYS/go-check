@@ -1,15 +1,14 @@
 package perfdata
 
 import (
-	"strings"
 	"errors"
 	"regexp"
-	"strconv"
+	"strings"
 )
 
-type Perfdata struct {
-	PerfdataUint []NagiosPerfdataUint
-	PerfdataInt []NagiosPerfdataInt
+type Collection struct {
+	PerfdataUint  []NagiosPerfdataUint
+	PerfdataInt   []NagiosPerfdataInt
 	PerfdataFloat []NagiosPerfdataFloat
 }
 
@@ -28,13 +27,6 @@ type perfdata interface {
 	String() string
 }
 
-type rangeType struct {
-	outside	bool
-	lowerBound	string
-	upperBound	string
-}
-
-
 func formatLabel(label *string) string {
 	// Label
 	var result string
@@ -46,19 +38,7 @@ func formatLabel(label *string) string {
 	return result
 }
 
-func formatRange(someRange rangeType) string {
-	var result string
-	if someRange.outside {
-		result += "@"
-	}
-	if someRange.lowerBound != "" {
-		result += ":" + someRange.lowerBound
-	}
-	result += someRange.upperBound
-	return result
-}
-
-// --- Try to specify Perfdata format
+// --- Try to specify Collection format
 // PERFDATA := (Label=ValueUnitofmeasurement;Warn;Crit;Min;Max)+
 // Label := [!'=]+ // All characters except ' and = , but I also don't want \n
 // Value := INT
@@ -78,7 +58,7 @@ func formatRange(someRange rangeType) string {
 // Note on range: The specification above does not reflect the logic of the format
 // if start == 0 start and the following : may be omitted, the end may also be omitted if the end is infinity
 // the tilde character specifies negative infinity
-// if the range starts with @ the alert is inside the range (inclusive endpoints), otherwise outside (inclusive endpoints)
+// if the range starts with @ the alert is inside the range (inclusive endpoints), otherwise Inside (inclusive endpoints)
 // ---
 // Check input according to https://www.monitoring-plugins.org/doc/guidelines.html#AEN201
 // or https://nagios-plugins.org/doc/guidelines.html
@@ -123,82 +103,83 @@ func sanityCheckUom(uom *string) (error, uomType) {
 	}
 }
 
-
-func sanityCheckRange(rangeValue rangeType) error {
-	if rangeValue.lowerBound == "~" {
+/*
+func sanityCheckRange(rangeValue Threshold) error {
+	if rangeValue.Lower == "~" {
 		// this is ok
-		if rangeValue.upperBound != "~" {
+		if rangeValue.Upper != "~" {
 			// Since start <= end this can only be wrong
-			return errors.New("Range Error: Start > End! This is wrong")
+			return errors.New("Threshold Error: Start > End! This is wrong")
 		} else {
 			// This is valid, although useless
 			// Warning: Mathematicans might disagree with that
 			return nil
 		}
-	} else if rangeValue.lowerBound == "" {
-		// This is equivalent to lowerBound = 0
-		// So, upperBound must be >0
+	} else if rangeValue.Lower == "" {
+		// This is equivalent to Lower = 0
+		// So, Upper must be >0
 		// this be infinity or a number value
-		if rangeValue.upperBound == "" {
+		if rangeValue.Upper == "" {
 			// infty, this is fine
 			return nil
 		}
-		if num, err := strconv.ParseInt(rangeValue.upperBound, 10, 64); err == nil {
+		if num, err := strconv.ParseInt(rangeValue.Upper, 10, 64); err == nil {
 			if num < 0 {
-				return errors.New("Range Error: End < Start")
+				return errors.New("Threshold Error: End < Start")
 			}
 		}
-		if num, err := strconv.ParseFloat(rangeValue.upperBound, 64); err == nil {
+		if num, err := strconv.ParseFloat(rangeValue.Upper, 64); err == nil {
 			if num < 0 {
-				return errors.New("Range Error: End < Start")
+				return errors.New("Threshold Error: End < Start")
 			}
 		} else {
-			return  errors.New("Range Error: Could not parse upper Bound")
+			return  errors.New("Threshold Error: Could not parse upper Bound")
 		}
 	}
 
-	// At this point there has to a number in lowerBound
-	if lower, err := strconv.ParseInt(rangeValue.lowerBound, 10, 64); err == nil {
-		if upper, err := strconv.ParseInt(rangeValue.upperBound, 10, 64); err == nil {
+	// At this point there has to a number in Lower
+	if lower, err := strconv.ParseInt(rangeValue.Lower, 10, 64); err == nil {
+		if upper, err := strconv.ParseInt(rangeValue.Upper, 10, 64); err == nil {
 			if upper < lower  {
-				return errors.New("Range Error: End < Start")
+				return errors.New("Threshold Error: End < Start")
 			} else {
 				return nil
 			}
 		}
-		if upper, err := strconv.ParseFloat(rangeValue.upperBound, 64); err == nil {
+		if upper, err := strconv.ParseFloat(rangeValue.Upper, 64); err == nil {
 			if upper < float64(lower) {
-				return errors.New("Range Error: End < Start")
+				return errors.New("Threshold Error: End < Start")
 			} else {
 				return nil
 			}
 		} else {
-			return  errors.New("Range Error: Could not parse upper Bound")
+			return  errors.New("Threshold Error: Could not parse upper Bound")
 		}
 	}
-	if lower, err := strconv.ParseFloat(rangeValue.lowerBound, 64); err == nil {
-		if upper, err := strconv.ParseInt(rangeValue.upperBound, 10, 64); err == nil {
+	if lower, err := strconv.ParseFloat(rangeValue.Lower, 64); err == nil {
+		if upper, err := strconv.ParseInt(rangeValue.Upper, 10, 64); err == nil {
 			if float64(upper) < lower  {
-				return errors.New("Range Error: End < Start")
+				return errors.New("Threshold Error: End < Start")
 			} else {
 				return nil
 			}
 		}
-		if upper, err := strconv.ParseFloat(rangeValue.upperBound, 64); err == nil {
+		if upper, err := strconv.ParseFloat(rangeValue.Upper, 64); err == nil {
 			if upper < float64(lower) {
-				return errors.New("Range Error: End < Start")
+				return errors.New("Threshold Error: End < Start")
 			} else {
 				return nil
 			}
 		} else {
-			return  errors.New("Range Error: Could not parse upper Bound")
+			return  errors.New("Threshold Error: Could not parse upper Bound")
 		}
 	} else {
-		return  errors.New("Range Error: Could not parse lower Bound")
+		return  errors.New("Threshold Error: Could not parse lower Bound")
 	}
 }
+*/
 
-func (o *Perfdata) formatPerfdata() string {
+func (o *Collection) formatPerfdata() string {
 	if (len(o.PerfdataInt) == 0) && (len(o.PerfdataUint) == 0) && (len(o.PerfdataFloat) == 0) {
 		return ""
 	}
@@ -215,12 +196,12 @@ func (o *Perfdata) formatPerfdata() string {
 	return result
 }
 
-func (o *Perfdata) AddNagiosPerfdataInt(data NagiosPerfdataInt) {
+func (o *Collection) AddNagiosPerfdataInt(data NagiosPerfdataInt) {
 	o.PerfdataInt = append(o.PerfdataInt, data)
 }
-func (o *Perfdata) AddNagiosPerfdataUint(data NagiosPerfdataUint) {
+func (o *Collection) AddNagiosPerfdataUint(data NagiosPerfdataUint) {
 	o.PerfdataUint = append(o.PerfdataUint, data)
 }
-func (o *Perfdata) AddNagiosPerfdataFloat(data NagiosPerfdataFloat) {
+func (o *Collection) AddNagiosPerfdataFloat(data NagiosPerfdataFloat) {
 	o.PerfdataFloat = append(o.PerfdataFloat, data)
 }

@@ -1,18 +1,17 @@
 package perfdata
 
 import (
-	"errors"
 	"strconv"
 )
 
 type NagiosPerfdataInt struct {
 	Label string
 	Value int64
-	Uom	string
-	Warn rangeType
-	Crit rangeType
-	Min int64
-	Max int64
+	Uom   string
+	Warn  Threshold
+	Crit  Threshold
+	Min   int64
+	Max   int64
 }
 
 func (data NagiosPerfdataInt) String() string {
@@ -50,6 +49,7 @@ func (data NagiosPerfdataInt) String() string {
 	return result
 }
 
+/*
 func (perfdata NagiosPerfdataInt)SanityCheck() error {
 	// Label
 	err := sanityCheckLabel(&perfdata.Label)
@@ -81,3 +81,4 @@ func (perfdata NagiosPerfdataInt)SanityCheck() error {
 
 	return nil
 }
+*/
