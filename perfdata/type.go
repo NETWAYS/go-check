@@ -17,7 +17,7 @@ type Perfdata struct {
 }
 
 // Lists all allowed characters inside a label, so we can replace any non-matching
-var invalidInLabelRe = regexp.MustCompile(`[^a-zA-Z0-9 _\-+:/.]+`)
+var validInLabelRe = regexp.MustCompile(`[^a-zA-Z0-9 _\-+:/.]+`)
 
 func (p Perfdata) String() (s string) {
 	s = FormatLabel(p.Label) + "="
@@ -63,7 +63,7 @@ func FormatNumeric(value interface{}) string {
 
 func FormatLabel(label string) string {
 	// Replace invalid character groups by an underscore
-	label = invalidInLabelRe.ReplaceAllString(label, "_")
+	label = validInLabelRe.ReplaceAllString(label, "_")
 
 	if strings.ContainsAny(label, " ") {
 		return fmt.Sprintf(`'%s'`, label)

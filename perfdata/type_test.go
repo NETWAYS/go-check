@@ -34,4 +34,6 @@ func TestFormatLabel(t *testing.T) {
 	assert.Equal(t, "test", FormatLabel("test"))
 	assert.Equal(t, "'test test'", FormatLabel("test test"))
 	assert.Equal(t, "test_x", FormatLabel("test\t\n\\x"))
+	assert.Equal(t, "t_est_x", FormatLabel("t%$%^est\t\n\\x"))
+	assert.Equal(t, "test/:x", FormatLabel("test/:x"))
 }
