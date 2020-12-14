@@ -3,6 +3,7 @@ package perfdata
 import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
+	"github.com/NETWAYS/go-check"
 	"testing"
 )
 
@@ -11,8 +12,8 @@ func ExamplePerfdata() {
 		Label: "test",
 		Value: 10.1,
 		Uom:   "%",
-		Warn:  &Threshold{Upper: 80},
-		Crit:  &Threshold{Upper: 90},
+		Warn:  &check.Threshold{Upper: 80},
+		Crit:  &check.Threshold{Upper: 90},
 		Min:   0, Max: 100}
 
 	fmt.Println(perf)

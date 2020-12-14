@@ -1,4 +1,4 @@
-package perfdata
+package check
 
 import (
 	"github.com/stretchr/testify/assert"

@@ -4,14 +4,15 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"github.com/NETWAYS/go-check"
 )
 
 type Perfdata struct {
 	Label string
 	Value interface{}
 	Uom   string
-	Warn  *Threshold
-	Crit  *Threshold
+	Warn  *check.Threshold
+	Crit  *check.Threshold
 	Min   interface{}
 	Max   interface{}
 }
@@ -27,7 +28,7 @@ func (p Perfdata) String() (s string) {
 	s += p.Uom // TODO: typing and nil check?
 
 	// Thresholds
-	for _, value := range []*Threshold{p.Warn, p.Crit} {
+	for _, value := range []*check.Threshold{p.Warn, p.Crit} {
 		s += ";"
 		if value != nil {
 			s += value.String()
