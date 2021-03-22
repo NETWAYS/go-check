@@ -20,6 +20,7 @@ func HandleTimeout(timeout int) {
 		// signal handling has already been set up
 		return
 	}
+
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, os.Interrupt, syscall.SIGTERM, syscall.SIGHUP)
 

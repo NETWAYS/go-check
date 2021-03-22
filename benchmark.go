@@ -25,10 +25,11 @@ type BenchmarkEvent struct {
 var ActiveBenchmark *Benchmark
 
 // NewBenchmark starts a new benchmark and records the message as event
-func NewBenchmark(message string) *Benchmark {
-	b := &Benchmark{}
+func NewBenchmark(message string) (b *Benchmark) {
+	b = &Benchmark{}
 	b.Record(message)
-	return b
+
+	return
 }
 
 // Initialize a Benchmark for the running program as static instance
@@ -60,15 +61,17 @@ func DumpBenchmarkWhen(criteria bool) {
 func (b *Benchmark) Record(message string) {
 	t := time.Now()
 
+	var dur time.Duration
+
 	// calculate duration since last event
 	count := len(b.Events)
-	var dur time.Duration
 	if count > 0 {
 		dur = t.Sub(*b.Events[count-1].Time)
 	}
 
 	// read memory info
 	var mem runtime.MemStats
+
 	runtime.ReadMemStats(&mem)
 
 	// log the data for other use

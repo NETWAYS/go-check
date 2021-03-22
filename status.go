@@ -22,5 +22,6 @@ func StatusText(status int) string {
 		return "CRITICAL"
 	case Unknown:
 	}
+
 	return "UNKNOWN"
 }

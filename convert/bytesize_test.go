@@ -23,10 +23,7 @@ func ExampleParseBytes() {
 }
 
 func TestParseBytes(t *testing.T) {
-	var b *Bytesize
-	var err error
-
-	err, b = ParseBytes(uint64(1))
+	err, b := ParseBytes(uint64(1))
 	assert.NoError(t, err)
 	assert.Equal(t, float64(1), b.Data)
 	assert.Equal(t, "B", b.Unit)
@@ -61,7 +58,7 @@ func TestParseBytes(t *testing.T) {
 	assert.Equal(t, -1.123, b.Data)
 	assert.Equal(t, "MB", b.Unit)
 
-	err, b = ParseBytes("foobar")
+	err, _ = ParseBytes("foobar")
 	assert.Error(t, err)
 }
 

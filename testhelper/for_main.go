@@ -13,9 +13,11 @@ import (
 func RunMainTest(f func(), args ...string) string {
 	base := []string{"check_with_go_test"}
 	origArgs := os.Args
+
 	os.Args = append(base, args...)
 	stdout := CaptureStdout(f)
 	os.Args = origArgs
+
 	return stdout
 }
 
@@ -50,9 +52,11 @@ func CaptureStdout(f func()) string {
 	f()
 
 	w.Close()
+
 	os.Stdout = old
 
 	var buf bytes.Buffer
 	_, _ = io.Copy(&buf, r)
+
 	return buf.String()
 }

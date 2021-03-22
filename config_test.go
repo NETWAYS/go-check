@@ -14,6 +14,7 @@ func ExampleConfig() {
 	_ = config.FlagSet.StringP("hostname", "H", "localhost", "Hostname to check")
 
 	os.Args = []string{"check_example", "--help"}
+
 	config.ParseArguments()
 
 	log.Info("test")

@@ -19,6 +19,7 @@ func ExampleInitBenchmark() {
 	debug := true /* flags.Debug */
 	if debug {
 		InitBenchmark("Start plugin")
+
 		defer DumpBenchmarkWhen(debug /* flags.Debug */)
 	}
 
