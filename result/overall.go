@@ -66,15 +66,19 @@ func (o *Overall) GetSummary() string {
 		if o.Criticals > 0 {
 			o.Summary += fmt.Sprintf("critical=%d ", o.Criticals)
 		}
+
 		if o.Unknowns > 0 {
 			o.Summary += fmt.Sprintf("unknown=%d ", o.Unknowns)
 		}
+
 		if o.Warnings > 0 {
 			o.Summary += fmt.Sprintf("warning=%d ", o.Warnings)
 		}
+
 		if o.OKs > 0 {
 			o.Summary += fmt.Sprintf("ok=%d ", o.OKs)
 		}
+
 		if o.Summary == "" {
 			o.Summary = "No status information"
 		} else {

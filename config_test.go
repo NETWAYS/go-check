@@ -14,6 +14,7 @@ func ExampleConfig() {
 	_ = config.FlagSet.StringP("hostname", "H", "localhost", "Hostname to check")
 
 	os.Args = []string{"check_example", "--help"}
+
 	config.ParseArguments()
 
 	log.Info("test")
@@ -27,5 +28,6 @@ func ExampleConfig() {
 	//   -d, --debug             Enable debug mode
 	//   -v, --verbose           Enable verbose mode
 	//   -V, --version           Print version and exit
+	// UNKNOWN - pflag: help requested
 	// would exit with code 3
 }

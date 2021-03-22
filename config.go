@@ -1,6 +1,7 @@
 package check
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -33,10 +34,12 @@ func NewConfig() *Config {
 
 	c.FlagSet.Usage = func() {
 		fmt.Printf("Usage of %s\n", c.Name)
+
 		if c.Readme != "" {
 			fmt.Println()
 			fmt.Println(c.Readme)
 		}
+
 		fmt.Println()
 		fmt.Println("Arguments:")
 		c.FlagSet.PrintDefaults()
@@ -61,10 +64,11 @@ func (c *Config) ParseArray(arguments []string) {
 
 	err := c.FlagSet.Parse(arguments)
 	if err != nil {
-		if err != flag.ErrHelp {
+		if errors.Is(err, flag.ErrHelp) {
 			ExitError(err)
+		} else {
+			BaseExit(3)
 		}
-		BaseExit(3)
 	}
 
 	if c.PrintVersion {
