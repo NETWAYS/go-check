@@ -28,5 +28,6 @@ func ExampleConfig() {
 	//   -d, --debug             Enable debug mode
 	//   -v, --verbose           Enable verbose mode
 	//   -V, --version           Print version and exit
+	// UNKNOWN - pflag: help requested
 	// would exit with code 3
 }

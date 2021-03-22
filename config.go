@@ -66,9 +66,9 @@ func (c *Config) ParseArray(arguments []string) {
 	if err != nil {
 		if errors.Is(err, flag.ErrHelp) {
 			ExitError(err)
+		} else {
+			BaseExit(3)
 		}
-
-		BaseExit(3)
 	}
 
 	if c.PrintVersion {
