@@ -98,3 +98,4 @@ func (o *Overall) GetOutput() string {
 
 	return output
 }
+
