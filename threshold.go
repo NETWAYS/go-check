@@ -81,8 +81,9 @@ func ParseThreshold(spec string) (t *Threshold, err error) {
 	return
 }
 
+// String returns the plain representation of the Threshold
 func (t Threshold) String() (s string) {
-	s = BoundToString(t.Upper)
+	s = BoundaryToString(t.Upper)
 
 	// remove upper ~, which is the default
 	if s == "~" {
@@ -90,7 +91,7 @@ func (t Threshold) String() (s string) {
 	}
 
 	if t.Lower != 0 {
-		s = BoundToString(t.Lower) + ":" + s
+		s = BoundaryToString(t.Lower) + ":" + s
 	}
 
 	if t.Inside {
@@ -102,11 +103,15 @@ func (t Threshold) String() (s string) {
 
 // Compares a value against the threshold, and returns true if the value violates the threshold.
 func (t Threshold) DoesViolate(value float64) bool {
-	panic("not yet implemented") // TODO: implement me
+	if t.Inside {
+		return value >= t.Lower && value <= t.Upper
+	} else {
+		return value < t.Lower || value > t.Upper
+	}
 }
 
 // Convert a threshold bound to its string representation
-func BoundToString(value float64) (s string) {
+func BoundaryToString(value float64) (s string) {
 	s = fmt.Sprintf("%g", value)
 
 	// In the threshold context, the sign derives from lower and upper bound, we only need the ~ notation
@@ -115,9 +120,4 @@ func BoundToString(value float64) (s string) {
 	}
 
 	return
-}
-
-// TODO: remove
-func formatRange(someRange Threshold) string {
-	return someRange.String()
 }

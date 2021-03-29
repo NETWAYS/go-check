@@ -15,10 +15,10 @@ var testThresholds = map[string]*Threshold{
 	"":       nil,
 }
 
-func TestBoundToString(t *testing.T) {
-	assert.Equal(t, "10", BoundToString(10))
-	assert.Equal(t, "10.1", BoundToString(10.1))
-	assert.Equal(t, "10.0000000000001", BoundToString(10.0000000000001))
+func TestBoundaryToString(t *testing.T) {
+	assert.Equal(t, "10", BoundaryToString(10))
+	assert.Equal(t, "10.1", BoundaryToString(10.1))
+	assert.Equal(t, "10.0000000000001", BoundaryToString(10.0000000000001))
 }
 
 func TestParseThreshold(t *testing.T) {
@@ -40,4 +40,55 @@ func TestThreshold_String(t *testing.T) {
 			assert.Equal(t, spec, ref.String())
 		}
 	}
+}
+
+// Threshold  Generate an alert if x...
+// 10         < 0 or > 10, (outside the range of {0 .. 10})
+// 10:        < 10, (outside {10 .. ∞})
+// ~:10       > 10, (outside the range of {-∞ .. 10})
+// 10:20      < 10 or > 20, (outside the range of {10 .. 20})
+// @10:20     ≥ 10 and ≤ 20, (inside the range of {10 .. 20})
+func TestThreshold_DoesViolate(t *testing.T) {
+	thr, err := ParseThreshold("10")
+	assert.NoError(t, err)
+	assert.True(t, thr.DoesViolate(11))
+	assert.False(t, thr.DoesViolate(10))
+	assert.False(t, thr.DoesViolate(0))
+	assert.True(t, thr.DoesViolate(-1))
+
+	thr, err = ParseThreshold("10:")
+	assert.NoError(t, err)
+	assert.False(t, thr.DoesViolate(3000))
+	assert.False(t, thr.DoesViolate(10))
+	assert.True(t, thr.DoesViolate(9))
+	assert.True(t, thr.DoesViolate(0))
+	assert.True(t, thr.DoesViolate(-1))
+
+	thr, err = ParseThreshold("~:10")
+	assert.NoError(t, err)
+	assert.False(t, thr.DoesViolate(-3000))
+	assert.False(t, thr.DoesViolate(0))
+	assert.False(t, thr.DoesViolate(10))
+	assert.True(t, thr.DoesViolate(11))
+	assert.True(t, thr.DoesViolate(3000))
+
+	thr, err = ParseThreshold("10:20")
+	assert.NoError(t, err)
+	assert.False(t, thr.DoesViolate(10))
+	assert.False(t, thr.DoesViolate(15))
+	assert.False(t, thr.DoesViolate(20))
+	assert.True(t, thr.DoesViolate(9))
+	assert.True(t, thr.DoesViolate(-1))
+	assert.True(t, thr.DoesViolate(20.1))
+	assert.True(t, thr.DoesViolate(3000))
+
+	thr, err = ParseThreshold("@10:20")
+	assert.NoError(t, err)
+	assert.True(t, thr.DoesViolate(10))
+	assert.True(t, thr.DoesViolate(15))
+	assert.True(t, thr.DoesViolate(20))
+	assert.False(t, thr.DoesViolate(9))
+	assert.False(t, thr.DoesViolate(-1))
+	assert.False(t, thr.DoesViolate(20.1))
+	assert.False(t, thr.DoesViolate(3000))
 }
