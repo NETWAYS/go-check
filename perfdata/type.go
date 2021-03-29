@@ -5,6 +5,11 @@ import (
 	"strings"
 )
 
+// Perfdata represents all properties of performance data for Icinga
+//
+// Implements fmt.Stringer to return the plaintext format for a plugin output.
+//
+// Also see https://www.monitoring-plugins.org/doc/guidelines.html#AEN201
 type Perfdata struct {
 	Label string
 	Value interface{}
@@ -15,12 +20,16 @@ type Perfdata struct {
 	Max   interface{}
 }
 
+// String returns the proper format for the plugin output
 func (p Perfdata) String() (s string) {
 	s = FormatLabel(p.Label) + "="
 
 	// Value
 	s += FormatNumeric(p.Value)
-	s += p.Uom // TODO: typing and nil check?
+
+	if IsValidUom(p.Uom) {
+		s += p.Uom
+	}
 
 	// Thresholds
 	for _, value := range []*check.Threshold{p.Warn, p.Crit} {
