@@ -1,10 +1,8 @@
 package perfdata
 
 import (
-	"fmt"
-	"regexp"
-	"strings"
 	"github.com/NETWAYS/go-check"
+	"strings"
 )
 
 type Perfdata struct {
@@ -16,9 +14,6 @@ type Perfdata struct {
 	Min   interface{}
 	Max   interface{}
 }
-
-// Lists all allowed characters inside a label, so we can replace any non-matching
-var validInLabelRe = regexp.MustCompile(`[^a-zA-Z0-9 _\-+:/.]+`)
 
 func (p Perfdata) String() (s string) {
 	s = FormatLabel(p.Label) + "="
@@ -47,28 +42,4 @@ func (p Perfdata) String() (s string) {
 	s = strings.TrimRight(s, ";")
 
 	return
-}
-
-func FormatNumeric(value interface{}) string {
-	switch value.(type) {
-	case float64, float32:
-		return fmt.Sprintf("%g", value)
-	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32:
-		return fmt.Sprintf("%d", value)
-	case fmt.Stringer, string:
-		return fmt.Sprintf("%s", value)
-	default:
-		panic(fmt.Sprintf("unsupported type for perfdata: %T", value))
-	}
-}
-
-func FormatLabel(label string) string {
-	// Replace invalid character groups by an underscore
-	label = validInLabelRe.ReplaceAllString(label, "_")
-
-	if strings.ContainsAny(label, " ") {
-		return fmt.Sprintf(`'%s'`, label)
-	}
-
-	return label
 }
