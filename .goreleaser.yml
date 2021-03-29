@@ -1,0 +1,14 @@
+# See documentation at https://goreleaser.com
+before:
+  hooks:
+    - go mod download
+build:
+  skip: true
+release:
+  github:
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
