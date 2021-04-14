@@ -1,7 +1,6 @@
 package check
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -64,11 +63,7 @@ func (c *Config) ParseArray(arguments []string) {
 
 	err := c.FlagSet.Parse(arguments)
 	if err != nil {
-		if errors.Is(err, flag.ErrHelp) {
-			ExitError(err)
-		} else {
-			BaseExit(3)
-		}
+		ExitError(err)
 	}
 
 	if c.PrintVersion {
