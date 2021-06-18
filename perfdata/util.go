@@ -25,7 +25,7 @@ func FormatNumeric(value interface{}) string {
 	switch value.(type) {
 	case float64, float32:
 		return fmt.Sprintf("%g", value)
-	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32:
+	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
 		return fmt.Sprintf("%d", value)
 	case fmt.Stringer, string:
 		return fmt.Sprintf("%s", value)
