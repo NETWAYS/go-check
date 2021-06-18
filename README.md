@@ -16,8 +16,6 @@ package main
 
 import (
 	"github.com/NETWAYS/go-check"
-	log "github.com/sirupsen/logrus"
-	"os"
 )
 
 func main() {
@@ -28,12 +26,17 @@ func main() {
 
 	_ = config.FlagSet.StringP("hostname", "H", "localhost", "Hostname to check")
 
-	os.Args = []string{"check_example", "--help"}
-
 	config.ParseArguments()
 
-	log.Info("test")
+	// Some checking should be done here, when --help is not passed
+
+	check.Exitf(check.OK, "Everything is fine - answer=%d", 42)
 }
+```
+
+```
+OK - Everything is fine - answer=42
+would exit with code 0
 ```
 
 See the [documentation on pkg.go.dev](https://pkg.go.dev/github.com/NETWAYS/go-check) for more details and examples.
