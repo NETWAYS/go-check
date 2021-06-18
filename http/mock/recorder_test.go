@@ -28,7 +28,8 @@ func ExampleActivateRecorder() {
 	// Start a simple HTTP server
 	runHTTP()
 
-	resp, err := http.Get("http://localhost:8080/test") // nolint:noctx
+	// Do any HTTP request
+	resp, err := http.Get("http://localhost:64888/test") // nolint:noctx
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -47,7 +48,7 @@ func ExampleActivateRecorder() {
 	// Output:
 	// Hello World
 	// ---
-	// url: http://localhost:8080/test
+	// url: http://localhost:64888/test
 	// method: GET
 	// query: ""
 	// status: 200 OK
@@ -59,5 +60,5 @@ func runHTTP() {
 		_, _ = io.WriteString(w, `Hello World`)
 	})
 
-	go http.ListenAndServe(":8080", nil) //nolint:errcheck
+	go http.ListenAndServe(":64888", nil) //nolint:errcheck
 }
