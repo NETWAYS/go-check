@@ -24,10 +24,10 @@ func main() {
 	// time.Sleep(20 * time.Second)
 
 	if *value > *critical {
-		check.Exit(check.Critical, "value is %d", *value)
+		check.Exitf(check.Critical, "value is %d", *value)
 	} else if *value > *warning {
-		check.Exit(check.Warning, "value is %d", *value)
+		check.Exitf(check.Warning, "value is %d", *value)
 	} else {
-		check.Exit(check.OK, "value is %d", *value)
+		check.Exitf(check.OK, "value is %d", *value)
 	}
 }

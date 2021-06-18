@@ -25,7 +25,7 @@ func HandleTimeout(timeout int) {
 	signal.Notify(signals, os.Interrupt, syscall.SIGTERM, syscall.SIGHUP)
 
 	if timeout < 1 {
-		Exit(Unknown, "Invalid timeout: %d", timeout)
+		Exitf(Unknown, "Invalid timeout: %d", timeout)
 	}
 
 	timedOut := time.After(time.Duration(timeout) * time.Second)
@@ -33,8 +33,8 @@ func HandleTimeout(timeout int) {
 
 	select {
 	case s := <-signals:
-		Exit(Unknown, "Received signal: %s", s)
+		Exitf(Unknown, "Received signal: %s", s)
 	case <-timedOut:
-		Exit(Unknown, "Timeout reached")
+		ExitRaw(Unknown, "Timeout reached")
 	}
 }
