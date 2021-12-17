@@ -94,14 +94,14 @@ func (b *Benchmark) Dump() {
 	fmt.Println("---------|--------|-------|------|--------")
 
 	for _, event := range b.Events {
-		_, total := convert.ParseBytes(event.TotalAlloc)
-		_, heap := convert.ParseBytes(event.HeapAlloc)
+		total := convert.BytesIEC(event.TotalAlloc)
+		heap := convert.BytesIEC(event.HeapAlloc)
 
-		fmt.Printf("%s | %.03f | %0.2f MB | %0.2f MB | %s\n",
+		fmt.Printf("%s | %.03f | %s | %s | %s\n",
 			event.Time.Format("15:04:05"),
 			event.Offset.Seconds(),
-			total.ToMegabyte(),
-			heap.ToMegabyte(),
+			total.HumanReadable(),
+			heap.HumanReadable(),
 			event.Message)
 	}
 }
