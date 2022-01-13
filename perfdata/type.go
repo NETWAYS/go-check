@@ -2,7 +2,6 @@ package perfdata
 
 import (
 	"github.com/NETWAYS/go-check"
-	"strings"
 )
 
 // Perfdata represents all properties of performance data for Icinga
