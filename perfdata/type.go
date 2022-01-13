@@ -47,8 +47,5 @@ func (p Perfdata) String() (s string) {
 		}
 	}
 
-	// Remove trailing semicolons
-	s = strings.TrimRight(s, ";")
-
 	return
 }
