@@ -2,7 +2,6 @@ package perfdata
 
 import (
 	"github.com/NETWAYS/go-check"
-	"strings"
 )
 
 // Perfdata represents all properties of performance data for Icinga
@@ -46,9 +45,6 @@ func (p Perfdata) String() (s string) {
 			s += FormatNumeric(value)
 		}
 	}
-
-	// Remove trailing semicolons
-	s = strings.TrimRight(s, ";")
 
 	return
 }
