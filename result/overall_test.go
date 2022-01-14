@@ -3,6 +3,7 @@ package result
 import (
 	"fmt"
 	"github.com/NETWAYS/go-check"
+	"github.com/NETWAYS/go-check/perfdata"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -90,7 +91,7 @@ func ExampleOverall_Add() {
 	overall.Add(check.Critical, "The other is critical")
 
 	fmt.Println(overall)
-	// Output: {1 0 1 0  [[OK] One element is good [CRITICAL] The other is critical]}
+	// Output: {1 0 1 0  [[OK] One element is good [CRITICAL] The other is critical] []}
 }
 
 func ExampleOverall_GetOutput() {
@@ -112,4 +113,25 @@ func ExampleOverall_GetStatus() {
 
 	fmt.Println(overall.GetStatus())
 	// Output: 2
+}
+
+func TestOverall_withSubchecks(t *testing.T) {
+	var overall Overall
+
+	example_perfdata := perfdata.Perfdata{Label: "pd_test", Value: 5, Uom: "s"}
+	pd_list := perfdata.PerfdataList{}
+	pd_list.Add(&example_perfdata)
+	subcheck := Subcheck{
+		State: check.OK,
+		Output: "Subcheck1 Test",
+		Perfdata: pd_list,
+	}
+
+	overall.AddSubcheck(subcheck)
+	overall.AddOK("bla")
+
+	fmt.Println(overall.GetOutput())
+	
+	// Output: [OK] bla
+    // |- [OK] Subcheck1 Test|pd_test=5s;;;;
 }

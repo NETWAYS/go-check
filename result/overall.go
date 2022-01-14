@@ -4,6 +4,7 @@ package result
 import (
 	"fmt"
 	"github.com/NETWAYS/go-check"
+	"github.com/NETWAYS/go-check/perfdata"
 	"strings"
 )
 
@@ -13,21 +14,37 @@ type Overall struct {
 	Criticals int
 	Unknowns  int
 	Summary   string
-	Outputs   []string
+	Outputs   []string // Deprecate this in a future version
+	subchecks []Subcheck
 }
 
+type Subcheck struct {
+	State int
+	Output string
+	Perfdata perfdata.PerfdataList
+	subchecks []Subcheck
+}
+
+func (s *Subcheck) String() string {
+	return fmt.Sprintf("[%s] %s|%s", check.StatusText(s.State), s.Output, s.Perfdata.String())
+}
+
+// Deprecate this in a future version
 func (o *Overall) AddOK(output string) {
 	o.Add(check.OK, output)
 }
 
+// Deprecate this in a future version
 func (o *Overall) AddWarning(output string) {
 	o.Add(check.Warning, output)
 }
 
+// Deprecate this in a future version
 func (o *Overall) AddCritical(output string) {
 	o.Add(check.Critical, output)
 }
 
+// Deprecate this in a future version
 func (o *Overall) AddUnknown(output string) {
 	o.Add(check.Unknown, output)
 }
@@ -45,6 +62,14 @@ func (o *Overall) Add(state int, output string) {
 	}
 
 	o.Outputs = append(o.Outputs, fmt.Sprintf("[%s] %s", check.StatusText(state), output))
+}
+
+func (o* Overall) AddSubcheck(subcheck Subcheck) {
+	o.subchecks = append(o.subchecks, subcheck)
+}
+
+func (o* Subcheck) AddSubcheck(subcheck Subcheck) {
+	o.subchecks = append(o.subchecks, subcheck)
 }
 
 func (o *Overall) GetStatus() int {
@@ -96,6 +121,25 @@ func (o *Overall) GetOutput() string {
 		output += extra + "\n"
 	}
 
+	if o.subchecks != nil {
+		for _, s := range o.subchecks {
+			output += s.getOutput(0)
+		}
+	}
+
 	return output
 }
 
+func (s *Subcheck) getOutput(indent_level int) string {
+	var output string
+	prefix := strings.Repeat("  ", indent_level)
+	output += prefix + "|- " + s.String() + "\n"
+
+	if s.subchecks != nil {
+		for _, ss := range s.subchecks {
+			output += ss.getOutput(indent_level + 1)
+		}
+	}
+
+	return output
+}
