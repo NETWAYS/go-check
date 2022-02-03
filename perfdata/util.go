@@ -2,6 +2,7 @@ package perfdata
 
 import (
 	"fmt"
+	"github.com/NETWAYS/go-check"
 	"regexp"
 	"strings"
 )
@@ -22,13 +23,15 @@ var validUomSlice = strings.Split(ValidUom, "|")
 //
 // This supports most internal types of Go and all fmt.Stringer interfaces.
 func FormatNumeric(value interface{}) string {
-	switch value.(type) {
-	case float64, float32:
-		return fmt.Sprintf("%g", value)
+	switch v := value.(type) {
+	case float64:
+		return check.FormatFloat(v)
+	case float32:
+		return check.FormatFloat(float64(v))
 	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
-		return fmt.Sprintf("%d", value)
+		return fmt.Sprintf("%d", v)
 	case fmt.Stringer, string:
-		return fmt.Sprintf("%s", value)
+		return fmt.Sprint(v)
 	default:
 		panic(fmt.Sprintf("unsupported type for perfdata: %T", value))
 	}

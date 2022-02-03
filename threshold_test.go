@@ -6,19 +6,20 @@ import (
 )
 
 var testThresholds = map[string]*Threshold{
-	"10":     {Lower: 0, Upper: 10},
-	"10:":    {Lower: 10, Upper: PosInf},
-	"~:10":   {Lower: NegInf, Upper: 10},
-	"10:20":  {Lower: 10, Upper: 20},
-	"@10:20": {Lower: 10, Upper: 20, Inside: true},
-	"-10:10": {Lower: -10, Upper: 10},
-	"":       nil,
+	"10":             {Lower: 0, Upper: 10},
+	"10:":            {Lower: 10, Upper: PosInf},
+	"~:10":           {Lower: NegInf, Upper: 10},
+	"10:20":          {Lower: 10, Upper: 20},
+	"@10:20":         {Lower: 10, Upper: 20, Inside: true},
+	"-10:10":         {Lower: -10, Upper: 10},
+	"-10.001:10.001": {Lower: -10.001, Upper: 10.001},
+	"":               nil,
 }
 
 func TestBoundaryToString(t *testing.T) {
 	assert.Equal(t, "10", BoundaryToString(10))
 	assert.Equal(t, "10.1", BoundaryToString(10.1))
-	assert.Equal(t, "10.0000000000001", BoundaryToString(10.0000000000001))
+	assert.Equal(t, "10.001", BoundaryToString(10.001))
 }
 
 func TestParseThreshold(t *testing.T) {
@@ -30,6 +31,7 @@ func TestParseThreshold(t *testing.T) {
 		} else {
 			assert.NoError(t, err)
 			assert.Equal(t, ref, th)
+			assert.Equal(t, spec, th.String())
 		}
 	}
 }
@@ -91,4 +93,13 @@ func TestThreshold_DoesViolate(t *testing.T) {
 	assert.False(t, thr.DoesViolate(-1))
 	assert.False(t, thr.DoesViolate(20.1))
 	assert.False(t, thr.DoesViolate(3000))
+}
+
+func TestFormatFloat(t *testing.T) {
+	assert.Equal(t, "1000000000000", FormatFloat(1000000000000))
+	assert.Equal(t, "1000000000", FormatFloat(1000000000))
+	assert.Equal(t, "1234567890.988", FormatFloat(1234567890.9877))
+
+	assert.Equal(t, "-Inf", FormatFloat(NegInf))
+	assert.Equal(t, "+Inf", FormatFloat(PosInf))
 }
