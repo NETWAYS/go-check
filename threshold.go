@@ -5,6 +5,7 @@ import (
 	"math"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 // Defining a threshold for any numeric value
@@ -110,9 +111,9 @@ func (t Threshold) DoesViolate(value float64) bool {
 	}
 }
 
-// Convert a threshold bound to its string representation
+// BoundaryToString returns the string representation of a Threshold boundary.
 func BoundaryToString(value float64) (s string) {
-	s = fmt.Sprintf("%g", value)
+	s = FormatFloat(value)
 
 	// In the threshold context, the sign derives from lower and upper bound, we only need the ~ notation
 	if s == "+Inf" || s == "-Inf" {
@@ -120,4 +121,13 @@ func BoundaryToString(value float64) (s string) {
 	}
 
 	return
+}
+
+// FormatFloat returns a string representation of floats, avoiding scientific notation and removes trailing zeros.
+func FormatFloat(value float64) string {
+	s := fmt.Sprintf("%.3f", value)
+	s = strings.TrimRight(s, "0") // remove trailing 0
+	s = strings.TrimRight(s, ".") // remove trailing dot
+
+	return s
 }
