@@ -7,17 +7,8 @@ import (
 	"strings"
 )
 
-// ValidUom lists all valid units allowed by spec and Icinga 2
-//
-// Also see:
-//   - https://www.monitoring-plugins.org/doc/guidelines.html#AEN201
-//   - https://github.com/Icinga/icinga2/blob/master/lib/base/perfdatavalue.cpp
-const ValidUom = "us|ms|s|tb|gb|mb|kb|b|%|c"
-
 // Lists all allowed characters inside a label, so we can replace any non-matching
 var validInLabelRe = regexp.MustCompile(`[^a-zA-Z0-9 _\-+:/.]+`)
-
-var validUomSlice = strings.Split(ValidUom, "|")
 
 // FormatNumeric returns a string representation of various possible numerics
 //
@@ -49,15 +40,4 @@ func FormatLabel(label string) string {
 	}
 
 	return label
-}
-
-// IsValidUom compares the given unit against ValidUom
-func IsValidUom(uom string) bool {
-	for _, k := range validUomSlice {
-		if k == uom {
-			return true
-		}
-	}
-
-	return false
 }
