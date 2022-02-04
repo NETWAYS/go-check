@@ -9,27 +9,30 @@ import (
 //
 // Implements fmt.Stringer to return the plaintext format for a plugin output.
 //
-// Also see https://www.monitoring-plugins.org/doc/guidelines.html#AEN201
+// For examples of Uom see:
+//
+// https://www.monitoring-plugins.org/doc/guidelines.html#AEN201
+//
+// https://github.com/Icinga/icinga2/blob/master/lib/base/perfdatavalue.cpp
+//
+// https://icinga.com/docs/icinga-2/latest/doc/05-service-monitoring/#unit-of-measurement-uom
 type Perfdata struct {
 	Label string
 	Value interface{}
-	Uom   string
-	Warn  *check.Threshold
-	Crit  *check.Threshold
-	Min   interface{}
-	Max   interface{}
+	// Uom is the unit-of-measurement, see links above for details.
+	Uom  string
+	Warn *check.Threshold
+	Crit *check.Threshold
+	Min  interface{}
+	Max  interface{}
 }
 
 // String returns the proper format for the plugin output
 func (p Perfdata) String() (s string) {
 	s = FormatLabel(p.Label) + "="
 
-	// Value
 	s += FormatNumeric(p.Value)
-
-	if IsValidUom(p.Uom) {
-		s += p.Uom
-	}
+	s += p.Uom
 
 	// Thresholds
 	for _, value := range []*check.Threshold{p.Warn, p.Crit} {

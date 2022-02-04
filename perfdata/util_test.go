@@ -22,9 +22,3 @@ func TestFormatLabel(t *testing.T) {
 	assert.Equal(t, "t_est_x", FormatLabel("t%$%^est\t\n\\x"))
 	assert.Equal(t, "test/:x", FormatLabel("test/:x"))
 }
-
-func TestIsValidUom(t *testing.T) {
-	assert.True(t, IsValidUom("%"))
-	assert.False(t, IsValidUom(""))
-	assert.False(t, IsValidUom("X"))
-}
