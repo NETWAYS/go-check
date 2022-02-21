@@ -8,6 +8,13 @@ import (
 	"strings"
 )
 
+// So, this is the idea:
+// A check plugin has a single Overall (singleton)
+// Each partial thing which is tested, gets it's own subcheck
+// The results of these may be relevant to the overall status in the end
+// or not, e.g. if a plugin trieds two different methods for something and
+// one suffices, but one fails, the whole check might be OK and only the subcheck
+// Warning or Critical.
 type Overall struct {
 	OKs       int
 	Warnings  int
@@ -165,7 +172,7 @@ func (s *Subcheck) getOutput(indent_level int) string {
 
 	if s.subchecks != nil {
 		for _, ss := range s.subchecks {
-			output += ss.getOutput(indent_level + 1)
+			output += ss.getOutput(indent_level + 2)
 		}
 	}
 
