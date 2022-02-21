@@ -104,9 +104,37 @@ func (o *Overall) GetSummary() string {
 			o.Summary += fmt.Sprintf("ok=%d ", o.OKs)
 		}
 
-		if o.Summary == "" {
+		if o.Summary == "" && len(o.subchecks) == 0 {
 			o.Summary = "No status information"
 		} else {
+			criticals := 0
+			warnings := 0
+			oks := 0
+			unknowns := 0
+			for _, sc := range o.subchecks {
+				if sc.State == check.Critical {
+					criticals ++
+				} else if sc.State == check.Warning {
+					warnings ++
+				} else if sc.State == check.Unknown {
+					unknowns ++
+				} else if sc.State == check.OK {
+					oks ++
+				}
+			}
+
+			if criticals > 0 {
+				o.Summary += fmt.Sprintf("critical=%d ", criticals)
+			}
+			if unknowns > 0 {
+				o.Summary += fmt.Sprintf("unknowns=%d ", unknowns)
+			}
+			if warnings > 0 {
+				o.Summary += fmt.Sprintf("warning=%d ", warnings)
+			}
+			if oks > 0 {
+				o.Summary += fmt.Sprintf("ok=%d ", oks)
+			}
 			o.Summary = "states: " + strings.TrimSpace(o.Summary)
 		}
 	}

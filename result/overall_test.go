@@ -122,8 +122,8 @@ func TestOverall_withSubchecks(t *testing.T) {
 	pd_list := perfdata.PerfdataList{}
 	pd_list.Add(&example_perfdata)
 	subcheck := Subcheck{
-		State: check.OK,
-		Output: "Subcheck1 Test",
+		State:    check.OK,
+		Output:   "Subcheck1 Test",
 		Perfdata: pd_list,
 	}
 
@@ -131,7 +131,51 @@ func TestOverall_withSubchecks(t *testing.T) {
 	overall.AddOK("bla")
 
 	fmt.Println(overall.GetOutput())
-	
+
 	// Output: [OK] bla
-    // |- [OK] Subcheck1 Test|pd_test=5s;;;;
+	// |- [OK] Subcheck1 Test|pd_test=5s;;;;
+}
+
+func TestOverall_withSubchecks2(t *testing.T) {
+	var overall Overall
+
+	example_perfdata := perfdata.Perfdata{Label: "pd_test", Value: 5, Uom: "s"}
+	example_perfdata2 := perfdata.Perfdata{
+		Label: "pd_test2",
+		Value: 1099511627776,
+		Uom:   "kB",
+		Warn:  &check.Threshold{Inside: true, Lower: 3.14, Upper: 0x66666666666},
+		Crit:  &check.Threshold{Inside: false, Lower: 07777777777777, Upper: 0xFFFFFFFFFFFFFFFFFFFF},
+		Max:   uint64(18446744073709551615),
+	}
+	example_perfdata3 := perfdata.Perfdata{Label: "kl;jr2if;l2rkjasdf", Value: 5, Uom: "m"}
+	example_perfdata4 := perfdata.Perfdata{Label: "asdf", Value: uint64(18446744073709551615), Uom: "B"}
+
+	pd_list := perfdata.PerfdataList{}
+	pd_list.Add(&example_perfdata)
+	pd_list.Add(&example_perfdata2)
+
+	pd_list2 := perfdata.PerfdataList{}
+	pd_list2.Add(&example_perfdata3)
+	pd_list2.Add(&example_perfdata4)
+
+	subcheck := Subcheck{
+		State:    check.OK,
+		Output:   "Subcheck1 Test",
+		Perfdata: pd_list,
+	}
+	subcheck2 := Subcheck{
+		State:    check.Warning,
+		Output:   "Subcheck2 Test",
+		Perfdata: pd_list2,
+	}
+
+	overall.AddSubcheck(subcheck)
+	overall.AddSubcheck(subcheck2)
+
+	fmt.Println(overall.GetOutput())
+
+	// states: warning=1 ok=1
+	// |- [OK] Subcheck1 Test|pd_test=5s pd_test2=1099511627776kB;@3.14:7036874417766;549755813887:1208925819614629174706176;;18446744073709551615
+	// |- [WARNING] Subcheck2 Test|kl;jr2if;l2rkjasdf=5m asdf=18446744073709551615B
 }
