@@ -8,7 +8,7 @@ import (
 )
 
 // Lists all allowed characters inside a label, so we can replace any non-matching
-var validInLabelRe = regexp.MustCompile(`[^a-zA-Z0-9 _\-+:/.]+`)
+var validInLabelRe = regexp.MustCompile(`[^a-zA-Z0-9 _\-+:/.;]+`)
 
 // FormatNumeric returns a string representation of various possible numerics
 //
