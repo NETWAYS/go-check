@@ -26,9 +26,9 @@ type Overall struct {
 }
 
 type Subcheck struct {
-	State int
-	Output string
-	Perfdata perfdata.PerfdataList
+	State     int
+	Output    string
+	Perfdata  perfdata.PerfdataList
 	subchecks []Subcheck
 }
 
@@ -71,11 +71,11 @@ func (o *Overall) Add(state int, output string) {
 	o.Outputs = append(o.Outputs, fmt.Sprintf("[%s] %s", check.StatusText(state), output))
 }
 
-func (o* Overall) AddSubcheck(subcheck Subcheck) {
+func (o *Overall) AddSubcheck(subcheck Subcheck) {
 	o.subchecks = append(o.subchecks, subcheck)
 }
 
-func (o* Subcheck) AddSubcheck(subcheck Subcheck) {
+func (o *Subcheck) AddSubcheck(subcheck Subcheck) {
 	o.subchecks = append(o.subchecks, subcheck)
 }
 
@@ -120,13 +120,13 @@ func (o *Overall) GetSummary() string {
 			unknowns := 0
 			for _, sc := range o.subchecks {
 				if sc.State == check.Critical {
-					criticals ++
+					criticals++
 				} else if sc.State == check.Warning {
-					warnings ++
+					warnings++
 				} else if sc.State == check.Unknown {
-					unknowns ++
+					unknowns++
 				} else if sc.State == check.OK {
-					oks ++
+					oks++
 				}
 			}
 

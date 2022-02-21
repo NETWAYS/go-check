@@ -183,12 +183,12 @@ func TestOverall_withSubchecks2(t *testing.T) {
 func TestOverall_withSubchecks3(t *testing.T) {
 	var overall Overall
 	subcheck2 := Subcheck{
-		State:    check.OK,
-		Output:   "SubSubcheck",
+		State:  check.OK,
+		Output: "SubSubcheck",
 	}
 	subcheck := Subcheck{
-		State:    check.OK,
-		Output:   "Subcheck",
+		State:  check.OK,
+		Output: "Subcheck",
 	}
 	subcheck.subchecks = append(subcheck.subchecks, subcheck2)
 
@@ -197,6 +197,6 @@ func TestOverall_withSubchecks3(t *testing.T) {
 	fmt.Println(overall.GetOutput())
 
 	// states: ok=1
-    // |- [OK] Subcheck|
-    //     |- [OK] SubSubcheck|
+	// |- [OK] Subcheck|
+	//     |- [OK] SubSubcheck|
 }
