@@ -121,6 +121,7 @@ func ExampleOverall_withSubchecks() {
 	example_perfdata := perfdata.Perfdata{Label: "pd_test", Value: 5, Uom: "s"}
 	pd_list := perfdata.PerfdataList{}
 	pd_list.Add(&example_perfdata)
+
 	subcheck := Subcheck{
 		State:    check.OK,
 		Output:   "Subcheck1 Test",
@@ -137,6 +138,7 @@ func ExampleOverall_withSubchecks() {
 	// |- [OK] Subcheck1 Test|pd_test=5s
 }
 
+//nolint
 func ExampleOverall_withSubchecks2() {
 	var overall Overall
 
@@ -183,6 +185,7 @@ func ExampleOverall_withSubchecks2() {
 
 func ExampleOverall_withSubchecks3() {
 	var overall Overall
+
 	subcheck2 := Subcheck{
 		State:  check.OK,
 		Output: "SubSubcheck",
