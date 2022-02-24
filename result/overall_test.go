@@ -115,7 +115,7 @@ func ExampleOverall_GetStatus() {
 	// Output: 2
 }
 
-func TestOverall_withSubchecks(t *testing.T) {
+func ExampleOverall_withSubchecks() {
 	var overall Overall
 
 	example_perfdata := perfdata.Perfdata{Label: "pd_test", Value: 5, Uom: "s"}
@@ -131,12 +131,13 @@ func TestOverall_withSubchecks(t *testing.T) {
 	overall.AddOK("bla")
 
 	fmt.Println(overall.GetOutput())
-
-	// Output: [OK] bla
-	// |- [OK] Subcheck1 Test|pd_test=5s;;;;
+	// Output:
+	// states: ok=1 ok=1
+	// [OK] bla
+	// |- [OK] Subcheck1 Test|pd_test=5s
 }
 
-func TestOverall_withSubchecks2(t *testing.T) {
+func ExampleOverall_withSubchecks2() {
 	var overall Overall
 
 	example_perfdata := perfdata.Perfdata{Label: "pd_test", Value: 5, Uom: "s"}
@@ -180,7 +181,7 @@ func TestOverall_withSubchecks2(t *testing.T) {
 	// |- [WARNING] Subcheck2 Test|kl;jr2if;l2rkjasdf=5m asdf=18446744073709551615B
 }
 
-func TestOverall_withSubchecks3(t *testing.T) {
+func ExampleOverall_withSubchecks3() {
 	var overall Overall
 	subcheck2 := Subcheck{
 		State:  check.OK,
