@@ -167,6 +167,7 @@ func (o *Overall) GetOutput() string {
 
 func (s *Subcheck) getOutput(indent_level int) string {
 	var output string
+
 	prefix := strings.Repeat("  ", indent_level)
 	output += prefix + "|- " + s.String() + "\n"
 
