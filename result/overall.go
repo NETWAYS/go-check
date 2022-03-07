@@ -22,17 +22,17 @@ type Overall struct {
 	Unknowns  int
 	Summary   string
 	Outputs   []string // Deprecate this in a future version
-	subchecks []Subcheck
+	partialResults []PartialResult
 }
 
-type Subcheck struct {
+type PartialResult struct {
 	State     int
 	Output    string
 	Perfdata  perfdata.PerfdataList
-	subchecks []Subcheck
+	partialResults []PartialResult
 }
 
-func (s *Subcheck) String() string {
+func (s *PartialResult) String() string {
 	return fmt.Sprintf("[%s] %s|%s", check.StatusText(s.State), s.Output, s.Perfdata.String())
 }
 
@@ -71,12 +71,12 @@ func (o *Overall) Add(state int, output string) {
 	o.Outputs = append(o.Outputs, fmt.Sprintf("[%s] %s", check.StatusText(state), output))
 }
 
-func (o *Overall) AddSubcheck(subcheck Subcheck) {
-	o.subchecks = append(o.subchecks, subcheck)
+func (o *Overall) AddSubcheck(subcheck PartialResult) {
+	o.partialResults = append(o.partialResults, subcheck)
 }
 
-func (o *Subcheck) AddSubcheck(subcheck Subcheck) {
-	o.subchecks = append(o.subchecks, subcheck)
+func (o *PartialResult) AddSubcheck(subcheck PartialResult) {
+	o.partialResults = append(o.partialResults, subcheck)
 }
 
 func (o *Overall) GetStatus() int {
@@ -111,14 +111,14 @@ func (o *Overall) GetSummary() string {
 			o.Summary += fmt.Sprintf("ok=%d ", o.OKs)
 		}
 
-		if o.Summary == "" && len(o.subchecks) == 0 {
+		if o.Summary == "" && len(o.partialResults) == 0 {
 			o.Summary = "No status information"
 		} else {
 			criticals := 0
 			warnings := 0
 			oks := 0
 			unknowns := 0
-			for _, sc := range o.subchecks {
+			for _, sc := range o.partialResults {
 				if sc.State == check.Critical {
 					criticals++
 				} else if sc.State == check.Warning {
@@ -156,8 +156,8 @@ func (o *Overall) GetOutput() string {
 		output += extra + "\n"
 	}
 
-	if o.subchecks != nil {
-		for _, s := range o.subchecks {
+	if o.partialResults != nil {
+		for _, s := range o.partialResults {
 			output += s.getOutput(0)
 		}
 	}
@@ -165,14 +165,14 @@ func (o *Overall) GetOutput() string {
 	return output
 }
 
-func (s *Subcheck) getOutput(indent_level int) string {
+func (s *PartialResult) getOutput(indent_level int) string {
 	var output string
 
 	prefix := strings.Repeat("  ", indent_level)
 	output += prefix + "|- " + s.String() + "\n"
 
-	if s.subchecks != nil {
-		for _, ss := range s.subchecks {
+	if s.partialResults != nil {
+		for _, ss := range s.partialResults {
 			output += ss.getOutput(indent_level + 2)
 		}
 	}

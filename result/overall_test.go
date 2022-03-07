@@ -122,7 +122,7 @@ func ExampleOverall_withSubchecks() {
 	pd_list := perfdata.PerfdataList{}
 	pd_list.Add(&example_perfdata)
 
-	subcheck := Subcheck{
+	subcheck := PartialResult{
 		State:    check.OK,
 		Output:   "Subcheck1 Test",
 		Perfdata: pd_list,
@@ -162,12 +162,12 @@ func ExampleOverall_withSubchecks2() {
 	pd_list2.Add(&example_perfdata3)
 	pd_list2.Add(&example_perfdata4)
 
-	subcheck := Subcheck{
+	subcheck := PartialResult{
 		State:    check.OK,
 		Output:   "Subcheck1 Test",
 		Perfdata: pd_list,
 	}
-	subcheck2 := Subcheck{
+	subcheck2 := PartialResult{
 		State:    check.Warning,
 		Output:   "Subcheck2 Test",
 		Perfdata: pd_list2,
@@ -186,21 +186,21 @@ func ExampleOverall_withSubchecks2() {
 func ExampleOverall_withSubchecks3() {
 	var overall Overall
 
-	subcheck2 := Subcheck{
+	subcheck2 := PartialResult{
 		State:  check.OK,
 		Output: "SubSubcheck",
 	}
-	subcheck := Subcheck{
+	subcheck := PartialResult{
 		State:  check.OK,
-		Output: "Subcheck",
+		Output: "PartialResult",
 	}
-	subcheck.subchecks = append(subcheck.subchecks, subcheck2)
+	subcheck.partialResults = append(subcheck.partialResults, subcheck2)
 
 	overall.AddSubcheck(subcheck)
 
 	fmt.Println(overall.GetOutput())
 
 	// states: ok=1
-	// |- [OK] Subcheck|
+	// |- [OK] PartialResult|
 	//     |- [OK] SubSubcheck|
 }
