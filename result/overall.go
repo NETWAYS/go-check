@@ -169,7 +169,7 @@ func (s *PartialResult) getOutput(indent_level int) string {
 	var output string
 
 	prefix := strings.Repeat("  ", indent_level)
-	output += prefix + "|- " + s.String() + "\n"
+	output += prefix + "\\_ " + s.String() + "\n"
 
 	if s.partialResults != nil {
 		for _, ss := range s.partialResults {

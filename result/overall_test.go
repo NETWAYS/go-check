@@ -135,7 +135,7 @@ func ExampleOverall_withSubchecks() {
 	// Output:
 	// states: ok=1 ok=1
 	// [OK] bla
-	// |- [OK] Subcheck1 Test|pd_test=5s
+	// \_ [OK] Subcheck1 Test|pd_test=5s
 }
 
 //nolint
@@ -179,8 +179,8 @@ func ExampleOverall_withSubchecks2() {
 	fmt.Println(overall.GetOutput())
 
 	// states: warning=1 ok=1
-	// |- [OK] Subcheck1 Test|pd_test=5s pd_test2=1099511627776kB;@3.14:7036874417766;549755813887:1208925819614629174706176;;18446744073709551615
-	// |- [WARNING] Subcheck2 Test|kl;jr2if;l2rkjasdf=5m asdf=18446744073709551615B
+	// \_ [OK] Subcheck1 Test|pd_test=5s pd_test2=1099511627776kB;@3.14:7036874417766;549755813887:1208925819614629174706176;;18446744073709551615
+	// \_ [WARNING] Subcheck2 Test|kl;jr2if;l2rkjasdf=5m asdf=18446744073709551615B
 }
 
 func ExampleOverall_withSubchecks3() {
@@ -201,6 +201,6 @@ func ExampleOverall_withSubchecks3() {
 	fmt.Println(overall.GetOutput())
 
 	// states: ok=1
-	// |- [OK] PartialResult|
-	//     |- [OK] SubSubcheck|
+	// \_ [OK] PartialResult|
+	//     \_ [OK] SubSubcheck|
 }
