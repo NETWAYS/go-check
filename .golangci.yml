@@ -10,6 +10,9 @@ linters:
     - lll
     - whitespace
     - wsl
+    - exportloopref
+  disable:
+    - scopelint
   presets:
     - bugs
     - unused
