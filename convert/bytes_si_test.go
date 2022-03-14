@@ -6,7 +6,7 @@ import (
 )
 
 func TestBytesSI_HumanReadable(t *testing.T) {
-	assert.Equal(t, "0MB", BytesSI(0).HumanReadable())
+	assert.Equal(t, "0B", BytesSI(0).HumanReadable())
 	assert.Equal(t, "999B", BytesSI(999).HumanReadable())
 	assert.Equal(t, "999KB", BytesSI(999*1000).HumanReadable())
 	assert.Equal(t, "999MB", BytesSI(999*1000*1000).HumanReadable())
