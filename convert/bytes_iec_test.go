@@ -6,6 +6,7 @@ import (
 )
 
 func TestBytesIEC_HumanReadable(t *testing.T) {
+	assert.Equal(t, "0B", BytesIEC(0).HumanReadable())
 	assert.Equal(t, "999B", BytesIEC(999).HumanReadable())
 	assert.Equal(t, "999KiB", BytesIEC(999*1024).HumanReadable())
 	assert.Equal(t, "999MiB", BytesIEC(999*1024*1024).HumanReadable())
