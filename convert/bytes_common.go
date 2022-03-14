@@ -68,13 +68,20 @@ func ParseBytes(value string) (ByteAny, error) {
 // Meant as a universal function to be used by the implementations, with base and a list of unit names.
 //
 // A special behavior is that resulting values smaller than 2 are displayed with the lower exponent.
+// If the input value is 0, humanReadable will always return "0MB"
 //
 // Examples:
 //  1073741824B -> 1000KB
 //  2147483648B -> 2MB
+//  0 -> 0MB
 //
 func humanReadable(b uint64, units []string, base float64) (float64, string) {
+	if b == 0 {
+		return 0, "MB"
+	}
+
 	exponent := math.Log(float64(b)) / math.Log(base)
+
 	// Round to the unit scaled exponent
 	unitExponent := math.Floor(exponent)
 
