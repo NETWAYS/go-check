@@ -2,10 +2,11 @@ package result
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/NETWAYS/go-check"
 	"github.com/NETWAYS/go-check/perfdata"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestOverall_AddOK(t *testing.T) {
@@ -138,8 +139,7 @@ func ExampleOverall_withSubchecks() {
 	// \_ [OK] Subcheck1 Test|pd_test=5s
 }
 
-//nolint
-func ExampleOverall_withSubchecks2() {
+func TestOverall_withEnhancedSubchecks(t *testing.T) {
 	var overall Overall
 
 	example_perfdata := perfdata.Perfdata{Label: "pd_test", Value: 5, Uom: "s"}
@@ -176,14 +176,16 @@ func ExampleOverall_withSubchecks2() {
 	overall.AddSubcheck(subcheck)
 	overall.AddSubcheck(subcheck2)
 
-	fmt.Println(overall.GetOutput())
-
-	// states: warning=1 ok=1
-	// \_ [OK] Subcheck1 Test|pd_test=5s pd_test2=1099511627776kB;@3.14:7036874417766;549755813887:1208925819614629174706176;;18446744073709551615
-	// \_ [WARNING] Subcheck2 Test|kl;jr2if;l2rkjasdf=5m asdf=18446744073709551615B
+	resString := overall.GetOutput()
+	//nolint:lll
+	expectedString := `states: warning=1 ok=1
+\_ [OK] Subcheck1 Test|pd_test=5s pd_test2=1099511627776kB;@3.14:7036874417766;549755813887:1208925819614629174706176;;18446744073709551615
+\_ [WARNING] Subcheck2 Test|kl;jr2if;l2rkjasdf=5m asdf=18446744073709551615B
+`
+	assert.Equal(t, expectedString, resString)
 }
 
-func ExampleOverall_withSubchecks3() {
+func TestOverall_withSubchecks3(t *testing.T) {
 	var overall Overall
 
 	subcheck2 := PartialResult{
@@ -198,9 +200,48 @@ func ExampleOverall_withSubchecks3() {
 
 	overall.AddSubcheck(subcheck)
 
-	fmt.Println(overall.GetOutput())
+	output := overall.GetOutput()
 
-	// states: ok=1
-	// \_ [OK] PartialResult|
-	//     \_ [OK] SubSubcheck|
+	resString := `states: ok=1
+\_ [OK] PartialResult
+    \_ [OK] SubSubcheck
+`
+
+	assert.Equal(t, resString, output)
+}
+
+func TestOverall_withSubchecks4(t *testing.T) {
+	var overall Overall
+
+	subcheck2 := PartialResult{
+		State:  check.OK,
+		Output: "SubSubcheck",
+	}
+	subcheck := PartialResult{
+		State:  check.OK,
+		Output: "PartialResult",
+	}
+
+	perf1 := perfdata.Perfdata{
+		Label: "foo",
+		Value: 3,
+	}
+	perf2 := perfdata.Perfdata{
+		Label: "bar",
+		Value: 300,
+		Uom:   "%",
+	}
+
+	subcheck2.Perfdata.Add(&perf1)
+	subcheck2.Perfdata.Add(&perf2)
+	subcheck.partialResults = append(subcheck.partialResults, subcheck2)
+
+	overall.AddSubcheck(subcheck)
+
+	res := `states: ok=1
+\_ [OK] PartialResult
+    \_ [OK] SubSubcheck|foo=3 bar=300%
+`
+
+	assert.Equal(t, res, overall.GetOutput())
 }
