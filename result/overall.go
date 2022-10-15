@@ -33,7 +33,11 @@ type PartialResult struct {
 }
 
 func (s *PartialResult) String() string {
-	return fmt.Sprintf("[%s] %s|%s", check.StatusText(s.State), s.Output, s.Perfdata.String())
+	if len(s.Perfdata) == 0 {
+		return fmt.Sprintf("[%s] %s", check.StatusText(s.State), s.Output)
+	} else {
+		return fmt.Sprintf("[%s] %s|%s", check.StatusText(s.State), s.Output, s.Perfdata.String())
+	}
 }
 
 // Deprecate this in a future version
