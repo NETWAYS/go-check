@@ -3,9 +3,10 @@ package result
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/NETWAYS/go-check"
 	"github.com/NETWAYS/go-check/perfdata"
-	"strings"
 )
 
 // So, this is the idea:
@@ -16,19 +17,19 @@ import (
 // one suffices, but one fails, the whole check might be OK and only the subcheck
 // Warning or Critical.
 type Overall struct {
-	OKs       int
-	Warnings  int
-	Criticals int
-	Unknowns  int
-	Summary   string
-	Outputs   []string // Deprecate this in a future version
+	OKs            int
+	Warnings       int
+	Criticals      int
+	Unknowns       int
+	Summary        string
+	Outputs        []string // Deprecate this in a future version
 	partialResults []PartialResult
 }
 
 type PartialResult struct {
-	State     int
-	Output    string
-	Perfdata  perfdata.PerfdataList
+	State          int
+	Output         string
+	Perfdata       perfdata.PerfdataList
 	partialResults []PartialResult
 }
 
@@ -161,8 +162,8 @@ func (o *Overall) GetOutput() string {
 	}
 
 	if o.partialResults != nil {
-		for _, s := range o.partialResults {
-			output += s.getOutput(0)
+		for i := range o.partialResults {
+			output += o.partialResults[i].getOutput(0)
 		}
 	}
 
