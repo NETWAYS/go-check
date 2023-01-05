@@ -37,6 +37,7 @@ func (s *PartialResult) String() string {
 	if len(s.Perfdata) == 0 {
 		return fmt.Sprintf("[%s] %s", check.StatusText(s.State), s.Output)
 	}
+
 	return fmt.Sprintf("[%s] %s|%s", check.StatusText(s.State), s.Output, s.Perfdata.String())
 }
 
