@@ -28,30 +28,31 @@ type Perfdata struct {
 }
 
 // String returns the proper format for the plugin output
-func (p Perfdata) String() (s string) {
-	s = FormatLabel(p.Label) + "="
+func (p Perfdata) String() string {
+	var sb strings.Builder
 
-	s += FormatNumeric(p.Value)
-	s += p.Uom
+	sb.WriteString(FormatLabel(p.Label) + "=")
+
+	sb.WriteString(FormatNumeric(p.Value))
+	sb.WriteString(p.Uom)
 
 	// Thresholds
 	for _, value := range []*check.Threshold{p.Warn, p.Crit} {
-		s += ";"
+		sb.WriteString(";")
+
 		if value != nil {
-			s += value.String()
+			sb.WriteString(value.String())
 		}
 	}
 
 	// Limits
 	for _, value := range []interface{}{p.Min, p.Max} {
-		s += ";"
+		sb.WriteString(";")
+
 		if value != nil {
-			s += FormatNumeric(value)
+			sb.WriteString(FormatNumeric(value))
 		}
 	}
 
-	// Remove trailing semicolons
-	s = strings.TrimRight(s, ";")
-
-	return
+	return strings.TrimRight(sb.String(), ";")
 }

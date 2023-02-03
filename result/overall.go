@@ -155,32 +155,33 @@ func (o *Overall) GetSummary() string {
 }
 
 func (o *Overall) GetOutput() string {
-	output := o.GetSummary() + "\n"
+	var output strings.Builder
+	output.WriteString(o.GetSummary() + "\n")
 
 	for _, extra := range o.Outputs {
-		output += extra + "\n"
+		output.WriteString(extra + "\n")
 	}
 
 	if o.partialResults != nil {
 		for i := range o.partialResults {
-			output += o.partialResults[i].getOutput(0)
+			output.WriteString(o.partialResults[i].getOutput(0))
 		}
 	}
 
-	return output
+	return output.String()
 }
 
 func (s *PartialResult) getOutput(indent_level int) string {
-	var output string
+	var output strings.Builder
 
 	prefix := strings.Repeat("  ", indent_level)
-	output += prefix + "\\_ " + s.String() + "\n"
+	output.WriteString(prefix + "\\_ " + s.String() + "\n")
 
 	if s.partialResults != nil {
 		for _, ss := range s.partialResults {
-			output += ss.getOutput(indent_level + 2)
+			output.WriteString(ss.getOutput(indent_level + 2))
 		}
 	}
 
-	return output
+	return output.String()
 }
