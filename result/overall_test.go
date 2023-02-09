@@ -63,6 +63,9 @@ func TestOverall_GetStatus_GetSummary(t *testing.T) {
 	overall = Overall{OKs: 1, Warnings: 2}
 	assert.Equal(t, 1, overall.GetStatus())
 	assert.Equal(t, "states: warning=2 ok=1", overall.GetSummary())
+
+	overall = Overall{Summary: "foobar"}
+	assert.Equal(t, "foobar", overall.GetSummary())
 }
 
 func TestOverall_GetOutput(t *testing.T) {
