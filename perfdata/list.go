@@ -1,19 +1,25 @@
 package perfdata
 
+import (
+	"strings"
+)
+
 // PerfdataList can store multiple perfdata and brings a simple fmt.Stringer interface
 type PerfdataList []*Perfdata
 
 // String returns string representations of all Perfdata
-func (l PerfdataList) String() (s string) {
+func (l PerfdataList) String() string {
+	var out strings.Builder
+
 	for _, p := range l {
-		if len(s) > 0 {
-			s += " "
+		if len(out.String()) > 0 {
+			out.WriteString(" ")
 		}
 
-		s += p.String()
+		out.WriteString(p.String())
 	}
 
-	return
+	return out.String()
 }
 
 // Add a Perfdata to the list
