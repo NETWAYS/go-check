@@ -6,6 +6,7 @@ build:
   skip: true
 release:
   github:
+  draft: true
 changelog:
   sort: asc
   filters:
