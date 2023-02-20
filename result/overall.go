@@ -17,20 +17,22 @@ import (
 // one suffices, but one fails, the whole check might be OK and only the subcheck
 // Warning or Critical.
 type Overall struct {
-	OKs            int
-	Warnings       int
-	Criticals      int
-	Unknowns       int
-	Summary        string
-	Outputs        []string // Deprecate this in a future version
-	partialResults []PartialResult
+	oks                 int
+	warnings            int
+	criticals           int
+	unknowns            int
+	Summary             string
+	stateSetExplicitely bool
+	Outputs             []string // Deprecate this in a future version
+	partialResults      []PartialResult
 }
 
 type PartialResult struct {
-	State          int
-	Output         string
-	Perfdata       perfdata.PerfdataList
-	partialResults []PartialResult
+	State               int
+	Output              string
+	stateSetExplicitely bool
+	Perfdata            perfdata.PerfdataList
+	partialResults      []PartialResult
 }
 
 func (s *PartialResult) String() string {
@@ -64,14 +66,15 @@ func (o *Overall) AddUnknown(output string) {
 func (o *Overall) Add(state int, output string) {
 	switch state {
 	case check.OK:
-		o.OKs++
+		o.oks++
 	case check.Warning:
-		o.Warnings++
+		o.warnings++
 	case check.Critical:
-		o.Criticals++
+		o.criticals++
 	default:
-		o.Unknowns++
+		o.unknowns++
 	}
+	o.stateSetExplicitely = true
 
 	o.Outputs = append(o.Outputs, fmt.Sprintf("[%s] %s", check.StatusText(state), output))
 }
@@ -85,13 +88,13 @@ func (o *PartialResult) AddSubcheck(subcheck PartialResult) {
 }
 
 func (o *Overall) GetStatus() int {
-	if o.Criticals > 0 {
+	if o.criticals > 0 {
 		return check.Critical
-	} else if o.Unknowns > 0 {
+	} else if o.unknowns > 0 {
 		return check.Unknown
-	} else if o.Warnings > 0 {
+	} else if o.warnings > 0 {
 		return check.Warning
-	} else if o.OKs > 0 {
+	} else if o.oks > 0 {
 		return check.OK
 	} else {
 		return check.Unknown
@@ -104,60 +107,71 @@ func (o *Overall) GetSummary() string {
 		return o.Summary
 	}
 
-	if o.Criticals > 0 {
-		o.Summary += fmt.Sprintf("critical=%d ", o.Criticals)
-	}
-
-	if o.Unknowns > 0 {
-		o.Summary += fmt.Sprintf("unknown=%d ", o.Unknowns)
-	}
-
-	if o.Warnings > 0 {
-		o.Summary += fmt.Sprintf("warning=%d ", o.Warnings)
-	}
-
-	if o.OKs > 0 {
-		o.Summary += fmt.Sprintf("ok=%d ", o.OKs)
-	}
-
-	if o.Summary == "" && len(o.partialResults) == 0 {
-		o.Summary = "No status information"
-		return o.Summary
-	}
-
-	var (
-		criticals int
-		warnings  int
-		oks       int
-		unknowns  int
-	)
-
-	for _, sc := range o.partialResults {
-		if sc.State == check.Critical {
-			criticals++
-		} else if sc.State == check.Warning {
-			warnings++
-		} else if sc.State == check.Unknown {
-			unknowns++
-		} else if sc.State == check.OK {
-			oks++
+	// Was the state set explicitely?
+	if o.stateSetExplicitely {
+		// Yes, so lets generate it from the sum of the overall states
+		if o.criticals > 0 {
+			o.Summary += fmt.Sprintf("critical=%d ", o.criticals)
 		}
-	}
 
-	if criticals > 0 {
-		o.Summary += fmt.Sprintf("critical=%d ", criticals)
-	}
+		if o.unknowns > 0 {
+			o.Summary += fmt.Sprintf("unknown=%d ", o.unknowns)
+		}
 
-	if unknowns > 0 {
-		o.Summary += fmt.Sprintf("unknowns=%d ", unknowns)
-	}
+		if o.warnings > 0 {
+			o.Summary += fmt.Sprintf("warning=%d ", o.warnings)
+		}
 
-	if warnings > 0 {
-		o.Summary += fmt.Sprintf("warning=%d ", warnings)
-	}
+		if o.oks > 0 {
+			o.Summary += fmt.Sprintf("ok=%d ", o.oks)
+		}
 
-	if oks > 0 {
-		o.Summary += fmt.Sprintf("ok=%d ", oks)
+		if o.Summary == "" {
+			o.Summary = "No status information"
+			return o.Summary
+		}
+	} else {
+		// No, so lets combine the partial ones
+		if len(o.partialResults) == 0 {
+			// Oh, we actually don't have those either
+			o.Summary = "No status information"
+			return o.Summary
+		}
+
+		var (
+			criticals int
+			warnings  int
+			oks       int
+			unknowns  int
+		)
+
+		for _, sc := range o.partialResults {
+			if sc.State == check.Critical {
+				criticals++
+			} else if sc.State == check.Warning {
+				warnings++
+			} else if sc.State == check.Unknown {
+				unknowns++
+			} else if sc.State == check.OK {
+				oks++
+			}
+		}
+
+		if criticals > 0 {
+			o.Summary += fmt.Sprintf("critical=%d ", criticals)
+		}
+
+		if unknowns > 0 {
+			o.Summary += fmt.Sprintf("unknowns=%d ", unknowns)
+		}
+
+		if warnings > 0 {
+			o.Summary += fmt.Sprintf("warning=%d ", warnings)
+		}
+
+		if oks > 0 {
+			o.Summary += fmt.Sprintf("ok=%d ", oks)
+		}
 	}
 
 	o.Summary = "states: " + strings.TrimSpace(o.Summary)
@@ -196,4 +210,22 @@ func (s *PartialResult) getOutput(indent_level int) string {
 	}
 
 	return output.String()
+}
+
+func (s *PartialResult) getState() int {
+	if s.stateSetExplicitely {
+		return s.State
+	}
+
+	if len(s.partialResults) == 0 {
+		return check.Unknown
+	}
+
+	states := make([]int, len(s.partialResults))
+
+	for i := range s.partialResults {
+		states[i] = s.partialResults[i].State
+	}
+
+	return WorstState(states...)
 }
