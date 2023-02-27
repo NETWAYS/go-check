@@ -63,6 +63,8 @@ func (o *Overall) AddUnknown(output string) {
 	o.Add(check.Unknown, output)
 }
 
+// Add State
+// Hint: This will set stateSetExplicitely to true
 func (o *Overall) Add(state int, output string) {
 	switch state {
 	case check.OK:
@@ -75,6 +77,7 @@ func (o *Overall) Add(state int, output string) {
 		o.unknowns++
 	}
 
+	// TODO: Might be a bit obscure that the Add method also sets stateSetExplicitely
 	o.stateSetExplicitely = true
 
 	o.Outputs = append(o.Outputs, fmt.Sprintf("[%s] %s", check.StatusText(state), output))
