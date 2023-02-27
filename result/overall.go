@@ -30,7 +30,7 @@ type Overall struct {
 type PartialResult struct {
 	State               int
 	Output              string
-	stateSetExplicitely bool
+	stateSetExplicitely bool // nolint: unused
 	Perfdata            perfdata.PerfdataList
 	partialResults      []PartialResult
 }
@@ -74,6 +74,7 @@ func (o *Overall) Add(state int, output string) {
 	default:
 		o.unknowns++
 	}
+
 	o.stateSetExplicitely = true
 
 	o.Outputs = append(o.Outputs, fmt.Sprintf("[%s] %s", check.StatusText(state), output))
@@ -130,7 +131,9 @@ func (o *Overall) GetSummary() string {
 			o.Summary = "No status information"
 			return o.Summary
 		}
-	} else {
+	}
+
+	if !o.stateSetExplicitely {
 		// No, so lets combine the partial ones
 		if len(o.partialResults) == 0 {
 			// Oh, we actually don't have those either
@@ -146,13 +149,14 @@ func (o *Overall) GetSummary() string {
 		)
 
 		for _, sc := range o.partialResults {
-			if sc.State == check.Critical {
+			switch sc.State {
+			case check.Critical:
 				criticals++
-			} else if sc.State == check.Warning {
+			case check.Warning:
 				warnings++
-			} else if sc.State == check.Unknown {
+			case check.Unknown:
 				unknowns++
-			} else if sc.State == check.OK {
+			case check.OK:
 				oks++
 			}
 		}
@@ -212,6 +216,7 @@ func (s *PartialResult) getOutput(indent_level int) string {
 	return output.String()
 }
 
+// nolint: unused
 func (s *PartialResult) getState() int {
 	if s.stateSetExplicitely {
 		return s.State
