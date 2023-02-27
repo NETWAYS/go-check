@@ -43,27 +43,27 @@ func (s *PartialResult) String() string {
 	return fmt.Sprintf("[%s] %s|%s", check.StatusText(s.State), s.Output, s.Perfdata.String())
 }
 
-// Deprecate this in a future version
+// Deprecated: Will be removed in a future version, use Add() instead
 func (o *Overall) AddOK(output string) {
 	o.Add(check.OK, output)
 }
 
-// Deprecate this in a future version
+// Deprecated: Will be removed in a future version, use Add() instead
 func (o *Overall) AddWarning(output string) {
 	o.Add(check.Warning, output)
 }
 
-// Deprecate this in a future version
+// Deprecated: Will be removed in a future version, use Add() instead
 func (o *Overall) AddCritical(output string) {
 	o.Add(check.Critical, output)
 }
 
-// Deprecate this in a future version
+// Deprecated: Will be removed in a future version, use Add() instead
 func (o *Overall) AddUnknown(output string) {
 	o.Add(check.Unknown, output)
 }
 
-// Add State
+// Add State explicitely
 // Hint: This will set stateSetExplicitely to true
 func (o *Overall) Add(state int, output string) {
 	switch state {
