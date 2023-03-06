@@ -22,5 +22,4 @@ linters:
   presets:
     - bugs
     - unused
-    # - style
   fast: false

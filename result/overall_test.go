@@ -13,7 +13,7 @@ func TestOverall_AddOK(t *testing.T) {
 	overall := Overall{}
 	overall.Add(0, "test ok")
 
-	assert.Equal(t, 1, overall.OKs)
+	assert.Equal(t, 1, overall.oks)
 	assert.ElementsMatch(t, overall.Outputs, []string{"[OK] test ok"})
 }
 
@@ -21,7 +21,7 @@ func TestOverall_AddWarning(t *testing.T) {
 	overall := Overall{}
 	overall.Add(1, "test warning")
 
-	assert.Equal(t, 1, overall.Warnings)
+	assert.Equal(t, 1, overall.warnings)
 	assert.ElementsMatch(t, overall.Outputs, []string{"[WARNING] test warning"})
 }
 
@@ -29,7 +29,7 @@ func TestOverall_AddCritical(t *testing.T) {
 	overall := Overall{}
 	overall.Add(2, "test critical")
 
-	assert.Equal(t, 1, overall.Criticals)
+	assert.Equal(t, 1, overall.criticals)
 	assert.ElementsMatch(t, overall.Outputs, []string{"[CRITICAL] test critical"})
 }
 
@@ -37,7 +37,7 @@ func TestOverall_AddUnknown(t *testing.T) {
 	overall := Overall{}
 	overall.Add(3, "test unknown")
 
-	assert.Equal(t, 1, overall.Unknowns)
+	assert.Equal(t, 1, overall.unknowns)
 	assert.ElementsMatch(t, overall.Outputs, []string{"[UNKNOWN] test unknown"})
 }
 
@@ -48,19 +48,19 @@ func TestOverall_GetStatus_GetSummary(t *testing.T) {
 	assert.Equal(t, 3, overall.GetStatus())
 	assert.Equal(t, "No status information", overall.GetSummary())
 
-	overall = Overall{OKs: 1}
+	overall = Overall{oks: 1, stateSetExplicitely: true}
 	assert.Equal(t, 0, overall.GetStatus())
 	assert.Equal(t, "states: ok=1", overall.GetSummary())
 
-	overall = Overall{Criticals: 2, OKs: 1, Warnings: 2, Unknowns: 1}
+	overall = Overall{criticals: 2, oks: 1, warnings: 2, unknowns: 1, stateSetExplicitely: true}
 	assert.Equal(t, 2, overall.GetStatus())
 	assert.Equal(t, "states: critical=2 unknown=1 warning=2 ok=1", overall.GetSummary())
 
-	overall = Overall{Unknowns: 2, OKs: 1, Warnings: 2}
+	overall = Overall{unknowns: 2, oks: 1, warnings: 2, stateSetExplicitely: true}
 	assert.Equal(t, 3, overall.GetStatus())
 	assert.Equal(t, "states: unknown=2 warning=2 ok=1", overall.GetSummary())
 
-	overall = Overall{OKs: 1, Warnings: 2}
+	overall = Overall{oks: 1, warnings: 2, stateSetExplicitely: true}
 	assert.Equal(t, 1, overall.GetStatus())
 	assert.Equal(t, "states: warning=2 ok=1", overall.GetSummary())
 
@@ -94,8 +94,8 @@ func ExampleOverall_Add() {
 	overall.Add(check.OK, "One element is good")
 	overall.Add(check.Critical, "The other is critical")
 
-	fmt.Println(overall)
-	// Output: {1 0 1 0  [[OK] One element is good [CRITICAL] The other is critical] []}
+	fmt.Printf("%#v\n", overall)
+	// Output: result.Overall{oks:1, warnings:0, criticals:1, unknowns:0, Summary:"", stateSetExplicitely:true, Outputs:[]string{"[OK] One element is good", "[CRITICAL] The other is critical"}, partialResults:[]result.PartialResult(nil)}
 }
 
 func ExampleOverall_GetOutput() {
@@ -137,7 +137,7 @@ func ExampleOverall_withSubchecks() {
 
 	fmt.Println(overall.GetOutput())
 	// Output:
-	// states: ok=1 ok=1
+	// states: ok=1
 	// [OK] bla
 	// \_ [OK] Subcheck1 Test|pd_test=5s
 }
@@ -212,7 +212,6 @@ func TestOverall_withSubchecks3(t *testing.T) {
 
 	assert.Equal(t, resString, output)
 }
-
 func TestOverall_withSubchecks4(t *testing.T) {
 	var overall Overall
 
@@ -244,6 +243,46 @@ func TestOverall_withSubchecks4(t *testing.T) {
 	res := `states: ok=1
 \_ [OK] PartialResult
     \_ [OK] SubSubcheck|foo=3 bar=300%
+`
+
+	assert.Equal(t, res, overall.GetOutput())
+}
+
+func TestOverall_withSubchecks5(t *testing.T) {
+	var overall Overall
+
+	subcheck3 := PartialResult{
+		State:  check.Critical,
+		Output: "SubSubSubcheck",
+	}
+	subcheck2 := PartialResult{
+		Output: "SubSubcheck",
+	}
+	subcheck := PartialResult{
+		Output: "PartialResult",
+	}
+
+	perf1 := perfdata.Perfdata{
+		Label: "foo",
+		Value: 3,
+	}
+	perf2 := perfdata.Perfdata{
+		Label: "bar",
+		Value: 300,
+		Uom:   "%",
+	}
+
+	subcheck2.Perfdata.Add(&perf1)
+	subcheck2.Perfdata.Add(&perf2)
+	subcheck2.partialResults = append(subcheck.partialResults, subcheck3)
+	subcheck.partialResults = append(subcheck.partialResults, subcheck2)
+
+	overall.AddSubcheck(subcheck)
+
+	res := `states: ok=1
+\_ [OK] PartialResult
+    \_ [OK] SubSubcheck|foo=3 bar=300%
+        \_ [CRITICAL] SubSubSubcheck
 `
 
 	assert.Equal(t, res, overall.GetOutput())
