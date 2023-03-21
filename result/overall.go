@@ -36,11 +36,7 @@ type PartialResult struct {
 }
 
 func (s *PartialResult) String() string {
-	if len(s.Perfdata) == 0 {
-		return fmt.Sprintf("[%s] %s", check.StatusText(s.State), s.Output)
-	}
-
-	return fmt.Sprintf("[%s] %s|%s", check.StatusText(s.State), s.Output, s.Perfdata.String())
+	return fmt.Sprintf("[%s] %s", check.StatusText(s.State), s.Output)
 }
 
 // Deprecated: Will be removed in a future version, use Add() instead
@@ -196,14 +192,42 @@ func (o *Overall) GetOutput() string {
 	}
 
 	if o.partialResults != nil {
+		var pdata strings.Builder
+
+		// Generate indeted output and perfdata for all partialResults
 		for i := range o.partialResults {
 			output.WriteString(o.partialResults[i].getOutput(0))
+			pdata.WriteString(" " + o.partialResults[i].getPerfdata())
+		}
+
+		pdata_string := strings.Trim(pdata.String(), " ")
+
+		if len(pdata_string) > 0 {
+			output.WriteString("|" + pdata_string + "\n")
 		}
 	}
 
 	return output.String()
 }
 
+// Returns all subsequent perfdata as a concatenated string
+func (s *PartialResult) getPerfdata() string {
+	var output strings.Builder
+
+	if len(s.Perfdata) > 0 {
+		output.WriteString(s.Perfdata.String())
+	}
+
+	if s.partialResults != nil {
+		for _, ss := range s.partialResults {
+			output.WriteString(ss.getPerfdata())
+		}
+	}
+
+	return output.String()
+}
+
+// Generates indented output for all subsequent PartialResults
 func (s *PartialResult) getOutput(indent_level int) string {
 	var output strings.Builder
 
