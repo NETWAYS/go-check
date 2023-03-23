@@ -139,7 +139,8 @@ func ExampleOverall_withSubchecks() {
 	// Output:
 	// states: ok=1
 	// [OK] bla
-	// \_ [OK] Subcheck1 Test|pd_test=5s
+	// \_ [OK] Subcheck1 Test
+	// |pd_test=5s
 }
 
 func TestOverall_withEnhancedSubchecks(t *testing.T) {
@@ -182,8 +183,9 @@ func TestOverall_withEnhancedSubchecks(t *testing.T) {
 	resString := overall.GetOutput()
 	//nolint:lll
 	expectedString := `states: warning=1 ok=1
-\_ [OK] Subcheck1 Test|pd_test=5s pd_test2=1099511627776kB;@3.14:7036874417766;549755813887:1208925819614629174706176;;18446744073709551615
-\_ [WARNING] Subcheck2 Test|kl;jr2if;l2rkjasdf=5m asdf=18446744073709551615B
+\_ [OK] Subcheck1 Test
+\_ [WARNING] Subcheck2 Test
+|pd_test=5s pd_test2=1099511627776kB;@3.14:7036874417766;549755813887:1208925819614629174706176;;18446744073709551615 kl;jr2if;l2rkjasdf=5m asdf=18446744073709551615B
 `
 	assert.Equal(t, expectedString, resString)
 }
@@ -212,6 +214,7 @@ func TestOverall_withSubchecks3(t *testing.T) {
 
 	assert.Equal(t, resString, output)
 }
+
 func TestOverall_withSubchecks4(t *testing.T) {
 	var overall Overall
 
@@ -242,7 +245,8 @@ func TestOverall_withSubchecks4(t *testing.T) {
 
 	res := `states: ok=1
 \_ [OK] PartialResult
-    \_ [OK] SubSubcheck|foo=3 bar=300%
+    \_ [OK] SubSubcheck
+|foo=3 bar=300%
 `
 
 	assert.Equal(t, res, overall.GetOutput())
@@ -281,8 +285,9 @@ func TestOverall_withSubchecks5(t *testing.T) {
 
 	res := `states: ok=1
 \_ [OK] PartialResult
-    \_ [OK] SubSubcheck|foo=3 bar=300%
+    \_ [OK] SubSubcheck
         \_ [CRITICAL] SubSubSubcheck
+|foo=3 bar=300%
 `
 
 	assert.Equal(t, res, overall.GetOutput())
