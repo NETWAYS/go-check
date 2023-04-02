@@ -88,15 +88,61 @@ func (o *PartialResult) AddSubcheck(subcheck PartialResult) {
 }
 
 func (o *Overall) GetStatus() int {
-	if o.criticals > 0 {
-		return check.Critical
-	} else if o.unknowns > 0 {
-		return check.Unknown
-	} else if o.warnings > 0 {
-		return check.Warning
-	} else if o.oks > 0 {
-		return check.OK
+	if o.stateSetExplicitely {
+		if o.criticals > 0 {
+			return check.Critical
+		} else if o.unknowns > 0 {
+			return check.Unknown
+		} else if o.warnings > 0 {
+			return check.Warning
+		} else if o.oks > 0 {
+			return check.OK
+		} else {
+			return check.Unknown
+		}
 	} else {
+		// state set explicitely!
+
+		if len(o.partialResults) == 0 {
+			return check.Unknown
+		}
+
+		var (
+			criticals int
+			warnings  int
+			oks       int
+			unknowns  int
+		)
+
+		for _, sc := range o.partialResults {
+			switch sc.State {
+			case check.Critical:
+				criticals++
+			case check.Warning:
+				warnings++
+			case check.Unknown:
+				unknowns++
+			case check.OK:
+				oks++
+			}
+		}
+
+		if criticals > 0 {
+			return check.Critical
+		}
+
+		if unknowns > 0 {
+			return check.Unknown
+		}
+
+		if warnings > 0 {
+			return check.Warning
+		}
+
+		if oks > 0 {
+			return check.OK
+		}
+
 		return check.Unknown
 	}
 }
