@@ -42,30 +42,47 @@ func TestOverall_AddUnknown(t *testing.T) {
 }
 
 func TestOverall_GetStatus_GetSummary(t *testing.T) {
-	var overall Overall
+	testcases := []struct {
+		actual          Overall
+		expectedSummary string
+		expectedStatus  int
+	}{
+		{
+			actual:          Overall{},
+			expectedSummary: "No status information",
+			expectedStatus:  3,
+		},
+		{
+			actual:          Overall{oks: 1, stateSetExplicitely: true},
+			expectedSummary: "states: ok=1",
+			expectedStatus:  0,
+		},
+		{
+			actual:          Overall{criticals: 2, oks: 1, warnings: 2, unknowns: 1, stateSetExplicitely: true},
+			expectedSummary: "states: critical=2 unknown=1 warning=2 ok=1",
+			expectedStatus:  2,
+		},
+		{
+			actual:          Overall{unknowns: 2, oks: 1, warnings: 2, stateSetExplicitely: true},
+			expectedSummary: "states: unknown=2 warning=2 ok=1",
+			expectedStatus:  3,
+		},
+		{
+			actual:          Overall{oks: 1, warnings: 2, stateSetExplicitely: true},
+			expectedSummary: "states: warning=2 ok=1",
+			expectedStatus:  1,
+		},
+		{
+			actual:          Overall{Summary: "foobar"},
+			expectedSummary: "foobar",
+			expectedStatus:  3,
+		},
+	}
 
-	overall = Overall{}
-	assert.Equal(t, 3, overall.GetStatus())
-	assert.Equal(t, "No status information", overall.GetSummary())
-
-	overall = Overall{oks: 1, stateSetExplicitely: true}
-	assert.Equal(t, 0, overall.GetStatus())
-	assert.Equal(t, "states: ok=1", overall.GetSummary())
-
-	overall = Overall{criticals: 2, oks: 1, warnings: 2, unknowns: 1, stateSetExplicitely: true}
-	assert.Equal(t, 2, overall.GetStatus())
-	assert.Equal(t, "states: critical=2 unknown=1 warning=2 ok=1", overall.GetSummary())
-
-	overall = Overall{unknowns: 2, oks: 1, warnings: 2, stateSetExplicitely: true}
-	assert.Equal(t, 3, overall.GetStatus())
-	assert.Equal(t, "states: unknown=2 warning=2 ok=1", overall.GetSummary())
-
-	overall = Overall{oks: 1, warnings: 2, stateSetExplicitely: true}
-	assert.Equal(t, 1, overall.GetStatus())
-	assert.Equal(t, "states: warning=2 ok=1", overall.GetSummary())
-
-	overall = Overall{Summary: "foobar"}
-	assert.Equal(t, "foobar", overall.GetSummary())
+	for _, test := range testcases {
+		assert.Equal(t, test.expectedStatus, test.actual.GetStatus())
+		assert.Equal(t, test.expectedSummary, test.actual.GetSummary())
+	}
 }
 
 func TestOverall_GetOutput(t *testing.T) {
@@ -190,7 +207,7 @@ func TestOverall_withEnhancedSubchecks(t *testing.T) {
 	assert.Equal(t, expectedString, resString)
 }
 
-func TestOverall_withSubchecks3(t *testing.T) {
+func TestOverall_withSubchecks_Simple_Output(t *testing.T) {
 	var overall Overall
 
 	subcheck2 := PartialResult{
@@ -215,7 +232,7 @@ func TestOverall_withSubchecks3(t *testing.T) {
 	assert.Equal(t, resString, output)
 }
 
-func TestOverall_withSubchecks4(t *testing.T) {
+func TestOverall_withSubchecks_Perfdata(t *testing.T) {
 	var overall Overall
 
 	subcheck2 := PartialResult{
@@ -250,9 +267,10 @@ func TestOverall_withSubchecks4(t *testing.T) {
 `
 
 	assert.Equal(t, res, overall.GetOutput())
+	assert.Equal(t, 0, overall.GetStatus())
 }
 
-func TestOverall_withSubchecks5(t *testing.T) {
+func TestOverall_withSubchecks_PartialResult(t *testing.T) {
 	var overall Overall
 
 	subcheck3 := PartialResult{
@@ -291,4 +309,34 @@ func TestOverall_withSubchecks5(t *testing.T) {
 `
 
 	assert.Equal(t, res, overall.GetOutput())
+	assert.Equal(t, 0, overall.GetStatus())
+}
+
+func TestOverall_withSubchecks_PartialResultStatus(t *testing.T) {
+	var overall Overall
+
+	subcheck := PartialResult{
+		State:  check.OK,
+		Output: "Subcheck",
+	}
+	subsubcheck := PartialResult{
+		State:  check.Warning,
+		Output: "SubSubcheck",
+	}
+	subsubsubcheck := PartialResult{
+		State:  check.Critical,
+		Output: "SubSubSubcheck",
+	}
+
+	subsubcheck.AddSubcheck(subsubsubcheck)
+	subcheck.AddSubcheck(subsubcheck)
+	overall.AddSubcheck(subcheck)
+
+	res := `states: ok=1
+\_ [OK] Subcheck
+    \_ [WARNING] SubSubcheck
+        \_ [CRITICAL] SubSubSubcheck
+`
+	assert.Equal(t, res, overall.GetOutput())
+	assert.Equal(t, 0, overall.GetStatus())
 }
