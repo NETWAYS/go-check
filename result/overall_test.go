@@ -207,7 +207,7 @@ func TestOverall_withEnhancedSubchecks(t *testing.T) {
 	assert.Equal(t, expectedString, resString)
 }
 
-func TestOverall_withSubchecks3(t *testing.T) {
+func TestOverall_withSubchecks_Simple_Output(t *testing.T) {
 	var overall Overall
 
 	subcheck2 := PartialResult{
@@ -232,7 +232,7 @@ func TestOverall_withSubchecks3(t *testing.T) {
 	assert.Equal(t, resString, output)
 }
 
-func TestOverall_withSubchecks4(t *testing.T) {
+func TestOverall_withSubchecks_Perfdata(t *testing.T) {
 	var overall Overall
 
 	subcheck2 := PartialResult{
@@ -267,9 +267,10 @@ func TestOverall_withSubchecks4(t *testing.T) {
 `
 
 	assert.Equal(t, res, overall.GetOutput())
+	assert.Equal(t, 0, overall.GetStatus())
 }
 
-func TestOverall_withSubchecks5(t *testing.T) {
+func TestOverall_withSubchecks_PartialResult(t *testing.T) {
 	var overall Overall
 
 	subcheck3 := PartialResult{
@@ -308,4 +309,34 @@ func TestOverall_withSubchecks5(t *testing.T) {
 `
 
 	assert.Equal(t, res, overall.GetOutput())
+	assert.Equal(t, 0, overall.GetStatus())
+}
+
+func TestOverall_withSubchecks_PartialResultStatus(t *testing.T) {
+	var overall Overall
+
+	subcheck := PartialResult{
+		State:  check.OK,
+		Output: "Subcheck",
+	}
+	subsubcheck := PartialResult{
+		State:  check.Warning,
+		Output: "SubSubcheck",
+	}
+	subsubsubcheck := PartialResult{
+		State:  check.Critical,
+		Output: "SubSubSubcheck",
+	}
+
+	subsubcheck.AddSubcheck(subsubsubcheck)
+	subcheck.AddSubcheck(subsubcheck)
+	overall.AddSubcheck(subcheck)
+
+	res := `states: ok=1
+\_ [OK] Subcheck
+    \_ [WARNING] SubSubcheck
+        \_ [CRITICAL] SubSubSubcheck
+`
+	assert.Equal(t, res, overall.GetOutput())
+	assert.Equal(t, 0, overall.GetStatus())
 }
