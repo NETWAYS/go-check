@@ -11,9 +11,9 @@ import (
 
 // So, this is the idea:
 // A check plugin has a single Overall (singleton)
-// Each partial thing which is tested, gets it's own subcheck
+// Each partial thing which is tested, gets its own subcheck
 // The results of these may be relevant to the overall status in the end
-// or not, e.g. if a plugin trieds two different methods for something and
+// or not, e.g. if a plugin tries two different methods for something and
 // one suffices, but one fails, the whole check might be OK and only the subcheck
 // Warning or Critical.
 type Overall struct {
