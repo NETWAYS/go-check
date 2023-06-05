@@ -205,6 +205,8 @@ func TestOverall_withEnhancedSubchecks(t *testing.T) {
 |pd_test=5s pd_test2=1099511627776kB;@3.14:7036874417766;549755813887:1208925819614629174706176;;18446744073709551615 kl;jr2if;l2rkjasdf=5m asdf=18446744073709551615B
 `
 	assert.Equal(t, expectedString, resString)
+
+	assert.Equal(t, check.Warning, overall.GetStatus())
 }
 
 func TestOverall_withSubchecks_Simple_Output(t *testing.T) {
