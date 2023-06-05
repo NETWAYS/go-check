@@ -112,7 +112,7 @@ func ExampleOverall_Add() {
 	overall.Add(check.Critical, "The other is critical")
 
 	fmt.Printf("%#v\n", overall)
-	// Output: result.Overall{oks:1, warnings:0, criticals:1, unknowns:0, Summary:"", stateSetExplicitely:true, Outputs:[]string{"[OK] One element is good", "[CRITICAL] The other is critical"}, partialResults:[]result.PartialResult(nil)}
+	// Output: result.Overall{oks:1, warnings:0, criticals:1, unknowns:0, Summary:"", stateSetExplicitely:true, Outputs:[]string{"[OK] One element is good", "[CRITICAL] The other is critical"}, PartialResults:[]result.PartialResult(nil)}
 }
 
 func ExampleOverall_GetOutput() {
@@ -144,7 +144,7 @@ func ExampleOverall_withSubchecks() {
 	pd_list.Add(&example_perfdata)
 
 	subcheck := PartialResult{
-		State:    check.OK,
+		state:    check.OK,
 		Output:   "Subcheck1 Test",
 		Perfdata: pd_list,
 	}
@@ -184,14 +184,16 @@ func TestOverall_withEnhancedSubchecks(t *testing.T) {
 	pd_list2.Add(&example_perfdata4)
 
 	subcheck := PartialResult{
-		State:    check.OK,
-		Output:   "Subcheck1 Test",
-		Perfdata: pd_list,
+		state:               check.OK,
+		stateSetExplicitely: true,
+		Output:              "Subcheck1 Test",
+		Perfdata:            pd_list,
 	}
 	subcheck2 := PartialResult{
-		State:    check.Warning,
-		Output:   "Subcheck2 Test",
-		Perfdata: pd_list2,
+		state:               check.Warning,
+		stateSetExplicitely: true,
+		Output:              "Subcheck2 Test",
+		Perfdata:            pd_list2,
 	}
 
 	overall.AddSubcheck(subcheck)
@@ -205,20 +207,22 @@ func TestOverall_withEnhancedSubchecks(t *testing.T) {
 |pd_test=5s pd_test2=1099511627776kB;@3.14:7036874417766;549755813887:1208925819614629174706176;;18446744073709551615 kl;jr2if;l2rkjasdf=5m asdf=18446744073709551615B
 `
 	assert.Equal(t, expectedString, resString)
+
+	assert.Equal(t, check.Warning, overall.GetStatus())
 }
 
 func TestOverall_withSubchecks_Simple_Output(t *testing.T) {
 	var overall Overall
 
 	subcheck2 := PartialResult{
-		State:  check.OK,
+		state:  check.OK,
 		Output: "SubSubcheck",
 	}
 	subcheck := PartialResult{
-		State:  check.OK,
+		state:  check.OK,
 		Output: "PartialResult",
 	}
-	subcheck.partialResults = append(subcheck.partialResults, subcheck2)
+	subcheck.PartialResults = append(subcheck.PartialResults, subcheck2)
 
 	overall.AddSubcheck(subcheck)
 
@@ -236,11 +240,11 @@ func TestOverall_withSubchecks_Perfdata(t *testing.T) {
 	var overall Overall
 
 	subcheck2 := PartialResult{
-		State:  check.OK,
+		state:  check.OK,
 		Output: "SubSubcheck",
 	}
 	subcheck := PartialResult{
-		State:  check.OK,
+		state:  check.OK,
 		Output: "PartialResult",
 	}
 
@@ -256,7 +260,7 @@ func TestOverall_withSubchecks_Perfdata(t *testing.T) {
 
 	subcheck2.Perfdata.Add(&perf1)
 	subcheck2.Perfdata.Add(&perf2)
-	subcheck.partialResults = append(subcheck.partialResults, subcheck2)
+	subcheck.PartialResults = append(subcheck.PartialResults, subcheck2)
 
 	overall.AddSubcheck(subcheck)
 
@@ -274,7 +278,7 @@ func TestOverall_withSubchecks_PartialResult(t *testing.T) {
 	var overall Overall
 
 	subcheck3 := PartialResult{
-		State:  check.Critical,
+		state:  check.Critical,
 		Output: "SubSubSubcheck",
 	}
 	subcheck2 := PartialResult{
@@ -296,8 +300,8 @@ func TestOverall_withSubchecks_PartialResult(t *testing.T) {
 
 	subcheck2.Perfdata.Add(&perf1)
 	subcheck2.Perfdata.Add(&perf2)
-	subcheck2.partialResults = append(subcheck.partialResults, subcheck3)
-	subcheck.partialResults = append(subcheck.partialResults, subcheck2)
+	subcheck2.PartialResults = append(subcheck.PartialResults, subcheck3)
+	subcheck.PartialResults = append(subcheck.PartialResults, subcheck2)
 
 	overall.AddSubcheck(subcheck)
 
@@ -316,16 +320,19 @@ func TestOverall_withSubchecks_PartialResultStatus(t *testing.T) {
 	var overall Overall
 
 	subcheck := PartialResult{
-		State:  check.OK,
-		Output: "Subcheck",
+		state:               check.OK,
+		stateSetExplicitely: true,
+		Output:              "Subcheck",
 	}
 	subsubcheck := PartialResult{
-		State:  check.Warning,
-		Output: "SubSubcheck",
+		state:               check.Warning,
+		stateSetExplicitely: true,
+		Output:              "SubSubcheck",
 	}
 	subsubsubcheck := PartialResult{
-		State:  check.Critical,
-		Output: "SubSubSubcheck",
+		state:               check.Critical,
+		stateSetExplicitely: true,
+		Output:              "SubSubSubcheck",
 	}
 
 	subsubcheck.AddSubcheck(subsubsubcheck)
@@ -339,4 +346,40 @@ func TestOverall_withSubchecks_PartialResultStatus(t *testing.T) {
 `
 	assert.Equal(t, res, overall.GetOutput())
 	assert.Equal(t, 0, overall.GetStatus())
+}
+
+func TestDefaultStates1(t *testing.T) {
+	var overall Overall
+
+	subcheck := PartialResult{}
+
+	subcheck.SetDefaultState(check.OK)
+
+	overall.AddSubcheck(subcheck)
+
+	assert.Equal(t, check.OK, overall.GetStatus())
+}
+
+func TestDefaultStates2(t *testing.T) {
+	var overall Overall
+
+	subcheck := PartialResult{}
+
+	overall.AddSubcheck(subcheck)
+
+	assert.Equal(t, check.Unknown, subcheck.getState())
+	assert.Equal(t, check.Unknown, overall.GetStatus())
+}
+
+func TestDefaultStates3(t *testing.T) {
+	var overall Overall
+
+	subcheck := PartialResult{}
+	subcheck.SetDefaultState(check.OK)
+
+	subcheck.SetState(check.Warning)
+
+	overall.AddSubcheck(subcheck)
+
+	assert.Equal(t, check.Warning, overall.GetStatus())
 }
