@@ -2,6 +2,7 @@
 package result
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -11,9 +12,9 @@ import (
 
 // So, this is the idea:
 // A check plugin has a single Overall (singleton)
-// Each partial thing which is tested, gets it's own subcheck
+// Each partial thing which is tested, gets its own subcheck
 // The results of these may be relevant to the overall status in the end
-// or not, e.g. if a plugin trieds two different methods for something and
+// or not, e.g. if a plugin tries two different methods for something and
 // one suffices, but one fails, the whole check might be OK and only the subcheck
 // Warning or Critical.
 type Overall struct {
@@ -24,19 +25,21 @@ type Overall struct {
 	Summary             string
 	stateSetExplicitely bool
 	Outputs             []string // Deprecate this in a future version
-	partialResults      []PartialResult
+	PartialResults      []PartialResult
 }
 
 type PartialResult struct {
-	State               int
+	state               int // Result state, either set explicitely or derived from partialResults
 	Output              string
 	stateSetExplicitely bool // nolint: unused
+	defaultState        int  // Default result state, if no partial results are available and no state is set explicitely
+	defaultStateSet     bool // nolint: unused
 	Perfdata            perfdata.PerfdataList
-	partialResults      []PartialResult
+	PartialResults      []PartialResult
 }
 
 func (s *PartialResult) String() string {
-	return fmt.Sprintf("[%s] %s", check.StatusText(s.State), s.Output)
+	return fmt.Sprintf("[%s] %s", check.StatusText(s.state), s.Output)
 }
 
 // Deprecated: Will be removed in a future version, use Add() instead
@@ -80,11 +83,11 @@ func (o *Overall) Add(state int, output string) {
 }
 
 func (o *Overall) AddSubcheck(subcheck PartialResult) {
-	o.partialResults = append(o.partialResults, subcheck)
+	o.PartialResults = append(o.PartialResults, subcheck)
 }
 
 func (o *PartialResult) AddSubcheck(subcheck PartialResult) {
-	o.partialResults = append(o.partialResults, subcheck)
+	o.PartialResults = append(o.PartialResults, subcheck)
 }
 
 func (o *Overall) GetStatus() int {
@@ -101,9 +104,8 @@ func (o *Overall) GetStatus() int {
 			return check.Unknown
 		}
 	} else {
-		// state set explicitely!
-
-		if len(o.partialResults) == 0 {
+		// state not set explicitely!
+		if len(o.PartialResults) == 0 {
 			return check.Unknown
 		}
 
@@ -114,8 +116,8 @@ func (o *Overall) GetStatus() int {
 			unknowns  int
 		)
 
-		for _, sc := range o.partialResults {
-			switch sc.State {
+		for _, sc := range o.PartialResults {
+			switch sc.getState() {
 			case check.Critical:
 				criticals++
 			case check.Warning:
@@ -180,7 +182,7 @@ func (o *Overall) GetSummary() string {
 
 	if !o.stateSetExplicitely {
 		// No, so lets combine the partial ones
-		if len(o.partialResults) == 0 {
+		if len(o.PartialResults) == 0 {
 			// Oh, we actually don't have those either
 			o.Summary = "No status information"
 			return o.Summary
@@ -193,8 +195,8 @@ func (o *Overall) GetSummary() string {
 			unknowns  int
 		)
 
-		for _, sc := range o.partialResults {
-			switch sc.State {
+		for _, sc := range o.PartialResults {
+			switch sc.state {
 			case check.Critical:
 				criticals++
 			case check.Warning:
@@ -237,13 +239,13 @@ func (o *Overall) GetOutput() string {
 		output.WriteString(extra + "\n")
 	}
 
-	if o.partialResults != nil {
+	if o.PartialResults != nil {
 		var pdata strings.Builder
 
 		// Generate indeted output and perfdata for all partialResults
-		for i := range o.partialResults {
-			output.WriteString(o.partialResults[i].getOutput(0))
-			pdata.WriteString(" " + o.partialResults[i].getPerfdata())
+		for i := range o.PartialResults {
+			output.WriteString(o.PartialResults[i].getOutput(0))
+			pdata.WriteString(" " + o.PartialResults[i].getPerfdata())
 		}
 
 		pdata_string := strings.Trim(pdata.String(), " ")
@@ -264,8 +266,8 @@ func (s *PartialResult) getPerfdata() string {
 		output.WriteString(s.Perfdata.String())
 	}
 
-	if s.partialResults != nil {
-		for _, ss := range s.partialResults {
+	if s.PartialResults != nil {
+		for _, ss := range s.PartialResults {
 			output.WriteString(ss.getPerfdata())
 		}
 	}
@@ -280,8 +282,8 @@ func (s *PartialResult) getOutput(indent_level int) string {
 	prefix := strings.Repeat("  ", indent_level)
 	output.WriteString(prefix + "\\_ " + s.String() + "\n")
 
-	if s.partialResults != nil {
-		for _, ss := range s.partialResults {
+	if s.PartialResults != nil {
+		for _, ss := range s.PartialResults {
 			output.WriteString(ss.getOutput(indent_level + 2))
 		}
 	}
@@ -289,20 +291,46 @@ func (s *PartialResult) getOutput(indent_level int) string {
 	return output.String()
 }
 
+func (s *PartialResult) SetDefaultState(state int) error {
+	if state < check.OK || state > check.Unknown {
+		return errors.New("Default State is not a valid result state. Got " + fmt.Sprint(state) + " which is not valid")
+	}
+
+	s.defaultState = state
+	s.defaultStateSet = true
+
+	return nil
+}
+
+func (s *PartialResult) SetState(state int) error {
+	if state < check.OK || state > check.Unknown {
+		return errors.New("Default State is not a valid result state. Got " + fmt.Sprint(state) + " which is not valid")
+	}
+
+	s.state = state
+	s.stateSetExplicitely = true
+
+	return nil
+}
+
 // nolint: unused
 func (s *PartialResult) getState() int {
 	if s.stateSetExplicitely {
-		return s.State
+		return s.state
 	}
 
-	if len(s.partialResults) == 0 {
+	if len(s.PartialResults) == 0 {
+		if s.defaultStateSet {
+			return s.defaultState
+		}
+
 		return check.Unknown
 	}
 
-	states := make([]int, len(s.partialResults))
+	states := make([]int, len(s.PartialResults))
 
-	for i := range s.partialResults {
-		states[i] = s.partialResults[i].State
+	for i := range s.PartialResults {
+		states[i] = s.PartialResults[i].state
 	}
 
 	return WorstState(states...)

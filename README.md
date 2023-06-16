@@ -9,7 +9,11 @@ go-check
 
 go-check is a library to help with development of monitoring plugins for tools like Icinga.
 
-## Usage
+See the [documentation on pkg.go.dev](https://pkg.go.dev/github.com/NETWAYS/go-check) for more details and examples.
+
+# Usage
+
+## Simple Example
 
 ```go
 package main
@@ -29,29 +33,110 @@ func main() {
 	config.ParseArguments()
 
 	// Some checking should be done here, when --help is not passed
-
 	check.Exitf(check.OK, "Everything is fine - answer=%d", 42)
+    // Output:
+    // OK - Everything is fine - answer=42
 }
 ```
 
+## Exit Codes
+
 ```
-OK - Everything is fine - answer=42
-would exit with code 0
+check.Exitf(OK, "Everything is fine - value=%d", 42) // OK, 0
+
+check.ExitRaw(check.Critical, "CRITICAL", "|", "percent_packet_loss=100") // CRITICAL, 2
+
+err := fmt.Errorf("connection to %s has been timed out", "localhost:12345")
+
+check.ExitError(err) // UNKNOWN, 3
 ```
 
-See the [documentation on pkg.go.dev](https://pkg.go.dev/github.com/NETWAYS/go-check) for more details and examples.
+## Timeout Handling
 
-## Plugins
+```
+checkPluginTimeoutInSeconds := 10
+go check.HandleTimeout(checkPluginTimeoutInSeconds)
+```
+
+## Thresholds
+
+```
+warnThreshold, err := check.ParseThreshold("~:3")
+
+if err != nil {
+    return t, err
+}
+
+if warnThreshold.DoesViolate(3.6) {
+    fmt.Println("Not great, not terrible.")
+}
+```
+
+## Perfdata
+
+```
+var pl perfdata.PerfdataList
+
+pl.Add(&perfdata.Perfdata{
+    Label: "process.cpu.percent",
+    Value: 25,
+    Uom:   "%",
+    Warn:  50,
+    Crit:  90,
+    Min:   0,
+    Max:   100})
+
+fmt.Println(pl.String())
+```
+
+## Results
+
+```
+allStates = []int{0,2,3,0,1,2}
+
+switch result.WorstState(allStates...) {
+case 0:
+    rc = check.OK
+case 1:
+    rc = check.Warning
+case 2:
+    rc = check.Critical
+default:
+    rc = check.Unknown
+}
+```
+
+## Partial Results
+
+```
+o := Overall{}
+o.Add(0, "Something is OK")
+
+pr := PartialResult{
+    State:  check.OK,
+    Output: "My Subcheck",
+}
+
+o.AddSubcheck(pr)
+
+fmt.Println(o.GetOutput())
+
+// states: ok=1
+// [OK] Something is OK
+// \_ [OK] My Subcheck
+```
+
+
+# Examples
 
 A few plugins using go-check:
 
 * [check_cloud_aws](https://github.com/NETWAYS/check_cloud_aws)
-* [check_cloud_azure](https://github.com/NETWAYS/check_cloud_azure)
-* [check_cloud_gcp](https://github.com/NETWAYS/check_cloud_gcp)
+* [check_logstash](https://github.com/NETWAYS/check_logstash)
 * [check_sentinelone](https://github.com/NETWAYS/check_sentinelone)
 * [check_sophos_central](https://github.com/NETWAYS/check_sophos_central)
 
-## License
+# License
 
 Copyright (c) 2020 [NETWAYS GmbH](mailto:info@netways.de)
 
