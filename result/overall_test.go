@@ -370,7 +370,7 @@ func TestSubchecksPerfdata(t *testing.T) {
 		Output: "Check2",
 		Perfdata: perfdata.PerfdataList{
 			&perfdata.Perfdata{
-				Label: "foo2",
+				Label: "foo2 bar",
 				Value: 46,
 			},
 		},
@@ -379,7 +379,7 @@ func TestSubchecksPerfdata(t *testing.T) {
 	overall.AddSubcheck(check1)
 	overall.AddSubcheck(check2)
 
-	resultString := "states: warning=1 ok=1\n\\_ [OK] Check1\n\\_ [WARNING] Check2\n|foo=23 bar=42 foo2=46\n"
+	resultString := "states: warning=1 ok=1\n\\_ [OK] Check1\n\\_ [WARNING] Check2\n|foo=23 bar=42 'foo2 bar'=46\n"
 
 	assert.Equal(t, resultString, overall.GetOutput())
 }
