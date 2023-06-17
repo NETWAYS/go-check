@@ -14,7 +14,12 @@ func main() {
 	check1 := result.PartialResult{}
 
 	check1.Output = "Check1"
-	check1.SetState(check.OK)
+	err := check1.SetState(check.OK)
+
+	if err != nil {
+		check.ExitError(err)
+	}
+
 	check1.Perfdata.Add(&perfdata.Perfdata{
 		Label: "foo",
 		Value: 23,
@@ -23,7 +28,11 @@ func main() {
 	check2 := result.PartialResult{}
 
 	check2.Output = "Check2"
-	check2.SetState(check.Warning)
+	err = check2.SetState(check.Warning)
+
+	if err != nil {
+		check.ExitError(err)
+	}
 
 	check2.Perfdata.Add(&perfdata.Perfdata{
 		Label: "bar",
