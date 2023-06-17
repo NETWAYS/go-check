@@ -117,7 +117,7 @@ func (o *Overall) GetStatus() int {
 		)
 
 		for _, sc := range o.PartialResults {
-			switch sc.GetState() {
+			switch sc.GetStatus() {
 			case check.Critical:
 				criticals++
 			case check.Warning:
@@ -314,7 +314,7 @@ func (s *PartialResult) SetState(state int) error {
 }
 
 // nolint: unused
-func (s *PartialResult) GetState() int {
+func (s *PartialResult) GetStatus() int {
 	if s.stateSetExplicitely {
 		return s.state
 	}
