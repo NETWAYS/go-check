@@ -367,7 +367,7 @@ func TestDefaultStates2(t *testing.T) {
 
 	overall.AddSubcheck(subcheck)
 
-	assert.Equal(t, check.Unknown, subcheck.getState())
+	assert.Equal(t, check.Unknown, subcheck.GetState())
 	assert.Equal(t, check.Unknown, overall.GetStatus())
 }
 
