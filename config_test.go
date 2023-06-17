@@ -14,6 +14,6 @@ func ExampleConfig() {
 
 	Exitf(OK, "Everything is fine - answer=%d", 42)
 
-	// Output: OK - Everything is fine - answer=42
+	// Output: [OK] - Everything is fine - answer=42
 	// would exit with code 0
 }

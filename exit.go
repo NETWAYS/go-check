@@ -2,11 +2,12 @@ package check
 
 import (
 	"fmt"
-	"github.com/mitchellh/go-ps"
 	"os"
 	"runtime/debug"
 	"strconv"
 	"strings"
+
+	"github.com/mitchellh/go-ps"
 )
 
 // AllowExit lets you disable the call to os.Exit() in ExitXxx() functions of this package.
@@ -34,7 +35,7 @@ func Exitf(rc int, output string, args ...interface{}) {
 func ExitRaw(rc int, output ...string) {
 	var text strings.Builder
 
-	text.WriteString(StatusText(rc) + " -")
+	text.WriteString("[" + StatusText(rc) + "] -")
 
 	for _, s := range output {
 		text.WriteString(" " + s)
