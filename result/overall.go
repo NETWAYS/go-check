@@ -39,7 +39,7 @@ type PartialResult struct {
 }
 
 func (s *PartialResult) String() string {
-	return fmt.Sprintf("[%s] %s", check.StatusText(s.state), s.Output)
+	return fmt.Sprintf("[%s] %s", check.StatusText(s.GetStatus()), s.Output)
 }
 
 // Deprecated: Will be removed in a future version, use Add() instead
