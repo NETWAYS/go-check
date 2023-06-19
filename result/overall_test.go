@@ -354,6 +354,42 @@ func TestOverall_withSubchecks_PartialResultStatus(t *testing.T) {
 	assert.Equal(t, 0, overall.GetStatus())
 }
 
+func TestSubchecksPerfdata(t *testing.T) {
+	var overall Overall
+
+	check1 := PartialResult{
+		state:  check.OK,
+		Output: "Check1",
+		Perfdata: perfdata.PerfdataList{
+			&perfdata.Perfdata{
+				Label: "foo",
+				Value: 23,
+			},
+			&perfdata.Perfdata{
+				Label: "bar",
+				Value: 42,
+			},
+		},
+	}
+	check2 := PartialResult{
+		state:  check.Warning,
+		Output: "Check2",
+		Perfdata: perfdata.PerfdataList{
+			&perfdata.Perfdata{
+				Label: "foo2 bar",
+				Value: 46,
+			},
+		},
+	}
+
+	overall.AddSubcheck(check1)
+	overall.AddSubcheck(check2)
+
+	resultString := "states: warning=1 ok=1\n\\_ [OK] Check1\n\\_ [WARNING] Check2\n|foo=23 bar=42 'foo2 bar'=46\n"
+
+	assert.Equal(t, resultString, overall.GetOutput())
+}
+
 func TestDefaultStates1(t *testing.T) {
 	var overall Overall
 
