@@ -297,7 +297,13 @@ func TestOverall_withSubchecks_PartialResult(t *testing.T) {
 		Value: 300,
 		Uom:   "%",
 	}
+	perf3 := perfdata.Perfdata{
+		Label: "baz",
+		Value: 23,
+		Uom:   "B",
+	}
 
+	subcheck3.Perfdata.Add(&perf3)
 	subcheck2.Perfdata.Add(&perf1)
 	subcheck2.Perfdata.Add(&perf2)
 	subcheck2.PartialResults = append(subcheck.PartialResults, subcheck3)
@@ -309,7 +315,7 @@ func TestOverall_withSubchecks_PartialResult(t *testing.T) {
 \_ [OK] PartialResult
     \_ [OK] SubSubcheck
         \_ [CRITICAL] SubSubSubcheck
-|foo=3 bar=300%
+|foo=3 bar=300% baz=23B
 `
 
 	assert.Equal(t, res, overall.GetOutput())

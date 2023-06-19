@@ -268,11 +268,11 @@ func (s *PartialResult) getPerfdata() string {
 
 	if s.PartialResults != nil {
 		for _, ss := range s.PartialResults {
-			output.WriteString(ss.getPerfdata())
+			output.WriteString(" " + ss.getPerfdata())
 		}
 	}
 
-	return output.String()
+	return strings.TrimSpace(output.String())
 }
 
 // Generates indented output for all subsequent PartialResults
