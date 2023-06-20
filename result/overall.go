@@ -196,7 +196,7 @@ func (o *Overall) GetSummary() string {
 		)
 
 		for _, sc := range o.PartialResults {
-			switch sc.state {
+			switch sc.GetStatus() {
 			case check.Critical:
 				criticals++
 			case check.Warning:
