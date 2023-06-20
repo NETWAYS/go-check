@@ -442,3 +442,29 @@ func TestDefaultStates3(t *testing.T) {
 
 	assert.Equal(t, check.Warning, overall.GetStatus())
 }
+
+func TestOverallOutputWithMultiLayerPartials(t *testing.T) {
+	var overall Overall
+
+	subcheck1 := PartialResult{}
+	subcheck1.SetState(check.Warning)
+
+	subcheck2 := PartialResult{}
+
+	subcheck2_1 := PartialResult{}
+	subcheck2_1.SetState(check.OK)
+
+	subcheck2_2 := PartialResult{}
+	subcheck2_2.SetState(check.Critical)
+
+	subcheck2.AddSubcheck(subcheck2_1)
+	subcheck2.AddSubcheck(subcheck2_2)
+
+	overall.AddSubcheck(subcheck1)
+	overall.AddSubcheck(subcheck2)
+
+	resultString := "states: critical=1 warning=1\n\\_ [WARNING] \n\\_ [CRITICAL] \n    \\_ [OK] \n    \\_ [CRITICAL] \n"
+
+	assert.Equal(t, resultString, overall.GetOutput())
+	assert.Equal(t, check.Critical, overall.GetStatus())
+}
