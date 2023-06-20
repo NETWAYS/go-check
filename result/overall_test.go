@@ -338,22 +338,19 @@ func TestOverall_withSubchecks_PartialResultStatus(t *testing.T) {
 	var overall Overall
 
 	subcheck := PartialResult{
-		stateSetExplicitely: true,
-		Output:              "Subcheck",
+		Output: "Subcheck",
 	}
 
 	subcheck.SetState(check.OK)
 
 	subsubcheck := PartialResult{
-		stateSetExplicitely: true,
-		Output:              "SubSubcheck",
+		Output: "SubSubcheck",
 	}
 
 	subsubcheck.SetState(check.Warning)
 
 	subsubsubcheck := PartialResult{
-		stateSetExplicitely: true,
-		Output:              "SubSubSubcheck",
+		Output: "SubSubSubcheck",
 	}
 
 	subsubsubcheck.SetState(check.Critical)
