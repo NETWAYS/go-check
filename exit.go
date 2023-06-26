@@ -48,13 +48,6 @@ func ExitRaw(rc int, output ...string) {
 	BaseExit(rc)
 }
 
-// Exit prints the plugin output and exits the program
-//
-// Deprecated, please use Exitf or ExitRaw.
-func Exit(rc int, output string, args ...interface{}) {
-	Exitf(rc, output, args...)
-}
-
 func BaseExit(rc int) {
 	if AllowExit {
 		os.Exit(rc)
