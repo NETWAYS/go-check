@@ -8,6 +8,23 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func BenchmarkPerfdataString(b *testing.B) {
+	b.ReportAllocs()
+
+	perf := Perfdata{
+		Label: "test test=test",
+		Value: 10.1,
+		Uom:   "%",
+		Warn:  &check.Threshold{Upper: 80},
+		Crit:  &check.Threshold{Upper: 90},
+		Min:   0,
+		Max:   100}
+
+	for i := 0; i < b.N; i++ {
+		perf.String()
+	}
+}
+
 func ExamplePerfdata() {
 	perf := Perfdata{
 		Label: "test",
