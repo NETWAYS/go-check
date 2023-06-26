@@ -151,7 +151,7 @@ func ExampleOverall_withSubchecks() {
 	subcheck.SetState(check.OK)
 
 	overall.AddSubcheck(subcheck)
-	overall.AddOK("bla")
+	overall.Add(0, "bla")
 
 	fmt.Println(overall.GetOutput())
 	// Output:
