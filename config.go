@@ -6,8 +6,6 @@ import (
 	"path"
 
 	flag "github.com/spf13/pflag"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type Config struct {
@@ -72,7 +70,6 @@ func (c *Config) ParseArray(arguments []string) {
 	}
 
 	if c.DefaultHelper {
-		c.SetupLogging()
 		c.EnableTimeoutHandler()
 	}
 }
@@ -84,14 +81,4 @@ func (c *Config) addDefaultFlags() {
 	c.FlagSet.BoolVarP(&c.PrintVersion, "version", "V", false, "Print version and exit")
 
 	c.DefaultFlags = false
-}
-
-func (c *Config) SetupLogging() {
-	if c.Debug {
-		log.SetLevel(log.DebugLevel)
-	} else if c.Verbose {
-		log.SetLevel(log.InfoLevel)
-	} else {
-		log.SetLevel(log.WarnLevel)
-	}
 }

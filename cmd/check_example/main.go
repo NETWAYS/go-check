@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/NETWAYS/go-check"
-	log "github.com/sirupsen/logrus"
+	"log"
 )
 
 func main() {
@@ -19,8 +19,9 @@ func main() {
 
 	config.ParseArguments()
 
-	log.Info("Start logging")
-
+	if config.Debug {
+		log.Println("Start logging")
+	}
 	// time.Sleep(20 * time.Second)
 
 	if *value > *critical {
