@@ -125,9 +125,5 @@ func BoundaryToString(value float64) (s string) {
 
 // FormatFloat returns a string representation of floats, avoiding scientific notation and removes trailing zeros.
 func FormatFloat(value float64) string {
-	s := fmt.Sprintf("%.3f", value)
-	s = strings.TrimRight(s, "0") // remove trailing 0
-	s = strings.TrimRight(s, ".") // remove trailing dot
-
-	return s
+	return strings.TrimRight(strings.TrimRight(fmt.Sprintf("%.3f", value), "0"), ".") // remove trailing 0 and trailing dot
 }
