@@ -6,8 +6,6 @@ import (
 	"runtime/debug"
 	"strconv"
 	"strings"
-
-	"github.com/mitchellh/go-ps"
 )
 
 // AllowExit lets you disable the call to os.Exit() in ExitXxx() functions of this package.
@@ -66,14 +64,14 @@ func ExitError(err error) {
 // The function will recover from the condition and exit with a proper UNKNOWN status, while showing error
 // and the call stack.
 func CatchPanic() {
-	ppid := os.Getppid()
-	if parent, err := ps.FindProcess(ppid); err == nil {
-		if parent.Executable() == "dlv" {
-			// seems to be a debugger, don't continue with recover
-			return
-		}
-	}
-
+	// This can be enabled when working with a debugger
+	// ppid := os.Getppid()
+	// if parent, err := ps.FindProcess(ppid); err == nil {
+	//	if parent.Executable() == "dlv" {
+	//		// seems to be a debugger, don't continue with recover
+	//		return
+	//	}
+	// }
 	if r := recover(); r != nil {
 		output := fmt.Sprint("Golang encountered a panic: ", r)
 		if PrintStack {
