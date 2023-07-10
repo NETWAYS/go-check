@@ -22,9 +22,8 @@ const IECBase = 1024
 func (b BytesIEC) HumanReadable() string {
 	value, unit := humanReadable(uint64(b), ByteIECUnits, IECBase)
 
-	s := strconv.FormatFloat(value, 'f', 2, 64) // nolint:gomnd
-	s = strings.TrimRight(s, "0")               // Remove trailing zero decimals
-	s = strings.TrimRight(s, ".")               // Remove any left over decimal dot
+	// Remove trailing zero decimals and any left over decimal dot
+	s := strings.TrimRight(strings.TrimRight(strconv.FormatFloat(value, 'f', 2, 64), "0"), ".")
 
 	return s + unit
 }
