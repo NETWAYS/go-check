@@ -10,9 +10,11 @@ import (
 	"github.com/NETWAYS/go-check/perfdata"
 )
 
-// So, this is the idea:
-// A check plugin has a single Overall (singleton)
-// Each partial thing which is tested, gets its own subcheck
+// Overall is a singleton for a monitoring pluging that has several partial results (or sub-results)
+//
+// Design decisions: A check plugin has a single Overall (singleton),
+// each partial thing which is tested, gets its own subcheck.
+//
 // The results of these may be relevant to the overall status in the end
 // or not, e.g. if a plugin tries two different methods for something and
 // one suffices, but one fails, the whole check might be OK and only the subcheck
@@ -28,6 +30,7 @@ type Overall struct {
 	PartialResults      []PartialResult
 }
 
+// PartialResult represents a sub-result for an Overall struct
 type PartialResult struct {
 	state               int // Result state, either set explicitely or derived from partialResults
 	Output              string
@@ -38,11 +41,13 @@ type PartialResult struct {
 	PartialResults      []PartialResult
 }
 
+// String returns the status and output of the PartialResult
 func (s *PartialResult) String() string {
 	return fmt.Sprintf("[%s] %s", check.StatusText(s.GetStatus()), s.Output)
 }
 
-// Add State explicitely
+// Add adds a return state explicitely
+//
 // Hint: This will set stateSetExplicitely to true
 func (o *Overall) Add(state int, output string) {
 	switch state {
@@ -62,14 +67,17 @@ func (o *Overall) Add(state int, output string) {
 	o.Outputs = append(o.Outputs, fmt.Sprintf("[%s] %s", check.StatusText(state), output))
 }
 
+// AddSubcheck adds a PartialResult to the Overall
 func (o *Overall) AddSubcheck(subcheck PartialResult) {
 	o.PartialResults = append(o.PartialResults, subcheck)
 }
 
+// AddSubcheck adds a PartialResult to the PartialResult
 func (o *PartialResult) AddSubcheck(subcheck PartialResult) {
 	o.PartialResults = append(o.PartialResults, subcheck)
 }
 
+// GetStatus returns the current state (ok, warning, critical, unknown) of the Overall
 func (o *Overall) GetStatus() int {
 	if o.stateSetExplicitely {
 		if o.criticals > 0 {
@@ -129,6 +137,7 @@ func (o *Overall) GetStatus() int {
 	}
 }
 
+// GetSummary returns a text representation of the current state of the Overall
 // nolint: funlen
 func (o *Overall) GetSummary() string {
 	if o.Summary != "" {
@@ -210,6 +219,7 @@ func (o *Overall) GetSummary() string {
 	return o.Summary
 }
 
+// GetOutput returns a text representation of the current outputs of the Overall
 func (o *Overall) GetOutput() string {
 	var output strings.Builder
 
@@ -238,7 +248,7 @@ func (o *Overall) GetOutput() string {
 	return output.String()
 }
 
-// Returns all subsequent perfdata as a concatenated string
+// getPerfdata returns all subsequent perfdata as a concatenated string
 func (s *PartialResult) getPerfdata() string {
 	var output strings.Builder
 
@@ -255,7 +265,7 @@ func (s *PartialResult) getPerfdata() string {
 	return strings.TrimSpace(output.String())
 }
 
-// Generates indented output for all subsequent PartialResults
+// getOutput generates indented output for all subsequent PartialResults
 func (s *PartialResult) getOutput(indent_level int) string {
 	var output strings.Builder
 
@@ -271,6 +281,7 @@ func (s *PartialResult) getOutput(indent_level int) string {
 	return output.String()
 }
 
+// SetDefaultState sets a new default state for a PartialResult
 func (s *PartialResult) SetDefaultState(state int) error {
 	if state < check.OK || state > check.Unknown {
 		return errors.New("Default State is not a valid result state. Got " + fmt.Sprint(state) + " which is not valid")
@@ -282,6 +293,7 @@ func (s *PartialResult) SetDefaultState(state int) error {
 	return nil
 }
 
+// SetState sets a state for a PartialResult
 func (s *PartialResult) SetState(state int) error {
 	if state < check.OK || state > check.Unknown {
 		return errors.New("Default State is not a valid result state. Got " + fmt.Sprint(state) + " which is not valid")
@@ -293,6 +305,7 @@ func (s *PartialResult) SetState(state int) error {
 	return nil
 }
 
+// GetStatus returns the current state (ok, warning, critical, unknown) of the PartialResult
 // nolint: unused
 func (s *PartialResult) GetStatus() int {
 	if s.stateSetExplicitely {
