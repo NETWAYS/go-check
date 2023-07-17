@@ -46,6 +46,9 @@ func ExitRaw(rc int, output ...string) {
 	BaseExit(rc)
 }
 
+// BaseExit exits the process with a given return code.
+//
+// Can be controlled with the global AllowExit
 func BaseExit(rc int) {
 	if AllowExit {
 		os.Exit(rc)

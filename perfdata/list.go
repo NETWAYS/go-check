@@ -19,7 +19,7 @@ func (l PerfdataList) String() string {
 	return strings.Trim(out.String(), " ")
 }
 
-// Add a Perfdata to the list
+// Add adds a Perfdata pointer to the list
 func (l *PerfdataList) Add(p *Perfdata) {
 	*l = append(*l, p)
 }

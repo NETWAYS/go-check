@@ -28,6 +28,7 @@ func (b BytesSI) HumanReadable() string {
 	return s + unit
 }
 
+// String returns a text representation of the current value.
 func (b BytesSI) String() string {
 	return b.HumanReadable()
 }
