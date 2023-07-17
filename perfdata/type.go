@@ -7,7 +7,7 @@ import (
 )
 
 // Replace not allowed characters inside a label
-var replacer = strings.NewReplacer("=", "_", "`", "_", "'", "_")
+var replacer = strings.NewReplacer("=", "_", "`", "_", "'", "_", "\"", "_")
 
 // formatNumeric returns a string representation of various possible numerics
 //
