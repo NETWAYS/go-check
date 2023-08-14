@@ -37,6 +37,13 @@ func TestRenderPerfdata(t *testing.T) {
 			},
 			expected: "test=2",
 		},
+		"with-quotes": {
+			perf: Perfdata{
+				Label: "te's\"t",
+				Value: 2,
+			},
+			expected: "te_s_t=2",
+		},
 		"with-special-chars": {
 			perf: Perfdata{
 				Label: "test_🖥️_'test",
