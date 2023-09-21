@@ -60,6 +60,12 @@ go check.HandleTimeout(checkPluginTimeoutInSeconds)
 
 ## Thresholds
 
+Threshold objects represent Nagios-style thresholds that have methods to evaluate if a given input is within the range.
+
+They can be created with the ParseThreshold parser.
+
+https://nagios-plugins.org/doc/guidelines.html#THRESHOLDFORMAT
+
 ```
 warnThreshold, err := check.ParseThreshold("~:3")
 
@@ -73,6 +79,10 @@ if warnThreshold.DoesViolate(3.6) {
 ```
 
 ## Perfdata
+
+The Perfdata object represents Nagios-style performance data that relates to the actual execution of a host or service check. 
+
+https://nagios-plugins.org/doc/guidelines.html#AEN200
 
 ```
 var pl perfdata.PerfdataList
