@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"reflect"
 
 	flag "github.com/spf13/pflag"
 )
@@ -96,4 +97,39 @@ func (c *Config) addDefaultFlags() {
 	c.FlagSet.BoolVarP(&c.PrintVersion, "version", "V", false, "Print version and exit")
 
 	c.DefaultFlags = false
+}
+
+// LoadFromEnv can be used to load struct values from 'env' tags.
+// Mainly used to avoid passing secrets via the CLI
+//
+//	type Config struct {
+//		Token    string `env:"BEARER_TOKEN"`
+//	}
+func LoadFromEnv(config interface{}) {
+	configValue := reflect.ValueOf(config).Elem()
+	configType := configValue.Type()
+
+	for i := 0; i < configValue.NumField(); i++ {
+		field := configType.Field(i)
+		tag := field.Tag.Get("env")
+
+		// If there's no "env" tag, skip this field.
+		if tag == "" {
+			continue
+		}
+
+		envValue := os.Getenv(tag)
+
+		if envValue == "" {
+			continue
+		}
+
+		// Potential for addding different types, for now we only use strings
+		// since the main use case is credentials
+		// nolint: exhaustive
+		switch field.Type.Kind() {
+		case reflect.String:
+			configValue.Field(i).SetString(envValue)
+		}
+	}
 }

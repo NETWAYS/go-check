@@ -1,5 +1,12 @@
 package check
 
+import (
+	"os"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
 func ExampleConfig() {
 	config := NewConfig()
 	config.Name = "check_test"
@@ -16,4 +23,23 @@ func ExampleConfig() {
 
 	// Output: [OK] - Everything is fine - answer=42
 	// would exit with code 0
+}
+
+type ConfigForTesting struct {
+	Auth   string `env:"AUTH"`
+	Bearer string `env:"EXAMPLE"`
+}
+
+func TestLoadFromEnv(t *testing.T) {
+	c := ConfigForTesting{}
+
+	err := os.Setenv("EXAMPLE", "foobar")
+	defer os.Unsetenv("EXAMPLE") // just to not create any side effects
+
+	assert.NoError(t, err)
+
+	LoadFromEnv(&c)
+
+	assert.Equal(t, "foobar", c.Bearer)
+	assert.Equal(t, "", c.Auth)
 }
