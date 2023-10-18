@@ -1,8 +1,6 @@
 run:
-  deadline: 1m
-  skip-files:
-    - '(.+)_test\.go'
-
+  timeout: 5m
+  tests: false
 linters:
   disable-all: false
   enable:
