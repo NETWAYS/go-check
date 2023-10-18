@@ -126,7 +126,7 @@ func LoadFromEnv(config interface{}) {
 
 		// Potential for addding different types, for now we only use strings
 		// since the main use case is credentials
-		// nolint: exhaustive
+		// nolint: exhaustive, gocritic
 		switch field.Type.Kind() {
 		case reflect.String:
 			configValue.Field(i).SetString(envValue)

@@ -2,8 +2,9 @@ package perfdata
 
 import (
 	"fmt"
-	"github.com/NETWAYS/go-check"
 	"strings"
+
+	"github.com/NETWAYS/go-check"
 )
 
 // Replace not allowed characters inside a label

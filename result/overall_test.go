@@ -53,22 +53,22 @@ func TestOverall_GetStatus_GetSummary(t *testing.T) {
 			expectedStatus:  3,
 		},
 		{
-			actual:          Overall{oks: 1, stateSetExplicitely: true},
+			actual:          Overall{oks: 1, stateSetExplicitly: true},
 			expectedSummary: "states: ok=1",
 			expectedStatus:  0,
 		},
 		{
-			actual:          Overall{criticals: 2, oks: 1, warnings: 2, unknowns: 1, stateSetExplicitely: true},
+			actual:          Overall{criticals: 2, oks: 1, warnings: 2, unknowns: 1, stateSetExplicitly: true},
 			expectedSummary: "states: critical=2 unknown=1 warning=2 ok=1",
 			expectedStatus:  2,
 		},
 		{
-			actual:          Overall{unknowns: 2, oks: 1, warnings: 2, stateSetExplicitely: true},
+			actual:          Overall{unknowns: 2, oks: 1, warnings: 2, stateSetExplicitly: true},
 			expectedSummary: "states: unknown=2 warning=2 ok=1",
 			expectedStatus:  3,
 		},
 		{
-			actual:          Overall{oks: 1, warnings: 2, stateSetExplicitely: true},
+			actual:          Overall{oks: 1, warnings: 2, stateSetExplicitly: true},
 			expectedSummary: "states: warning=2 ok=1",
 			expectedStatus:  1,
 		},
@@ -112,7 +112,7 @@ func ExampleOverall_Add() {
 	overall.Add(check.Critical, "The other is critical")
 
 	fmt.Printf("%#v\n", overall)
-	// Output: result.Overall{oks:1, warnings:0, criticals:1, unknowns:0, Summary:"", stateSetExplicitely:true, Outputs:[]string{"[OK] One element is good", "[CRITICAL] The other is critical"}, PartialResults:[]result.PartialResult(nil)}
+	// Output: result.Overall{oks:1, warnings:0, criticals:1, unknowns:0, Summary:"", stateSetExplicitly:true, Outputs:[]string{"[OK] One element is good", "[CRITICAL] The other is critical"}, PartialResults:[]result.PartialResult(nil)}
 }
 
 func ExampleOverall_GetOutput() {

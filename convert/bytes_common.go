@@ -71,10 +71,10 @@ func ParseBytes(value string) (ByteAny, error) {
 // If the input value is 0, humanReadable will always return "0B"
 //
 // Examples:
-//  1073741824B -> 1000KB
-//  2147483648B -> 2MB
-//  0 -> 0MB
 //
+//	1073741824B -> 1000KB
+//	2147483648B -> 2MB
+//	0 -> 0MB
 func humanReadable(b uint64, units []string, base float64) (float64, string) {
 	if b == 0 {
 		return 0, "B"

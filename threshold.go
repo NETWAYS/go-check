@@ -106,9 +106,9 @@ func (t Threshold) String() (s string) {
 func (t Threshold) DoesViolate(value float64) bool {
 	if t.Inside {
 		return value >= t.Lower && value <= t.Upper
-	} else {
-		return value < t.Lower || value > t.Upper
 	}
+
+	return value < t.Lower || value > t.Upper
 }
 
 // BoundaryToString returns the string representation of a Threshold boundary.
