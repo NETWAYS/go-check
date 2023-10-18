@@ -1,23 +1,44 @@
 run:
   timeout: 5m
   tests: false
+  skip-files:
+    - 'testhelper/for_main.go'
+issues:
+  exclude-rules:
+    - path: 'result/overall.go'
+      linters:
+        - nestif
+    - path: 'convert/bytes_common.go'
+      linters:
+        - ireturn
 linters:
-  disable-all: false
-  enable:
-    - funlen
-    - dogsled
-    - dupl
-    - lll
-    - whitespace
-    - wsl
-    - exportloopref
-  disable:
-    - scopelint
-    - deadcode
-    - structcheck
-    - varcheck
-    - musttag
-  presets:
-    - bugs
-    - unused
-  fast: false
+   enable-all: true
+   disable:
+     - cyclop
+     - depguard
+     - exhaustivestruct
+     - exhaustruct
+     - forbidigo
+     - forcetypeassert
+     - gci
+     - gochecknoglobals
+     - gochecknoinits
+     - godox
+     - godot
+     - goerr113
+     - gofumpt
+     - gomnd
+     - lll
+     - musttag
+     - nakedret
+     - nlreturn
+     - nolintlint
+     - nonamedreturns
+     - tagliatelle
+     - varnamelen
+     - wrapcheck
+linters-settings:
+   estif:
+     min-complexity: 4
+   maligned:
+     suggest-new: true

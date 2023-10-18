@@ -52,9 +52,9 @@ func ExitRaw(rc int, output ...string) {
 func BaseExit(rc int) {
 	if AllowExit {
 		os.Exit(rc)
-	} else {
-		_, _ = os.Stdout.WriteString("would exit with code " + strconv.Itoa(rc) + "\n")
 	}
+
+	_, _ = os.Stdout.WriteString("would exit with code " + strconv.Itoa(rc) + "\n")
 }
 
 // ExitError exists with an Unknown state while reporting the error

@@ -20,25 +20,25 @@ import (
 // one suffices, but one fails, the whole check might be OK and only the subcheck
 // Warning or Critical.
 type Overall struct {
-	oks                 int
-	warnings            int
-	criticals           int
-	unknowns            int
-	Summary             string
-	stateSetExplicitely bool
-	Outputs             []string // Deprecate this in a future version
-	PartialResults      []PartialResult
+	oks                int
+	warnings           int
+	criticals          int
+	unknowns           int
+	Summary            string
+	stateSetExplicitly bool
+	Outputs            []string // Deprecate this in a future version
+	PartialResults     []PartialResult
 }
 
 // PartialResult represents a sub-result for an Overall struct
 type PartialResult struct {
-	state               int // Result state, either set explicitely or derived from partialResults
-	Output              string
-	stateSetExplicitely bool // nolint: unused
-	defaultState        int  // Default result state, if no partial results are available and no state is set explicitely
-	defaultStateSet     bool // nolint: unused
-	Perfdata            perfdata.PerfdataList
-	PartialResults      []PartialResult
+	Perfdata           perfdata.PerfdataList
+	PartialResults     []PartialResult
+	Output             string
+	state              int  // Result state, either set explicitly or derived from partialResults
+	defaultState       int  // Default result state, if no partial results are available and no state is set explicitly
+	stateSetExplicitly bool // nolint: unused
+	defaultStateSet    bool // nolint: unused
 }
 
 // String returns the status and output of the PartialResult
@@ -46,9 +46,9 @@ func (s *PartialResult) String() string {
 	return fmt.Sprintf("[%s] %s", check.StatusText(s.GetStatus()), s.Output)
 }
 
-// Add adds a return state explicitely
+// Add adds a return state explicitly
 //
-// Hint: This will set stateSetExplicitely to true
+// Hint: This will set stateSetExplicitly to true
 func (o *Overall) Add(state int, output string) {
 	switch state {
 	case check.OK:
@@ -61,8 +61,8 @@ func (o *Overall) Add(state int, output string) {
 		o.unknowns++
 	}
 
-	// TODO: Might be a bit obscure that the Add method also sets stateSetExplicitely
-	o.stateSetExplicitely = true
+	// TODO: Might be a bit obscure that the Add method also sets stateSetExplicitly
+	o.stateSetExplicitly = true
 
 	o.Outputs = append(o.Outputs, fmt.Sprintf("[%s] %s", check.StatusText(state), output))
 }
@@ -73,13 +73,14 @@ func (o *Overall) AddSubcheck(subcheck PartialResult) {
 }
 
 // AddSubcheck adds a PartialResult to the PartialResult
-func (o *PartialResult) AddSubcheck(subcheck PartialResult) {
-	o.PartialResults = append(o.PartialResults, subcheck)
+func (s *PartialResult) AddSubcheck(subcheck PartialResult) {
+	s.PartialResults = append(s.PartialResults, subcheck)
 }
 
 // GetStatus returns the current state (ok, warning, critical, unknown) of the Overall
 func (o *Overall) GetStatus() int {
-	if o.stateSetExplicitely {
+	if o.stateSetExplicitly {
+		// nolint: gocritic
 		if o.criticals > 0 {
 			return check.Critical
 		} else if o.unknowns > 0 {
@@ -92,7 +93,7 @@ func (o *Overall) GetStatus() int {
 			return check.Unknown
 		}
 	} else {
-		// state not set explicitely!
+		// state not set explicitly!
 		if len(o.PartialResults) == 0 {
 			return check.Unknown
 		}
@@ -144,8 +145,8 @@ func (o *Overall) GetSummary() string {
 		return o.Summary
 	}
 
-	// Was the state set explicitely?
-	if o.stateSetExplicitely {
+	// Was the state set explicitly?
+	if o.stateSetExplicitly {
 		// Yes, so lets generate it from the sum of the overall states
 		if o.criticals > 0 {
 			o.Summary += fmt.Sprintf("critical=%d ", o.criticals)
@@ -169,7 +170,7 @@ func (o *Overall) GetSummary() string {
 		}
 	}
 
-	if !o.stateSetExplicitely {
+	if !o.stateSetExplicitly {
 		// No, so lets combine the partial ones
 		if len(o.PartialResults) == 0 {
 			// Oh, we actually don't have those either
@@ -238,10 +239,10 @@ func (o *Overall) GetOutput() string {
 			pdata.WriteString(" " + o.PartialResults[i].getPerfdata())
 		}
 
-		pdata_string := strings.Trim(pdata.String(), " ")
+		pdataString := strings.Trim(pdata.String(), " ")
 
-		if len(pdata_string) > 0 {
-			output.WriteString("|" + pdata_string + "\n")
+		if len(pdataString) > 0 {
+			output.WriteString("|" + pdataString + "\n")
 		}
 	}
 
@@ -266,15 +267,15 @@ func (s *PartialResult) getPerfdata() string {
 }
 
 // getOutput generates indented output for all subsequent PartialResults
-func (s *PartialResult) getOutput(indent_level int) string {
+func (s *PartialResult) getOutput(indentLevel int) string {
 	var output strings.Builder
 
-	prefix := strings.Repeat("  ", indent_level)
+	prefix := strings.Repeat("  ", indentLevel)
 	output.WriteString(prefix + "\\_ " + s.String() + "\n")
 
 	if s.PartialResults != nil {
 		for _, ss := range s.PartialResults {
-			output.WriteString(ss.getOutput(indent_level + 2))
+			output.WriteString(ss.getOutput(indentLevel + 2))
 		}
 	}
 
@@ -300,7 +301,7 @@ func (s *PartialResult) SetState(state int) error {
 	}
 
 	s.state = state
-	s.stateSetExplicitely = true
+	s.stateSetExplicitly = true
 
 	return nil
 }
@@ -308,7 +309,7 @@ func (s *PartialResult) SetState(state int) error {
 // GetStatus returns the current state (ok, warning, critical, unknown) of the PartialResult
 // nolint: unused
 func (s *PartialResult) GetStatus() int {
-	if s.stateSetExplicitely {
+	if s.stateSetExplicitly {
 		return s.state
 	}
 

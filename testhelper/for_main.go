@@ -2,9 +2,10 @@ package testhelper
 
 import (
 	"bytes"
-	"github.com/NETWAYS/go-check"
 	"io"
 	"os"
+
+	"github.com/NETWAYS/go-check"
 )
 
 // Execute main function from a main package, while capturing its stdout

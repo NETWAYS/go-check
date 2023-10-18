@@ -5,6 +5,7 @@ import (
 )
 
 // PerfdataList can store multiple perfdata and brings a simple fmt.Stringer interface
+// nolint: golint, revive
 type PerfdataList []*Perfdata
 
 // String returns string representations of all Perfdata
