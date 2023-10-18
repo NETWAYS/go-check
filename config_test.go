@@ -26,8 +26,9 @@ func ExampleConfig() {
 }
 
 type ConfigForTesting struct {
-	Auth   string `env:"AUTH"`
-	Bearer string `env:"EXAMPLE"`
+	Auth            string `env:"AUTH"`
+	Bearer          string `env:"EXAMPLE"`
+	OneMoreThanTags string
 }
 
 func TestLoadFromEnv(t *testing.T) {
@@ -42,4 +43,5 @@ func TestLoadFromEnv(t *testing.T) {
 
 	assert.Equal(t, "foobar", c.Bearer)
 	assert.Equal(t, "", c.Auth)
+	assert.Equal(t, "", c.OneMoreThanTags)
 }
