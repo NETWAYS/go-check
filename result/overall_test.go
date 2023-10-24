@@ -486,11 +486,11 @@ func TestOverallMpiOutput(t *testing.T) {
 
 	assert.Equal(t, compareString, resultString)
 
-	var compare Overall
+	var compare OverallOutput
 
 	err := json.Unmarshal(tmp, &compare)
 
 	assert.NoError(t, err)
 
-	assert.Equal(t, overall, compare)
+	assert.Equal(t, overall.convertToOutput(2), compare)
 }

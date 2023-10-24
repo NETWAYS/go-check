@@ -362,10 +362,11 @@ func (pr *PartialResult) convertToOutput() PartialResultOutput {
 	return result
 }
 
-func (o *Overall) convertToOutput() OverallOutput {
+func (o *Overall) convertToOutput(version uint) OverallOutput {
 	result := OverallOutput{}
 	result.Output = o.Summary
 	result.Rc = o.GetStatus()
+	result.MpiVersion = version
 
 	if len(o.PartialResults) != 0 {
 		for i := range o.PartialResults {
@@ -378,8 +379,7 @@ func (o *Overall) convertToOutput() OverallOutput {
 }
 
 func (o *Overall) GetMpiOutput(version uint) []byte {
-	oo := o.convertToOutput()
-	oo.MpiVersion = version
+	oo := o.convertToOutput(version)
 
 	result, err := json.Marshal(oo)
 	if err != nil {
