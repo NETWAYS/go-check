@@ -1,6 +1,7 @@
 package result
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -467,4 +468,29 @@ func TestOverallOutputWithMultiLayerPartials(t *testing.T) {
 
 	assert.Equal(t, resultString, overall.GetOutput())
 	assert.Equal(t, check.Critical, overall.GetStatus())
+}
+
+func TestOverallMpiOutput(t *testing.T) {
+	var overall Overall
+
+	subcheck1 := PartialResult{}
+	subcheck1.SetState(check.Warning)
+
+	overall.AddSubcheck(subcheck1)
+
+	tmp := overall.GetMpiOutput(2)
+
+	resultString := fmt.Sprintf("%s", tmp)
+
+	compareString := "{\"mpi_version\":2,\"rc\":1,\"partial_results\":[{\"rc\":1}]}"
+
+	assert.Equal(t, compareString, resultString)
+
+	var compare Overall
+
+	err := json.Unmarshal(tmp, &compare)
+
+	assert.NoError(t, err)
+
+	assert.Equal(t, overall, compare)
 }

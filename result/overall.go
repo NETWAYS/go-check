@@ -2,6 +2,7 @@
 package result
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -30,6 +31,14 @@ type Overall struct {
 	PartialResults     []PartialResult
 }
 
+type OverallOutput struct {
+	MpiVersion     uint                  `json:"mpi_version"`
+	Rc             int                   `json:"rc"`
+	Output         string                `json:"output,omitempty"`
+	PartialResults []PartialResultOutput `json:"partial_results,omitempty"`
+	Perfdata       perfdata.PerfdataList `json:"perfata,omitempty"`
+}
+
 // PartialResult represents a sub-result for an Overall struct
 type PartialResult struct {
 	Perfdata           perfdata.PerfdataList
@@ -39,6 +48,13 @@ type PartialResult struct {
 	defaultState       int  // Default result state, if no partial results are available and no state is set explicitly
 	stateSetExplicitly bool // nolint: unused
 	defaultStateSet    bool // nolint: unused
+}
+
+type PartialResultOutput struct {
+	Rc             int                   `json:"rc"`
+	Output         string                `json:"output,omitempty"`
+	PartialResults []PartialResultOutput `json:"partial_results,omitempty"`
+	Perfdata       perfdata.PerfdataList `json:"perfata,omitempty"`
 }
 
 // String returns the status and output of the PartialResult
@@ -328,4 +344,46 @@ func (s *PartialResult) GetStatus() int {
 	}
 
 	return WorstState(states...)
+}
+
+func (pr *PartialResult) convertToOutput() PartialResultOutput {
+	result := PartialResultOutput{}
+	result.Output = pr.Output
+	result.Perfdata = pr.Perfdata
+	result.Rc = pr.GetStatus()
+
+	if len(pr.PartialResults) != 0 {
+		for i := range pr.PartialResults {
+			tmp := pr.PartialResults[i].convertToOutput()
+			result.PartialResults = append(result.PartialResults, tmp)
+		}
+	}
+
+	return result
+}
+
+func (o *Overall) convertToOutput() OverallOutput {
+	result := OverallOutput{}
+	result.Output = o.Summary
+	result.Rc = o.GetStatus()
+
+	if len(o.PartialResults) != 0 {
+		for i := range o.PartialResults {
+			tmp := o.PartialResults[i].convertToOutput()
+			result.PartialResults = append(result.PartialResults, tmp)
+		}
+	}
+
+	return result
+}
+
+func (o *Overall) GetMpiOutput(version uint) []byte {
+	oo := o.convertToOutput()
+	oo.MpiVersion = version
+
+	result, err := json.Marshal(oo)
+	if err != nil {
+		return []byte{}
+	}
+	return result
 }

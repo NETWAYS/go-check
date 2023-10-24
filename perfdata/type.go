@@ -40,14 +40,14 @@ func formatNumeric(value interface{}) string {
 //
 // https://icinga.com/docs/icinga-2/latest/doc/05-service-monitoring/#unit-of-measurement-uom
 type Perfdata struct {
-	Label string
-	Value interface{}
+	Label string      `json:"label"`
+	Value interface{} `json:"value"`
 	// Uom is the unit-of-measurement, see links above for details.
-	Uom  string
-	Warn *check.Threshold
-	Crit *check.Threshold
-	Min  interface{}
-	Max  interface{}
+	Uom  string           `json:"unit"`
+	Warn *check.Threshold `json:"warning"`
+	Crit *check.Threshold `json:"critical"`
+	Min  interface{}      `json:"min"`
+	Max  interface{}      `json:"max"`
 }
 
 // String returns the proper format for the plugin output
