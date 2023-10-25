@@ -2,6 +2,7 @@
 package result
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -30,6 +31,14 @@ type Overall struct {
 	PartialResults     []PartialResult
 }
 
+type OverallOutput struct {
+	MpiVersion     uint                  `json:"mpi_version"`
+	Rc             int                   `json:"rc"`
+	Output         string                `json:"output,omitempty"`
+	PartialResults []PartialResultOutput `json:"partial_results,omitempty"`
+	Perfdata       perfdata.PerfdataList `json:"perfata,omitempty"`
+}
+
 // PartialResult represents a sub-result for an Overall struct
 type PartialResult struct {
 	Perfdata           perfdata.PerfdataList
@@ -41,9 +50,16 @@ type PartialResult struct {
 	defaultStateSet    bool // nolint: unused
 }
 
+type PartialResultOutput struct {
+	Rc             int                   `json:"rc"`
+	Output         string                `json:"output,omitempty"`
+	PartialResults []PartialResultOutput `json:"partial_results,omitempty"`
+	Perfdata       perfdata.PerfdataList `json:"perfata,omitempty"`
+}
+
 // String returns the status and output of the PartialResult
-func (s *PartialResult) String() string {
-	return fmt.Sprintf("[%s] %s", check.StatusText(s.GetStatus()), s.Output)
+func (pr *PartialResult) String() string {
+	return fmt.Sprintf("[%s] %s", check.StatusText(pr.GetStatus()), pr.Output)
 }
 
 // Add adds a return state explicitly
@@ -73,8 +89,8 @@ func (o *Overall) AddSubcheck(subcheck PartialResult) {
 }
 
 // AddSubcheck adds a PartialResult to the PartialResult
-func (s *PartialResult) AddSubcheck(subcheck PartialResult) {
-	s.PartialResults = append(s.PartialResults, subcheck)
+func (pr *PartialResult) AddSubcheck(subcheck PartialResult) {
+	pr.PartialResults = append(pr.PartialResults, subcheck)
 }
 
 // GetStatus returns the current state (ok, warning, critical, unknown) of the Overall
@@ -250,15 +266,15 @@ func (o *Overall) GetOutput() string {
 }
 
 // getPerfdata returns all subsequent perfdata as a concatenated string
-func (s *PartialResult) getPerfdata() string {
+func (pr *PartialResult) getPerfdata() string {
 	var output strings.Builder
 
-	if len(s.Perfdata) > 0 {
-		output.WriteString(s.Perfdata.String())
+	if len(pr.Perfdata) > 0 {
+		output.WriteString(pr.Perfdata.String())
 	}
 
-	if s.PartialResults != nil {
-		for _, ss := range s.PartialResults {
+	if pr.PartialResults != nil {
+		for _, ss := range pr.PartialResults {
 			output.WriteString(" " + ss.getPerfdata())
 		}
 	}
@@ -267,14 +283,14 @@ func (s *PartialResult) getPerfdata() string {
 }
 
 // getOutput generates indented output for all subsequent PartialResults
-func (s *PartialResult) getOutput(indentLevel int) string {
+func (pr *PartialResult) getOutput(indentLevel int) string {
 	var output strings.Builder
 
 	prefix := strings.Repeat("  ", indentLevel)
-	output.WriteString(prefix + "\\_ " + s.String() + "\n")
+	output.WriteString(prefix + "\\_ " + pr.String() + "\n")
 
-	if s.PartialResults != nil {
-		for _, ss := range s.PartialResults {
+	if pr.PartialResults != nil {
+		for _, ss := range pr.PartialResults {
 			output.WriteString(ss.getOutput(indentLevel + 2))
 		}
 	}
@@ -283,49 +299,92 @@ func (s *PartialResult) getOutput(indentLevel int) string {
 }
 
 // SetDefaultState sets a new default state for a PartialResult
-func (s *PartialResult) SetDefaultState(state int) error {
+func (pr *PartialResult) SetDefaultState(state int) error {
 	if state < check.OK || state > check.Unknown {
 		return errors.New("Default State is not a valid result state. Got " + fmt.Sprint(state) + " which is not valid")
 	}
 
-	s.defaultState = state
-	s.defaultStateSet = true
+	pr.defaultState = state
+	pr.defaultStateSet = true
 
 	return nil
 }
 
 // SetState sets a state for a PartialResult
-func (s *PartialResult) SetState(state int) error {
+func (pr *PartialResult) SetState(state int) error {
 	if state < check.OK || state > check.Unknown {
 		return errors.New("Default State is not a valid result state. Got " + fmt.Sprint(state) + " which is not valid")
 	}
 
-	s.state = state
-	s.stateSetExplicitly = true
+	pr.state = state
+	pr.stateSetExplicitly = true
 
 	return nil
 }
 
 // GetStatus returns the current state (ok, warning, critical, unknown) of the PartialResult
 // nolint: unused
-func (s *PartialResult) GetStatus() int {
-	if s.stateSetExplicitly {
-		return s.state
+func (pr *PartialResult) GetStatus() int {
+	if pr.stateSetExplicitly {
+		return pr.state
 	}
 
-	if len(s.PartialResults) == 0 {
-		if s.defaultStateSet {
-			return s.defaultState
+	if len(pr.PartialResults) == 0 {
+		if pr.defaultStateSet {
+			return pr.defaultState
 		}
 
 		return check.Unknown
 	}
 
-	states := make([]int, len(s.PartialResults))
+	states := make([]int, len(pr.PartialResults))
 
-	for i := range s.PartialResults {
-		states[i] = s.PartialResults[i].state
+	for i := range pr.PartialResults {
+		states[i] = pr.PartialResults[i].state
 	}
 
 	return WorstState(states...)
+}
+
+func (pr *PartialResult) convertToOutput() PartialResultOutput {
+	result := PartialResultOutput{}
+	result.Output = pr.Output
+	result.Perfdata = pr.Perfdata
+	result.Rc = pr.GetStatus()
+
+	if len(pr.PartialResults) != 0 {
+		for i := range pr.PartialResults {
+			tmp := pr.PartialResults[i].convertToOutput()
+			result.PartialResults = append(result.PartialResults, tmp)
+		}
+	}
+
+	return result
+}
+
+func (o *Overall) convertToOutput(version uint) OverallOutput {
+	result := OverallOutput{}
+	result.Output = o.Summary
+	result.Rc = o.GetStatus()
+	result.MpiVersion = version
+
+	if len(o.PartialResults) != 0 {
+		for i := range o.PartialResults {
+			tmp := o.PartialResults[i].convertToOutput()
+			result.PartialResults = append(result.PartialResults, tmp)
+		}
+	}
+
+	return result
+}
+
+func (o *Overall) GetMpiOutput(version uint) []byte {
+	oo := o.convertToOutput(version)
+
+	result, err := json.Marshal(oo)
+	if err != nil {
+		return []byte{}
+	}
+
+	return result
 }
