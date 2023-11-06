@@ -324,7 +324,7 @@ func (s *PartialResult) GetStatus() int {
 	states := make([]int, len(s.PartialResults))
 
 	for i := range s.PartialResults {
-		states[i] = s.PartialResults[i].state
+		states[i] = s.PartialResults[i].GetStatus()
 	}
 
 	return WorstState(states...)
