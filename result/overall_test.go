@@ -323,15 +323,15 @@ func TestOverall_withSubchecks_PartialResult(t *testing.T) {
 
 	overall.AddSubcheck(subcheck)
 
-	res := `states: ok=1
-\_ [OK] PartialResult
+	res := `states: critical=1
+\_ [CRITICAL] PartialResult
     \_ [CRITICAL] SubSubcheck
         \_ [CRITICAL] SubSubSubcheck
 |foo=3 bar=300% baz=23B
 `
 
 	assert.Equal(t, res, overall.GetOutput())
-	assert.Equal(t, 0, overall.GetStatus())
+	assert.Equal(t, check.Critical, overall.GetStatus())
 }
 
 func TestOverall_withSubchecks_PartialResultStatus(t *testing.T) {
