@@ -41,6 +41,13 @@ type PartialResult struct {
 	defaultStateSet    bool // nolint: unused
 }
 
+func NewPartialResult() PartialResult {
+	return PartialResult{
+		stateSetExplicitly: false,
+		defaultState:       check.Unknown,
+	}
+}
+
 // String returns the status and output of the PartialResult
 func (s *PartialResult) String() string {
 	return fmt.Sprintf("[%s] %s", check.StatusText(s.GetStatus()), s.Output)
