@@ -41,6 +41,15 @@ type PartialResult struct {
 	defaultStateSet    bool // nolint: unused
 }
 
+// Initializer for a PartialResult with "sane" defaults
+// Notable default compared to the nil object: the default state is set to Unknown
+func NewPartialResult() PartialResult {
+	return PartialResult{
+		stateSetExplicitly: false,
+		defaultState:       check.Unknown,
+	}
+}
+
 // String returns the status and output of the PartialResult
 func (s *PartialResult) String() string {
 	return fmt.Sprintf("[%s] %s", check.StatusText(s.GetStatus()), s.Output)
