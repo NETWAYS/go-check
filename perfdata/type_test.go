@@ -1,6 +1,7 @@
 package perfdata
 
 import (
+	"math"
 	"testing"
 
 	"github.com/NETWAYS/go-check"
@@ -58,6 +59,13 @@ func TestRenderPerfdata(t *testing.T) {
 				Uom:   "%",
 			},
 			expected: "test=2%",
+		},
+		"with-inf": {
+			perf: Perfdata{
+				Label: "test",
+				Value: math.Inf(1),
+			},
+			expected: "test=TODO",
 		},
 		"with-thresholds": {
 			perf: Perfdata{
