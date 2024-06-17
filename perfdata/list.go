@@ -13,8 +13,14 @@ func (l PerfdataList) String() string {
 	var out strings.Builder
 
 	for _, p := range l {
-		out.WriteString(" ")
-		out.WriteString(p.String())
+
+		pfDataString, err := p.String()
+
+		// Ignore perfdata points which fail to format
+		if err == nil {
+			out.WriteString(" ")
+			out.WriteString(pfDataString)
+		}
 	}
 
 	return strings.Trim(out.String(), " ")

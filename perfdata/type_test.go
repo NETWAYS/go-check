@@ -20,8 +20,9 @@ func BenchmarkPerfdataString(b *testing.B) {
 		Max:   100}
 
 	for i := 0; i < b.N; i++ {
-		p := perf.String()
+		p, err := perf.String()
 		_ = p
+		_ = err
 	}
 }
 
@@ -73,17 +74,52 @@ func TestRenderPerfdata(t *testing.T) {
 
 	for name, tc := range testcases {
 		t.Run(name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, tc.perf.String())
+			pfVal, err := tc.perf.String()
+			assert.NoError(t, err)
+			assert.Equal(t, tc.expected, pfVal)
 		})
 	}
 }
 
+type pfFormatTest struct {
+	Result     string
+	InputValue interface{}
+}
+
 func TestFormatNumeric(t *testing.T) {
-	assert.Equal(t, "10", formatNumeric(10))
-	assert.Equal(t, "-10", formatNumeric(-10))
-	assert.Equal(t, "10", formatNumeric(uint8(10)))
-	assert.Equal(t, "1234.567", formatNumeric(1234.567))
-	assert.Equal(t, "1234.567", formatNumeric(float32(1234.567)))
-	assert.Equal(t, "1234.567", formatNumeric("1234.567"))
-	assert.Equal(t, "1234567890.988", formatNumeric(1234567890.9877))
+	testdata := []pfFormatTest{
+		{
+			Result:     "10",
+			InputValue: 10,
+		},
+		{
+			Result:     "-10",
+			InputValue: -10,
+		},
+		{
+			Result:     "10",
+			InputValue: uint8(10),
+		},
+		{
+			Result:     "1234.567",
+			InputValue: 1234.567,
+		},
+		{
+			Result:     "1234.567",
+			InputValue: float32(1234.567),
+		},
+		{Result: "1234.567",
+			InputValue: "1234.567",
+		},
+		{
+			Result:     "1234567890.988",
+			InputValue: 1234567890.9877,
+		},
+	}
+
+	for _, val := range testdata {
+		formatted, err := formatNumeric(val.InputValue)
+		assert.NoError(t, err)
+		assert.Equal(t, val.Result, formatted)
+	}
 }
