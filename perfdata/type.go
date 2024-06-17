@@ -45,6 +45,14 @@ func formatNumeric(value interface{}) (string, error) {
 
 		return check.FormatFloat(v), nil
 	case float32:
+		if math.IsInf(float64(v), 0) {
+			return "", InfValueError{}
+		}
+
+		if math.IsNaN(float64(v)) {
+			return "", NanValueError{}
+		}
+
 		return check.FormatFloat(float64(v)), nil
 	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
 		return fmt.Sprintf("%d", v), nil
