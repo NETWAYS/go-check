@@ -13,7 +13,6 @@ func (l PerfdataList) String() string {
 	var out strings.Builder
 
 	for _, p := range l {
-
 		pfDataString, err := p.String()
 
 		// Ignore perfdata points which fail to format
