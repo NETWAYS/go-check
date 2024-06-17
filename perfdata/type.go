@@ -2,6 +2,7 @@ package perfdata
 
 import (
 	"fmt"
+	"math"
 	"strings"
 
 	"github.com/NETWAYS/go-check"
@@ -9,6 +10,20 @@ import (
 
 // Replace not allowed characters inside a label
 var replacer = strings.NewReplacer("=", "_", "`", "_", "'", "_", "\"", "_")
+
+type InfValueError struct {
+}
+
+func (i InfValueError) Error() string {
+	return "Performance data value is infinite"
+}
+
+type NanValueError struct {
+}
+
+func (i NanValueError) Error() string {
+	return "Performance data value is NaN (not a number)"
+}
 
 // formatNumeric returns a string representation of various possible numerics
 //
@@ -20,6 +35,14 @@ var replacer = strings.NewReplacer("=", "_", "`", "_", "'", "_", "\"", "_")
 func formatNumeric(value interface{}) (string, error) {
 	switch v := value.(type) {
 	case float64:
+		if math.IsInf(v, 0) {
+			return "", InfValueError{}
+		}
+
+		if math.IsNaN(v) {
+			return "", NanValueError{}
+		}
+
 		return check.FormatFloat(v), nil
 	case float32:
 		return check.FormatFloat(float64(v)), nil
