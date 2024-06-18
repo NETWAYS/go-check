@@ -1,6 +1,7 @@
 package perfdata
 
 import (
+	"math"
 	"testing"
 
 	"github.com/NETWAYS/go-check"
@@ -20,9 +21,8 @@ func BenchmarkPerfdataString(b *testing.B) {
 		Max:   100}
 
 	for i := 0; i < b.N; i++ {
-		p, err := perf.String()
+		p := perf.String()
 		_ = p
-		_ = err
 	}
 }
 
@@ -72,10 +72,31 @@ func TestRenderPerfdata(t *testing.T) {
 		},
 	}
 
+	testcasesWithErrors := map[string]struct {
+		perf     Perfdata
+		expected string
+	}{
+		"invalid-value": {
+			perf: Perfdata{
+				Label: "to infinity",
+				Value: math.Inf(+1),
+			},
+			expected: "",
+		},
+	}
+
 	for name, tc := range testcases {
 		t.Run(name, func(t *testing.T) {
-			pfVal, err := tc.perf.String()
+			pfVal, err := tc.perf.ValidatedString()
 			assert.NoError(t, err)
+			assert.Equal(t, tc.expected, pfVal)
+		})
+	}
+
+	for name, tc := range testcasesWithErrors {
+		t.Run(name, func(t *testing.T) {
+			pfVal, err := tc.perf.ValidatedString()
+			assert.Error(t, err)
 			assert.Equal(t, tc.expected, pfVal)
 		})
 	}

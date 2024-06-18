@@ -86,10 +86,17 @@ type Perfdata struct {
 }
 
 // String returns the proper format for the plugin output
+// on errors (occurs with invalid data, the empty string is returned
+func (p Perfdata) String() string {
+	tmp, _ := p.ValidatedString()
+	return tmp
+}
+
+// ValidatedString returns the proper format for the plugin output
 // Returns an eror in some known cases where the value of a data type does not
 // represent a valid measurement, see the explanation for "formatNumeric" for
 // perfdata values.
-func (p Perfdata) String() (string, error) {
+func (p Perfdata) ValidatedString() (string, error) {
 	var sb strings.Builder
 
 	// Add quotes if string contains any whitespace
