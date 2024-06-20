@@ -43,8 +43,6 @@ func formatNumeric(value interface{}) (string, error) {
 		return check.FormatFloat(float64(v)), nil
 	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
 		return fmt.Sprintf("%d", v), nil
-	case fmt.Stringer, string:
-		return fmt.Sprint(v), nil
 	default:
 		panic(fmt.Sprintf("unsupported type for perfdata: %T", value))
 	}
