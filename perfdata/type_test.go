@@ -123,7 +123,7 @@ func TestFormatNumeric(t *testing.T) {
 		},
 		{
 			Result:     "1234.567",
-			InputValue: 1234.567,
+			InputValue: float64(1234.567),
 		},
 		{
 			Result:     "1234.567",
