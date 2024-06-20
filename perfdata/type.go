@@ -1,6 +1,7 @@
 package perfdata
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"strings"
@@ -10,20 +11,6 @@ import (
 
 // Replace not allowed characters inside a label
 var replacer = strings.NewReplacer("=", "_", "`", "_", "'", "_", "\"", "_")
-
-type InfValueError struct {
-}
-
-func (i InfValueError) Error() string {
-	return "Performance data value is infinite"
-}
-
-type NanValueError struct {
-}
-
-func (i NanValueError) Error() string {
-	return "Performance data value is NaN (not a number)"
-}
 
 // formatNumeric returns a string representation of various possible numerics
 //
@@ -36,21 +23,21 @@ func formatNumeric(value interface{}) (string, error) {
 	switch v := value.(type) {
 	case float64:
 		if math.IsInf(v, 0) {
-			return "", InfValueError{}
+			return "", errors.New("Perfdata value is inifinite")
 		}
 
 		if math.IsNaN(v) {
-			return "", NanValueError{}
+			return "", errors.New("Perfdata value is inifinite")
 		}
 
 		return check.FormatFloat(v), nil
 	case float32:
 		if math.IsInf(float64(v), 0) {
-			return "", InfValueError{}
+			return "", errors.New("Perfdata value is inifinite")
 		}
 
 		if math.IsNaN(float64(v)) {
-			return "", NanValueError{}
+			return "", errors.New("Perfdata value is inifinite")
 		}
 
 		return check.FormatFloat(float64(v)), nil
