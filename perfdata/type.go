@@ -1,7 +1,9 @@
 package perfdata
 
 import (
+	"errors"
 	"fmt"
+	"math"
 	"strings"
 
 	"github.com/NETWAYS/go-check"
@@ -13,16 +15,36 @@ var replacer = strings.NewReplacer("=", "_", "`", "_", "'", "_", "\"", "_")
 // formatNumeric returns a string representation of various possible numerics
 //
 // This supports most internal types of Go and all fmt.Stringer interfaces.
-func formatNumeric(value interface{}) string {
+// Returns an eror in some known cases where the value of a data type does not
+// represent a valid measurement, e.g INF for floats
+// This error can probably ignored in most cases and the perfdata point omitted,
+// but silently dropping the value and returning the empty strings seems like bad style
+func formatNumeric(value interface{}) (string, error) {
 	switch v := value.(type) {
 	case float64:
-		return check.FormatFloat(v)
+		if math.IsInf(v, 0) {
+			return "", errors.New("Perfdata value is inifinite")
+		}
+
+		if math.IsNaN(v) {
+			return "", errors.New("Perfdata value is inifinite")
+		}
+
+		return check.FormatFloat(v), nil
 	case float32:
-		return check.FormatFloat(float64(v))
+		if math.IsInf(float64(v), 0) {
+			return "", errors.New("Perfdata value is inifinite")
+		}
+
+		if math.IsNaN(float64(v)) {
+			return "", errors.New("Perfdata value is inifinite")
+		}
+
+		return check.FormatFloat(float64(v)), nil
 	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
-		return fmt.Sprintf("%d", v)
+		return fmt.Sprintf("%d", v), nil
 	case fmt.Stringer, string:
-		return fmt.Sprint(v)
+		return fmt.Sprint(v), nil
 	default:
 		panic(fmt.Sprintf("unsupported type for perfdata: %T", value))
 	}
@@ -51,7 +73,17 @@ type Perfdata struct {
 }
 
 // String returns the proper format for the plugin output
+// on errors (occurs with invalid data, the empty string is returned
 func (p Perfdata) String() string {
+	tmp, _ := p.ValidatedString()
+	return tmp
+}
+
+// ValidatedString returns the proper format for the plugin output
+// Returns an eror in some known cases where the value of a data type does not
+// represent a valid measurement, see the explanation for "formatNumeric" for
+// perfdata values.
+func (p Perfdata) ValidatedString() (string, error) {
 	var sb strings.Builder
 
 	// Add quotes if string contains any whitespace
@@ -61,7 +93,12 @@ func (p Perfdata) String() string {
 		sb.WriteString(replacer.Replace(p.Label) + "=")
 	}
 
-	sb.WriteString(formatNumeric(p.Value))
+	pfVal, err := formatNumeric(p.Value)
+	if err != nil {
+		return "", err
+	}
+
+	sb.WriteString(pfVal)
 	sb.WriteString(p.Uom)
 
 	// Thresholds
@@ -78,9 +115,13 @@ func (p Perfdata) String() string {
 		sb.WriteString(";")
 
 		if value != nil {
-			sb.WriteString(formatNumeric(value))
+			pfVal, err := formatNumeric(value)
+			// Attention: we ignore limits if they are faulty
+			if err == nil {
+				sb.WriteString(pfVal)
+			}
 		}
 	}
 
-	return strings.TrimRight(sb.String(), ";")
+	return strings.TrimRight(sb.String(), ";"), nil
 }

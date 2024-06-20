@@ -1,6 +1,7 @@
 package perfdata
 
 import (
+	"math"
 	"testing"
 
 	"github.com/NETWAYS/go-check"
@@ -71,19 +72,75 @@ func TestRenderPerfdata(t *testing.T) {
 		},
 	}
 
+	testcasesWithErrors := map[string]struct {
+		perf     Perfdata
+		expected string
+	}{
+		"invalid-value": {
+			perf: Perfdata{
+				Label: "to infinity",
+				Value: math.Inf(+1),
+			},
+			expected: "",
+		},
+	}
+
 	for name, tc := range testcases {
 		t.Run(name, func(t *testing.T) {
-			assert.Equal(t, tc.expected, tc.perf.String())
+			pfVal, err := tc.perf.ValidatedString()
+			assert.NoError(t, err)
+			assert.Equal(t, tc.expected, pfVal)
+		})
+	}
+
+	for name, tc := range testcasesWithErrors {
+		t.Run(name, func(t *testing.T) {
+			pfVal, err := tc.perf.ValidatedString()
+			assert.Error(t, err)
+			assert.Equal(t, tc.expected, pfVal)
 		})
 	}
 }
 
+type pfFormatTest struct {
+	Result     string
+	InputValue interface{}
+}
+
 func TestFormatNumeric(t *testing.T) {
-	assert.Equal(t, "10", formatNumeric(10))
-	assert.Equal(t, "-10", formatNumeric(-10))
-	assert.Equal(t, "10", formatNumeric(uint8(10)))
-	assert.Equal(t, "1234.567", formatNumeric(1234.567))
-	assert.Equal(t, "1234.567", formatNumeric(float32(1234.567)))
-	assert.Equal(t, "1234.567", formatNumeric("1234.567"))
-	assert.Equal(t, "1234567890.988", formatNumeric(1234567890.9877))
+	testdata := []pfFormatTest{
+		{
+			Result:     "10",
+			InputValue: 10,
+		},
+		{
+			Result:     "-10",
+			InputValue: -10,
+		},
+		{
+			Result:     "10",
+			InputValue: uint8(10),
+		},
+		{
+			Result:     "1234.567",
+			InputValue: 1234.567,
+		},
+		{
+			Result:     "1234.567",
+			InputValue: float32(1234.567),
+		},
+		{Result: "1234.567",
+			InputValue: "1234.567",
+		},
+		{
+			Result:     "1234567890.988",
+			InputValue: 1234567890.9877,
+		},
+	}
+
+	for _, val := range testdata {
+		formatted, err := formatNumeric(val.InputValue)
+		assert.NoError(t, err)
+		assert.Equal(t, val.Result, formatted)
+	}
 }
