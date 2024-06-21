@@ -104,7 +104,7 @@ func TestRenderPerfdata(t *testing.T) {
 
 type pfFormatTest struct {
 	Result     string
-	InputValue PerfdataValue
+	InputValue Value
 }
 
 func TestFormatNumeric(t *testing.T) {

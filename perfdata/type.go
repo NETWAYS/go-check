@@ -2,8 +2,8 @@ package perfdata
 
 import (
 	"errors"
-	"fmt"
 	"math"
+	"strconv"
 	"strings"
 
 	"github.com/NETWAYS/go-check"
@@ -19,24 +19,26 @@ var replacer = strings.NewReplacer("=", "_", "`", "_", "'", "_", "\"", "_")
 // represent a valid measurement, e.g INF for floats
 // This error can probably ignored in most cases and the perfdata point omitted,
 // but silently dropping the value and returning the empty strings seems like bad style
-func formatNumeric(value PerfdataValue) (string, error) {
+func formatNumeric(value Value) (string, error) {
 	switch value.kind {
 	case floatType:
 		if math.IsInf(value.floatVal, 0) {
-			return "", errors.New("Perfdata value is inifinite")
+			return "", errors.New("perfdata value is inifinite")
 		}
 
 		if math.IsNaN(value.floatVal) {
-			return "", errors.New("Perfdata value is inifinite")
+			return "", errors.New("perfdata value is NaN")
 		}
 
 		return check.FormatFloat(value.floatVal), nil
 	case intType:
-		return fmt.Sprintf("%d", value.intVal), nil
+		return strconv.FormatInt(value.intVal, 10), nil
 	case uintType:
-		return fmt.Sprintf("%d", value.uintVal), nil
+		return strconv.FormatUint(value.uintVal, 10), nil
+	case noneType:
+		return "", errors.New("value was not set")
 	default:
-		return "", errors.New("This should not happen")
+		return "", errors.New("this should not happen")
 	}
 }
 
@@ -53,13 +55,13 @@ func formatNumeric(value PerfdataValue) (string, error) {
 // https://icinga.com/docs/icinga-2/latest/doc/05-service-monitoring/#unit-of-measurement-uom
 type Perfdata struct {
 	Label string
-	Value PerfdataValue
+	Value Value
 	// Uom is the unit-of-measurement, see links above for details.
 	Uom  string
 	Warn *check.Threshold
 	Crit *check.Threshold
-	Min  PerfdataValue
-	Max  PerfdataValue
+	Min  Value
+	Max  Value
 }
 
 type perfdataValueTypeEnum int
@@ -71,29 +73,29 @@ const (
 	floatType
 )
 
-type PerfdataValue struct {
+type Value struct {
 	kind     perfdataValueTypeEnum
 	uintVal  uint64
 	intVal   int64
 	floatVal float64
 }
 
-func NewPdvUint64(val uint64) PerfdataValue {
-	return PerfdataValue{
+func NewPdvUint64(val uint64) Value {
+	return Value{
 		kind:    uintType,
 		uintVal: val,
 	}
 }
 
-func NewPdvInt64(val int64) PerfdataValue {
-	return PerfdataValue{
+func NewPdvInt64(val int64) Value {
+	return Value{
 		kind:   intType,
 		intVal: val,
 	}
 }
 
-func NewPdvFloat64(val float64) PerfdataValue {
-	return PerfdataValue{
+func NewPdvFloat64(val float64) Value {
+	return Value{
 		kind:     floatType,
 		floatVal: val,
 	}
@@ -138,7 +140,7 @@ func (p Perfdata) ValidatedString() (string, error) {
 	}
 
 	// Limits
-	for _, value := range []PerfdataValue{p.Min, p.Max} {
+	for _, value := range []Value{p.Min, p.Max} {
 		sb.WriteString(";")
 
 		if value.kind != noneType {
