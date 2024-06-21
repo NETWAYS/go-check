@@ -19,32 +19,24 @@ var replacer = strings.NewReplacer("=", "_", "`", "_", "'", "_", "\"", "_")
 // represent a valid measurement, e.g INF for floats
 // This error can probably ignored in most cases and the perfdata point omitted,
 // but silently dropping the value and returning the empty strings seems like bad style
-func formatNumeric(value interface{}) (string, error) {
-	switch v := value.(type) {
-	case float64:
-		if math.IsInf(v, 0) {
+func formatNumeric(value PerfdataValue) (string, error) {
+	switch value.kind {
+	case floatType:
+		if math.IsInf(value.floatVal, 0) {
 			return "", errors.New("Perfdata value is inifinite")
 		}
 
-		if math.IsNaN(v) {
+		if math.IsNaN(value.floatVal) {
 			return "", errors.New("Perfdata value is inifinite")
 		}
 
-		return check.FormatFloat(v), nil
-	case float32:
-		if math.IsInf(float64(v), 0) {
-			return "", errors.New("Perfdata value is inifinite")
-		}
-
-		if math.IsNaN(float64(v)) {
-			return "", errors.New("Perfdata value is inifinite")
-		}
-
-		return check.FormatFloat(float64(v)), nil
-	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
-		return fmt.Sprintf("%d", v), nil
+		return check.FormatFloat(value.floatVal), nil
+	case intType:
+		return fmt.Sprintf("%d", value.intVal), nil
+	case uintType:
+		return fmt.Sprintf("%d", value.uintVal), nil
 	default:
-		panic(fmt.Sprintf("unsupported type for perfdata: %T", value))
+		return "", errors.New("This should not happen")
 	}
 }
 
@@ -61,13 +53,50 @@ func formatNumeric(value interface{}) (string, error) {
 // https://icinga.com/docs/icinga-2/latest/doc/05-service-monitoring/#unit-of-measurement-uom
 type Perfdata struct {
 	Label string
-	Value interface{}
+	Value PerfdataValue
 	// Uom is the unit-of-measurement, see links above for details.
 	Uom  string
 	Warn *check.Threshold
 	Crit *check.Threshold
-	Min  interface{}
-	Max  interface{}
+	Min  PerfdataValue
+	Max  PerfdataValue
+}
+
+type perfdataValueTypeEnum int
+
+const (
+	noneType perfdataValueTypeEnum = iota
+	intType
+	uintType
+	floatType
+)
+
+type PerfdataValue struct {
+	kind     perfdataValueTypeEnum
+	uintVal  uint64
+	intVal   int64
+	floatVal float64
+}
+
+func NewPdvUint64(val uint64) PerfdataValue {
+	return PerfdataValue{
+		kind:    uintType,
+		uintVal: val,
+	}
+}
+
+func NewPdvInt64(val int64) PerfdataValue {
+	return PerfdataValue{
+		kind:   intType,
+		intVal: val,
+	}
+}
+
+func NewPdvFloat64(val float64) PerfdataValue {
+	return PerfdataValue{
+		kind:     floatType,
+		floatVal: val,
+	}
 }
 
 // String returns the proper format for the plugin output
@@ -109,10 +138,10 @@ func (p Perfdata) ValidatedString() (string, error) {
 	}
 
 	// Limits
-	for _, value := range []interface{}{p.Min, p.Max} {
+	for _, value := range []PerfdataValue{p.Min, p.Max} {
 		sb.WriteString(";")
 
-		if value != nil {
+		if value.kind != noneType {
 			pfVal, err := formatNumeric(value)
 			// Attention: we ignore limits if they are faulty
 			if err == nil {

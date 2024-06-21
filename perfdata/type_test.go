@@ -13,12 +13,12 @@ func BenchmarkPerfdataString(b *testing.B) {
 
 	perf := Perfdata{
 		Label: "test test=test",
-		Value: 10.1,
+		Value: NewPdvFloat64(10.1),
 		Uom:   "%",
 		Warn:  &check.Threshold{Upper: 80},
 		Crit:  &check.Threshold{Upper: 90},
-		Min:   0,
-		Max:   100}
+		Min:   NewPdvUint64(0),
+		Max:   NewPdvInt64(100)}
 
 	for i := 0; i < b.N; i++ {
 		p := perf.String()
@@ -34,28 +34,28 @@ func TestRenderPerfdata(t *testing.T) {
 		"simple": {
 			perf: Perfdata{
 				Label: "test",
-				Value: 2,
+				Value: NewPdvUint64(2),
 			},
 			expected: "test=2",
 		},
 		"with-quotes": {
 			perf: Perfdata{
 				Label: "te's\"t",
-				Value: 2,
+				Value: NewPdvInt64(2),
 			},
 			expected: "te_s_t=2",
 		},
 		"with-special-chars": {
 			perf: Perfdata{
 				Label: "test_🖥️_'test",
-				Value: 2,
+				Value: NewPdvUint64(2),
 			},
 			expected: "test_🖥️__test=2",
 		},
 		"with-uom": {
 			perf: Perfdata{
 				Label: "test",
-				Value: 2,
+				Value: NewPdvInt64(2),
 				Uom:   "%",
 			},
 			expected: "test=2%",
@@ -63,7 +63,7 @@ func TestRenderPerfdata(t *testing.T) {
 		"with-thresholds": {
 			perf: Perfdata{
 				Label: "foo bar",
-				Value: 2.76,
+				Value: NewPdvFloat64(2.76),
 				Uom:   "m",
 				Warn:  &check.Threshold{Lower: 10, Upper: 25, Inside: true},
 				Crit:  &check.Threshold{Lower: 15, Upper: 20, Inside: false},
@@ -79,7 +79,7 @@ func TestRenderPerfdata(t *testing.T) {
 		"invalid-value": {
 			perf: Perfdata{
 				Label: "to infinity",
-				Value: math.Inf(+1),
+				Value: NewPdvFloat64(math.Inf(+1)),
 			},
 			expected: "",
 		},
@@ -104,34 +104,34 @@ func TestRenderPerfdata(t *testing.T) {
 
 type pfFormatTest struct {
 	Result     string
-	InputValue interface{}
+	InputValue PerfdataValue
 }
 
 func TestFormatNumeric(t *testing.T) {
 	testdata := []pfFormatTest{
 		{
 			Result:     "10",
-			InputValue: 10,
+			InputValue: NewPdvUint64(10),
 		},
 		{
 			Result:     "-10",
-			InputValue: -10,
+			InputValue: NewPdvInt64(-10),
 		},
 		{
 			Result:     "10",
-			InputValue: uint8(10),
+			InputValue: NewPdvUint64(10),
 		},
 		{
 			Result:     "1234.567",
-			InputValue: float64(1234.567),
+			InputValue: NewPdvFloat64(1234.567),
 		},
 		{
 			Result:     "3456.789",
-			InputValue: float32(3456.789),
+			InputValue: NewPdvFloat64(3456.789),
 		},
 		{
 			Result:     "1234567890.988",
-			InputValue: 1234567890.9877,
+			InputValue: NewPdvFloat64(1234567890.9877),
 		},
 	}
 

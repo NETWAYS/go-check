@@ -9,8 +9,8 @@ import (
 
 func ExamplePerfdataList() {
 	list := PerfdataList{}
-	list.Add(&Perfdata{Label: "test1", Value: 23})
-	list.Add(&Perfdata{Label: "test2", Value: 42})
+	list.Add(&Perfdata{Label: "test1", Value: NewPdvUint64(23)})
+	list.Add(&Perfdata{Label: "test2", Value: NewPdvUint64(42)})
 
 	fmt.Println(list)
 
@@ -20,8 +20,8 @@ func ExamplePerfdataList() {
 
 func TestPerfdataListFormating(t *testing.T) {
 	list := PerfdataList{}
-	list.Add(&Perfdata{Label: "test1", Value: 23})
-	list.Add(&Perfdata{Label: "test2", Value: 42})
+	list.Add(&Perfdata{Label: "test1", Value: NewPdvUint64(23)})
+	list.Add(&Perfdata{Label: "test2", Value: NewPdvUint64(42)})
 
 	assert.Equal(t, "test1=23 test2=42", list.String())
 }
@@ -30,8 +30,8 @@ func BenchmarkPerfdataListFormating(b *testing.B) {
 	b.ReportAllocs()
 
 	list := PerfdataList{}
-	list.Add(&Perfdata{Label: "test1", Value: 23})
-	list.Add(&Perfdata{Label: "test2", Value: 42})
+	list.Add(&Perfdata{Label: "test1", Value: NewPdvUint64(23)})
+	list.Add(&Perfdata{Label: "test2", Value: NewPdvUint64(42)})
 
 	for i := 0; i < b.N; i++ {
 		l := list.String()

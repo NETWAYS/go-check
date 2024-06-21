@@ -139,7 +139,7 @@ func ExampleOverall_GetStatus() {
 func ExampleOverall_withSubchecks() {
 	var overall Overall
 
-	example_perfdata := perfdata.Perfdata{Label: "pd_test", Value: 5, Uom: "s"}
+	example_perfdata := perfdata.Perfdata{Label: "pd_test", Value: perfdata.NewPdvUint64(5), Uom: "s"}
 	pd_list := perfdata.PerfdataList{}
 	pd_list.Add(&example_perfdata)
 
@@ -164,17 +164,17 @@ func ExampleOverall_withSubchecks() {
 func TestOverall_withEnhancedSubchecks(t *testing.T) {
 	var overall Overall
 
-	example_perfdata := perfdata.Perfdata{Label: "pd_test", Value: 5, Uom: "s"}
+	example_perfdata := perfdata.Perfdata{Label: "pd_test", Value: perfdata.NewPdvUint64(5), Uom: "s"}
 	example_perfdata2 := perfdata.Perfdata{
 		Label: "pd_test2",
-		Value: 1099511627776,
+		Value: perfdata.NewPdvUint64(1099511627776),
 		Uom:   "kB",
 		Warn:  &check.Threshold{Inside: true, Lower: 3.14, Upper: 0x66666666666},
 		Crit:  &check.Threshold{Inside: false, Lower: 07777777777777, Upper: 0xFFFFFFFFFFFFFFFFFFFF},
-		Max:   uint64(18446744073709551615),
+		Max:   perfdata.NewPdvUint64((18446744073709551615)),
 	}
-	example_perfdata3 := perfdata.Perfdata{Label: "kl;jr2if;l2rkjasdf", Value: 5, Uom: "m"}
-	example_perfdata4 := perfdata.Perfdata{Label: "asdf", Value: uint64(18446744073709551615), Uom: "B"}
+	example_perfdata3 := perfdata.Perfdata{Label: "kl;jr2if;l2rkjasdf", Value: perfdata.NewPdvUint64(5), Uom: "m"}
+	example_perfdata4 := perfdata.Perfdata{Label: "asdf", Value: perfdata.NewPdvUint64(18446744073709551615), Uom: "B"}
 
 	pd_list := perfdata.PerfdataList{}
 	pd_list.Add(&example_perfdata)
@@ -259,11 +259,11 @@ func TestOverall_withSubchecks_Perfdata(t *testing.T) {
 
 	perf1 := perfdata.Perfdata{
 		Label: "foo",
-		Value: 3,
+		Value: perfdata.NewPdvUint64(3),
 	}
 	perf2 := perfdata.Perfdata{
 		Label: "bar",
-		Value: 300,
+		Value: perfdata.NewPdvUint64(300),
 		Uom:   "%",
 	}
 
@@ -302,16 +302,16 @@ func TestOverall_withSubchecks_PartialResult(t *testing.T) {
 
 	perf1 := perfdata.Perfdata{
 		Label: "foo",
-		Value: 3,
+		Value: perfdata.NewPdvUint64(3),
 	}
 	perf2 := perfdata.Perfdata{
 		Label: "bar",
-		Value: 300,
+		Value: perfdata.NewPdvUint64(300),
 		Uom:   "%",
 	}
 	perf3 := perfdata.Perfdata{
 		Label: "baz",
-		Value: 23,
+		Value: perfdata.NewPdvUint64(23),
 		Uom:   "B",
 	}
 
@@ -376,11 +376,11 @@ func TestSubchecksPerfdata(t *testing.T) {
 		Perfdata: perfdata.PerfdataList{
 			&perfdata.Perfdata{
 				Label: "foo",
-				Value: 23,
+				Value: perfdata.NewPdvUint64(23),
 			},
 			&perfdata.Perfdata{
 				Label: "bar",
-				Value: 42,
+				Value: perfdata.NewPdvUint64(42),
 			},
 		},
 	}
@@ -392,7 +392,7 @@ func TestSubchecksPerfdata(t *testing.T) {
 		Perfdata: perfdata.PerfdataList{
 			&perfdata.Perfdata{
 				Label: "foo2 bar",
-				Value: 46,
+				Value: perfdata.NewPdvUint64(46),
 			},
 		},
 	}
