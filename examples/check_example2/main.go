@@ -20,10 +20,12 @@ func main() {
 		check.ExitError(err)
 	}
 
-	check1.Perfdata.Add(&perfdata.Perfdata{
+	pd := &perfdata.Perfdata{
 		Label: "foo",
-		Value: 23,
-	})
+		Value: perfdata.NewPdvUint64(23),
+	}
+
+	check1.Perfdata.Add(pd)
 
 	check2 := result.PartialResult{}
 
@@ -34,14 +36,17 @@ func main() {
 		check.ExitError(err)
 	}
 
-	check2.Perfdata.Add(&perfdata.Perfdata{
+	pd2 := &perfdata.Perfdata{
 		Label: "bar",
-		Value: 42,
-	})
-	check2.Perfdata.Add(&perfdata.Perfdata{
+		Value: perfdata.NewPdvUint64(42),
+	}
+	check2.Perfdata.Add(pd2)
+
+	pd3 := &perfdata.Perfdata{
 		Label: "foo2 bar",
-		Value: 46,
-	})
+		Value: perfdata.NewPdvUint64(46),
+	}
+	check2.Perfdata.Add(pd3)
 
 	overall.AddSubcheck(check1)
 	overall.AddSubcheck(check2)

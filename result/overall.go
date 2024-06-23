@@ -98,53 +98,53 @@ func (o *Overall) GetStatus() int {
 			return check.Warning
 		} else if o.oks > 0 {
 			return check.OK
-		} else {
-			return check.Unknown
-		}
-	} else {
-		// state not set explicitly!
-		if len(o.PartialResults) == 0 {
-			return check.Unknown
-		}
-
-		var (
-			criticals int
-			warnings  int
-			oks       int
-			unknowns  int
-		)
-
-		for _, sc := range o.PartialResults {
-			switch sc.GetStatus() {
-			case check.Critical:
-				criticals++
-			case check.Warning:
-				warnings++
-			case check.Unknown:
-				unknowns++
-			case check.OK:
-				oks++
-			}
-		}
-
-		if criticals > 0 {
-			return check.Critical
-		}
-
-		if unknowns > 0 {
-			return check.Unknown
-		}
-
-		if warnings > 0 {
-			return check.Warning
-		}
-
-		if oks > 0 {
-			return check.OK
 		}
 
 		return check.Unknown
 	}
+
+	// state not set explicitly!
+	if len(o.PartialResults) == 0 {
+		return check.Unknown
+	}
+
+	var (
+		criticals int
+		warnings  int
+		oks       int
+		unknowns  int
+	)
+
+	for _, sc := range o.PartialResults {
+		switch sc.GetStatus() {
+		case check.Critical:
+			criticals++
+		case check.Warning:
+			warnings++
+		case check.Unknown:
+			unknowns++
+		case check.OK:
+			oks++
+		}
+	}
+
+	if criticals > 0 {
+		return check.Critical
+	}
+
+	if unknowns > 0 {
+		return check.Unknown
+	}
+
+	if warnings > 0 {
+		return check.Warning
+	}
+
+	if oks > 0 {
+		return check.OK
+	}
+
+	return check.Unknown
 }
 
 // GetSummary returns a text representation of the current state of the Overall
