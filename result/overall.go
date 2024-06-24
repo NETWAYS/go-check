@@ -262,7 +262,7 @@ func (o *Overall) GetOutput() string {
 func (s *PartialResult) getPerfdata() string {
 	var output strings.Builder
 
-	if len(s.Perfdata) > 0 {
+	if len(s.Perfdata.List) > 0 {
 		output.WriteString(s.Perfdata.String())
 	}
 

@@ -11,7 +11,7 @@ import (
 func BenchmarkPerfdataString(b *testing.B) {
 	b.ReportAllocs()
 
-	perf := Perfdata{
+	perf := Perfdata[float64]{
 		Label: "test test=test",
 		Value: 10.1,
 		Uom:   "%",
@@ -28,56 +28,56 @@ func BenchmarkPerfdataString(b *testing.B) {
 
 func TestRenderPerfdata(t *testing.T) {
 	testcases := map[string]struct {
-		perf     Perfdata
+		perf     Perfdata[int]
 		expected string
 	}{
 		"simple": {
-			perf: Perfdata{
+			perf: Perfdata[int]{
 				Label: "test",
 				Value: 2,
 			},
-			expected: "test=2",
+			expected: "test=2;;;0;0",
 		},
 		"with-quotes": {
-			perf: Perfdata{
+			perf: Perfdata[int]{
 				Label: "te's\"t",
 				Value: 2,
 			},
-			expected: "te_s_t=2",
+			expected: "te_s_t=2;;;0;0",
 		},
 		"with-special-chars": {
-			perf: Perfdata{
+			perf: Perfdata[int]{
 				Label: "test_🖥️_'test",
 				Value: 2,
 			},
-			expected: "test_🖥️__test=2",
+			expected: "test_🖥️__test=2;;;0;0",
 		},
 		"with-uom": {
-			perf: Perfdata{
+			perf: Perfdata[int]{
 				Label: "test",
 				Value: 2,
 				Uom:   "%",
 			},
-			expected: "test=2%",
+			expected: "test=2%;;;0;0",
 		},
 		"with-thresholds": {
-			perf: Perfdata{
+			perf: Perfdata[int]{
 				Label: "foo bar",
-				Value: 2.76,
+				Value: 2,
 				Uom:   "m",
 				Warn:  &check.Threshold{Lower: 10, Upper: 25, Inside: true},
 				Crit:  &check.Threshold{Lower: 15, Upper: 20, Inside: false},
 			},
-			expected: "'foo bar'=2.76m;@10:25;15:20",
+			expected: "'foo bar'=2m;@10:25;15:20;0;0",
 		},
 	}
 
 	testcasesWithErrors := map[string]struct {
-		perf     Perfdata
+		perf     Perfdata[float64]
 		expected string
 	}{
 		"invalid-value": {
-			perf: Perfdata{
+			perf: Perfdata[float64]{
 				Label: "to infinity",
 				Value: math.Inf(+1),
 			},

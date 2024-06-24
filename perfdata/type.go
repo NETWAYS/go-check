@@ -9,6 +9,10 @@ import (
 	"github.com/NETWAYS/go-check"
 )
 
+type Numeric interface {
+	~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr | ~int | ~int8 | ~int16 | ~int32 | ~int64 | ~float32 | ~float64
+}
+
 // Replace not allowed characters inside a label
 var replacer = strings.NewReplacer("=", "_", "`", "_", "'", "_", "\"", "_")
 
@@ -59,20 +63,20 @@ func formatNumeric(value interface{}) (string, error) {
 // https://github.com/Icinga/icinga2/blob/master/lib/base/perfdatavalue.cpp
 //
 // https://icinga.com/docs/icinga-2/latest/doc/05-service-monitoring/#unit-of-measurement-uom
-type Perfdata struct {
+type Perfdata[N Numeric] struct {
 	Label string
-	Value interface{}
+	Value N
 	// Uom is the unit-of-measurement, see links above for details.
 	Uom  string
 	Warn *check.Threshold
 	Crit *check.Threshold
-	Min  interface{}
-	Max  interface{}
+	Min  N
+	Max  N
 }
 
 // String returns the proper format for the plugin output
 // on errors (occurs with invalid data, the empty string is returned
-func (p Perfdata) String() string {
+func (p Perfdata[N]) String() string {
 	tmp, _ := p.ValidatedString()
 	return tmp
 }
@@ -81,7 +85,7 @@ func (p Perfdata) String() string {
 // Returns an eror in some known cases where the value of a data type does not
 // represent a valid measurement, see the explanation for "formatNumeric" for
 // perfdata values.
-func (p Perfdata) ValidatedString() (string, error) {
+func (p Perfdata[N]) ValidatedString() (string, error) {
 	var sb strings.Builder
 
 	// Add quotes if string contains any whitespace
