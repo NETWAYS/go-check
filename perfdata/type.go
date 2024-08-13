@@ -23,21 +23,21 @@ func formatNumeric(value interface{}) (string, error) {
 	switch v := value.(type) {
 	case float64:
 		if math.IsInf(v, 0) {
-			return "", errors.New("Perfdata value is inifinite")
+			return "", errors.New("Perfdata value is infinite")
 		}
 
 		if math.IsNaN(v) {
-			return "", errors.New("Perfdata value is inifinite")
+			return "", errors.New("Perfdata value is infinite")
 		}
 
 		return check.FormatFloat(v), nil
 	case float32:
 		if math.IsInf(float64(v), 0) {
-			return "", errors.New("Perfdata value is inifinite")
+			return "", errors.New("Perfdata value is infinite")
 		}
 
 		if math.IsNaN(float64(v)) {
-			return "", errors.New("Perfdata value is inifinite")
+			return "", errors.New("Perfdata value is infinite")
 		}
 
 		return check.FormatFloat(float64(v)), nil
