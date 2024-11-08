@@ -11,6 +11,7 @@ import (
 	"github.com/NETWAYS/go-check/perfdata"
 )
 
+// The "width" of the indentation which is added on every level
 const indentationOffset = 2
 
 // Overall is a singleton for a monitoring plugin that has several partial results (or sub-results)
