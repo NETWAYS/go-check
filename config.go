@@ -81,7 +81,7 @@ func (c *Config) ParseArray(arguments []string) {
 
 	if c.PrintVersion {
 		fmt.Println(c.Name, "version", c.Version)
-		BaseExit(3)
+		BaseExit(Unknown)
 	}
 
 	if c.DefaultHelper {
@@ -109,7 +109,7 @@ func LoadFromEnv(config interface{}) {
 	configValue := reflect.ValueOf(config).Elem()
 	configType := configValue.Type()
 
-	for i := 0; i < configValue.NumField(); i++ {
+	for i := range configValue.NumField() {
 		field := configType.Field(i)
 		tag := field.Tag.Get("env")
 
@@ -124,7 +124,7 @@ func LoadFromEnv(config interface{}) {
 			continue
 		}
 
-		// Potential for addding different types, for now we only use strings
+		// Potential for adding different types, for now we only use strings
 		// since the main use case is credentials
 		// nolint: exhaustive, gocritic
 		switch field.Type.Kind() {

@@ -1,7 +1,7 @@
 run:
   timeout: 5m
   tests: false
-  skip-files:
+issues.exclude-files:
     - 'testhelper/for_main.go'
 issues:
   exclude-rules:
@@ -16,7 +16,6 @@ linters:
    disable:
      - cyclop
      - depguard
-     - exhaustivestruct
      - exhaustruct
      - forbidigo
      - forcetypeassert
@@ -25,7 +24,7 @@ linters:
      - gochecknoinits
      - godox
      - godot
-     - goerr113
+     - err113
      - gofumpt
      - gomnd
      - lll

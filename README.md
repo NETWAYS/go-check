@@ -34,8 +34,8 @@ func main() {
 
 	// Some checking should be done here, when --help is not passed
 	check.Exitf(check.OK, "Everything is fine - answer=%d", 42)
-    // Output:
-    // OK - Everything is fine - answer=42
+	// Output:
+	// OK - Everything is fine - answer=42
 }
 ```
 

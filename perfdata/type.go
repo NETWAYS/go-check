@@ -15,7 +15,7 @@ var replacer = strings.NewReplacer("=", "_", "`", "_", "'", "_", "\"", "_")
 // formatNumeric returns a string representation of various possible numerics
 //
 // This supports most internal types of Go and all fmt.Stringer interfaces.
-// Returns an eror in some known cases where the value of a data type does not
+// Returns an error in some known cases where the value of a data type does not
 // represent a valid measurement, e.g INF for floats
 // This error can probably ignored in most cases and the perfdata point omitted,
 // but silently dropping the value and returning the empty strings seems like bad style
@@ -78,7 +78,7 @@ func (p Perfdata) String() string {
 }
 
 // ValidatedString returns the proper format for the plugin output
-// Returns an eror in some known cases where the value of a data type does not
+// Returns an error in some known cases where the value of a data type does not
 // represent a valid measurement, see the explanation for "formatNumeric" for
 // perfdata values.
 func (p Perfdata) ValidatedString() (string, error) {

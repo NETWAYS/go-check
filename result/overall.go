@@ -4,13 +4,17 @@ package result
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/NETWAYS/go-check"
 	"github.com/NETWAYS/go-check/perfdata"
 )
 
-// Overall is a singleton for a monitoring pluging that has several partial results (or sub-results)
+// The "width" of the indentation which is added on every level
+const indentationOffset = 2
+
+// Overall is a singleton for a monitoring plugin that has several partial results (or sub-results)
 //
 // Design decisions: A check plugin has a single Overall (singleton),
 // each partial thing which is tested, gets its own subcheck.
@@ -98,53 +102,53 @@ func (o *Overall) GetStatus() int {
 			return check.Warning
 		} else if o.oks > 0 {
 			return check.OK
-		} else {
-			return check.Unknown
-		}
-	} else {
-		// state not set explicitly!
-		if len(o.PartialResults) == 0 {
-			return check.Unknown
-		}
-
-		var (
-			criticals int
-			warnings  int
-			oks       int
-			unknowns  int
-		)
-
-		for _, sc := range o.PartialResults {
-			switch sc.GetStatus() {
-			case check.Critical:
-				criticals++
-			case check.Warning:
-				warnings++
-			case check.Unknown:
-				unknowns++
-			case check.OK:
-				oks++
-			}
-		}
-
-		if criticals > 0 {
-			return check.Critical
-		}
-
-		if unknowns > 0 {
-			return check.Unknown
-		}
-
-		if warnings > 0 {
-			return check.Warning
-		}
-
-		if oks > 0 {
-			return check.OK
 		}
 
 		return check.Unknown
 	}
+
+	// state not set explicitly!
+	if len(o.PartialResults) == 0 {
+		return check.Unknown
+	}
+
+	var (
+		criticals int
+		warnings  int
+		oks       int
+		unknowns  int
+	)
+
+	for _, sc := range o.PartialResults {
+		switch sc.GetStatus() {
+		case check.Critical:
+			criticals++
+		case check.Warning:
+			warnings++
+		case check.Unknown:
+			unknowns++
+		case check.OK:
+			oks++
+		}
+	}
+
+	if criticals > 0 {
+		return check.Critical
+	}
+
+	if unknowns > 0 {
+		return check.Unknown
+	}
+
+	if warnings > 0 {
+		return check.Warning
+	}
+
+	if oks > 0 {
+		return check.OK
+	}
+
+	return check.Unknown
 }
 
 // GetSummary returns a text representation of the current state of the Overall
@@ -284,7 +288,7 @@ func (s *PartialResult) getOutput(indentLevel int) string {
 
 	if s.PartialResults != nil {
 		for _, ss := range s.PartialResults {
-			output.WriteString(ss.getOutput(indentLevel + 2))
+			output.WriteString(ss.getOutput(indentLevel + indentationOffset))
 		}
 	}
 
@@ -294,7 +298,7 @@ func (s *PartialResult) getOutput(indentLevel int) string {
 // SetDefaultState sets a new default state for a PartialResult
 func (s *PartialResult) SetDefaultState(state int) error {
 	if state < check.OK || state > check.Unknown {
-		return errors.New("Default State is not a valid result state. Got " + fmt.Sprint(state) + " which is not valid")
+		return errors.New("Default State is not a valid result state. Got " + strconv.Itoa(state) + " which is not valid")
 	}
 
 	s.defaultState = state
@@ -306,7 +310,7 @@ func (s *PartialResult) SetDefaultState(state int) error {
 // SetState sets a state for a PartialResult
 func (s *PartialResult) SetState(state int) error {
 	if state < check.OK || state > check.Unknown {
-		return errors.New("Default State is not a valid result state. Got " + fmt.Sprint(state) + " which is not valid")
+		return errors.New("Default State is not a valid result state. Got " + strconv.Itoa(state) + " which is not valid")
 	}
 
 	s.state = state
