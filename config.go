@@ -124,7 +124,7 @@ func LoadFromEnv(config interface{}) {
 			continue
 		}
 
-		// Potential for addding different types, for now we only use strings
+		// Potential for adding different types, for now we only use strings
 		// since the main use case is credentials
 		// nolint: exhaustive, gocritic
 		switch field.Type.Kind() {

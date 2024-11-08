@@ -10,7 +10,7 @@ import (
 	"github.com/NETWAYS/go-check/perfdata"
 )
 
-// Overall is a singleton for a monitoring pluging that has several partial results (or sub-results)
+// Overall is a singleton for a monitoring plugin that has several partial results (or sub-results)
 //
 // Design decisions: A check plugin has a single Overall (singleton),
 // each partial thing which is tested, gets its own subcheck.
