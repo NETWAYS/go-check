@@ -123,8 +123,11 @@ o := Overall{}
 o.Add(0, "Something is OK")
 
 pr := PartialResult{
-    State:  check.OK,
     Output: "My Subcheck",
+}
+
+if err := pr.SetState(check.OK); err != nil {
+  fmt.Printf(%s, err)
 }
 
 o.AddSubcheck(pr)
