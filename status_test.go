@@ -29,10 +29,48 @@ func TestStatusText(t *testing.T) {
 
 	for name, tc := range testcases {
 		t.Run(name, func(t *testing.T) {
-			actual := StatusText(tc.input)
+			actual, _ := GetStatusText(tc.input)
 
 			if actual != tc.expected {
 				t.Fatalf("expected %v, got %v", tc.expected, actual)
+			}
+		})
+	}
+}
+
+func TestStatusInt(t *testing.T) {
+	testcases := map[string]struct {
+		input    string
+		expected int
+	}{
+		"OK": {
+			expected: 0,
+			input:    "OK",
+		},
+		"WARNING": {
+			expected: 1,
+			input:    "warning",
+		},
+		"CRITICAL": {
+			expected: 2,
+			input:    "Critical",
+		},
+		"UNKNOWN": {
+			expected: 3,
+			input:    "unknown",
+		},
+		"Invalid-Input": {
+			expected: -1,
+			input:    "Something else",
+		},
+	}
+
+	for name, tc := range testcases {
+		t.Run(name, func(t *testing.T) {
+			actual, _ := GetStatusInt(tc.input)
+
+			if actual != tc.expected {
+				t.Error("\nActual: ", actual, "\nExpected: ", tc.expected)
 			}
 		})
 	}

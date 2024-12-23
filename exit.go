@@ -33,7 +33,9 @@ func Exitf(rc int, output string, args ...interface{}) {
 func ExitRaw(rc int, output ...string) {
 	var text strings.Builder
 
-	text.WriteString("[" + StatusText(rc) + "] -")
+	status, _ := GetStatusText(rc)
+
+	text.WriteString("[" + status + "] -")
 
 	for _, s := range output {
 		text.WriteString(" " + s)

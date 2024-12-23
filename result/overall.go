@@ -56,7 +56,8 @@ func NewPartialResult() PartialResult {
 
 // String returns the status and output of the PartialResult
 func (s *PartialResult) String() string {
-	return fmt.Sprintf("[%s] %s", check.StatusText(s.GetStatus()), s.Output)
+	status, _ := check.GetStatusText(s.GetStatus())
+	return fmt.Sprintf("[%s] %s", status, s.Output)
 }
 
 // Add adds a return state explicitly
@@ -77,7 +78,9 @@ func (o *Overall) Add(state int, output string) {
 	// TODO: Might be a bit obscure that the Add method also sets stateSetExplicitly
 	o.stateSetExplicitly = true
 
-	o.Outputs = append(o.Outputs, fmt.Sprintf("[%s] %s", check.StatusText(state), output))
+	status, _ := check.GetStatusText(state)
+
+	o.Outputs = append(o.Outputs, fmt.Sprintf("[%s] %s", status, output))
 }
 
 // AddSubcheck adds a PartialResult to the Overall
