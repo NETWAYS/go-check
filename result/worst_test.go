@@ -1,24 +1,42 @@
 package result
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-func TestWorstState(t *testing.T) {
+func TestWorstState2(t *testing.T) {
+	if WorstState(3) != 3 {
+		t.Fatalf("expected 3, got %d", WorstState(3))
+	}
+	if WorstState(2) != 2 {
+		t.Fatalf("expected 2, got %d", WorstState(2))
+	}
+	if WorstState(1) != 1 {
+		t.Fatalf("expected 1, got %d", WorstState(1))
+	}
+	if WorstState(0) != 0 {
+		t.Fatalf("expected 0, got %d", WorstState(0))
+	}
 
-	assert.Equal(t, 3, WorstState(3))
-	assert.Equal(t, 2, WorstState(2))
-	assert.Equal(t, 1, WorstState(1))
-	assert.Equal(t, 0, WorstState(0))
+	if WorstState(0, 1, 2, 3) != 2 {
+		t.Fatalf("expected 2, got %d", WorstState(0, 1, 2, 3))
+	}
+	if WorstState(0, 1, 3) != 3 {
+		t.Fatalf("expected 3, got %d", WorstState(0, 1, 3))
+	}
+	if WorstState(1, 0, 0) != 1 {
+		t.Fatalf("expected 1, got %d", WorstState(1, 0, 0))
+	}
+	if WorstState(0, 0, 0) != 0 {
+		t.Fatalf("expected 0, got %d", WorstState(0, 0, 0))
+	}
 
-	assert.Equal(t, 2, WorstState(0, 1, 2, 3))
-	assert.Equal(t, 3, WorstState(0, 1, 3))
-	assert.Equal(t, 1, WorstState(1, 0, 0))
-	assert.Equal(t, 0, WorstState(0, 0, 0))
-
-	assert.Equal(t, 3, WorstState(-1))
-	assert.Equal(t, 3, WorstState(4))
+	if WorstState(-1) != 3 {
+		t.Fatalf("expected 3, got %d", WorstState(-1))
+	}
+	if WorstState(4) != 3 {
+		t.Fatalf("expected 3, got %d", WorstState(4))
+	}
 }
 
 func BenchmarkWorstState(b *testing.B) {

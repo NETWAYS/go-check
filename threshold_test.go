@@ -1,7 +1,8 @@
 package check
 
 import (
-	"github.com/stretchr/testify/assert"
+	"math"
+	"reflect"
 	"testing"
 )
 
@@ -17,9 +18,15 @@ var testThresholds = map[string]*Threshold{
 }
 
 func TestBoundaryToString(t *testing.T) {
-	assert.Equal(t, "10", BoundaryToString(10))
-	assert.Equal(t, "10.1", BoundaryToString(10.1))
-	assert.Equal(t, "10.001", BoundaryToString(10.001))
+	if BoundaryToString(10) != "10" {
+		t.Fatalf("expected '10', got %s", BoundaryToString(10))
+	}
+	if BoundaryToString(10.1) != "10.1" {
+		t.Fatalf("expected '10.1', got %s", BoundaryToString(10.1))
+	}
+	if BoundaryToString(10.001) != "10.001" {
+		t.Fatalf("expected '10.001', got %s", BoundaryToString(10.001))
+	}
 }
 
 func TestParseThreshold(t *testing.T) {
@@ -27,11 +34,20 @@ func TestParseThreshold(t *testing.T) {
 		th, err := ParseThreshold(spec)
 
 		if ref == nil {
-			assert.Error(t, err)
+			if err == nil {
+				t.Errorf("Expected error, got nil")
+			}
 		} else {
-			assert.NoError(t, err)
-			assert.Equal(t, ref, th)
-			assert.Equal(t, spec, th.String())
+			if err != nil {
+				t.Fatalf("expected no error, got %v", err)
+			}
+
+			if !reflect.DeepEqual(ref, th) {
+				t.Fatalf("expected %v, got %v for spec %s", ref, th, spec)
+			}
+			if th.String() != spec {
+				t.Fatalf("expected %s, got %s for spec %s", spec, th.String(), spec)
+			}
 		}
 	}
 }
@@ -39,7 +55,9 @@ func TestParseThreshold(t *testing.T) {
 func TestThreshold_String(t *testing.T) {
 	for spec, ref := range testThresholds {
 		if ref != nil {
-			assert.Equal(t, spec, ref.String())
+			if spec != ref.String() {
+				t.Fatalf("expected %v, got %v", ref.String(), spec)
+			}
 		}
 	}
 }
@@ -52,54 +70,129 @@ func TestThreshold_String(t *testing.T) {
 // @10:20     ≥ 10 and ≤ 20, (inside the range of {10 .. 20})
 func TestThreshold_DoesViolate(t *testing.T) {
 	thr, err := ParseThreshold("10")
-	assert.NoError(t, err)
-	assert.True(t, thr.DoesViolate(11))
-	assert.False(t, thr.DoesViolate(10))
-	assert.False(t, thr.DoesViolate(0))
-	assert.True(t, thr.DoesViolate(-1))
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if !thr.DoesViolate(11) {
+		t.Fatalf("expected true, got false")
+	}
+	if thr.DoesViolate(10) {
+		t.Fatalf("expected false, got true")
+	}
+	if thr.DoesViolate(0) {
+		t.Fatalf("expected false, got true")
+	}
+	if !thr.DoesViolate(-1) {
+		t.Fatalf("expected true, got false")
+	}
 
 	thr, err = ParseThreshold("10:")
-	assert.NoError(t, err)
-	assert.False(t, thr.DoesViolate(3000))
-	assert.False(t, thr.DoesViolate(10))
-	assert.True(t, thr.DoesViolate(9))
-	assert.True(t, thr.DoesViolate(0))
-	assert.True(t, thr.DoesViolate(-1))
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if thr.DoesViolate(3000) {
+		t.Fatalf("expected false, got true")
+	}
+	if thr.DoesViolate(10) {
+		t.Fatalf("expected false, got true")
+	}
+	if !thr.DoesViolate(9) {
+		t.Fatalf("expected true, got false")
+	}
+	if !thr.DoesViolate(0) {
+		t.Fatalf("expected true, got false")
+	}
+	if !thr.DoesViolate(-1) {
+		t.Fatalf("expected true, got false")
+	}
 
 	thr, err = ParseThreshold("~:10")
-	assert.NoError(t, err)
-	assert.False(t, thr.DoesViolate(-3000))
-	assert.False(t, thr.DoesViolate(0))
-	assert.False(t, thr.DoesViolate(10))
-	assert.True(t, thr.DoesViolate(11))
-	assert.True(t, thr.DoesViolate(3000))
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if thr.DoesViolate(-3000) {
+		t.Fatalf("expected false, got true")
+	}
+	if thr.DoesViolate(0) {
+		t.Fatalf("expected false, got true")
+	}
+	if thr.DoesViolate(10) {
+		t.Fatalf("expected false, got true")
+	}
+	if !thr.DoesViolate(11) {
+		t.Fatalf("expected true, got false")
+	}
+	if !thr.DoesViolate(3000) {
+		t.Fatalf("expected true, got false")
+	}
 
 	thr, err = ParseThreshold("10:20")
-	assert.NoError(t, err)
-	assert.False(t, thr.DoesViolate(10))
-	assert.False(t, thr.DoesViolate(15))
-	assert.False(t, thr.DoesViolate(20))
-	assert.True(t, thr.DoesViolate(9))
-	assert.True(t, thr.DoesViolate(-1))
-	assert.True(t, thr.DoesViolate(20.1))
-	assert.True(t, thr.DoesViolate(3000))
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if thr.DoesViolate(10) {
+		t.Fatalf("expected false, got true")
+	}
+	if thr.DoesViolate(15) {
+		t.Fatalf("expected false, got true")
+	}
+	if thr.DoesViolate(20) {
+		t.Fatalf("expected false, got true")
+	}
+	if !thr.DoesViolate(9) {
+		t.Fatalf("expected true, got false")
+	}
+	if !thr.DoesViolate(-1) {
+		t.Fatalf("expected true, got false")
+	}
+	if !thr.DoesViolate(20.1) {
+		t.Fatalf("expected true, got false")
+	}
+	if !thr.DoesViolate(3000) {
+		t.Fatalf("expected true, got false")
+	}
 
 	thr, err = ParseThreshold("@10:20")
-	assert.NoError(t, err)
-	assert.True(t, thr.DoesViolate(10))
-	assert.True(t, thr.DoesViolate(15))
-	assert.True(t, thr.DoesViolate(20))
-	assert.False(t, thr.DoesViolate(9))
-	assert.False(t, thr.DoesViolate(-1))
-	assert.False(t, thr.DoesViolate(20.1))
-	assert.False(t, thr.DoesViolate(3000))
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if !thr.DoesViolate(10) {
+		t.Fatalf("expected true, got false")
+	}
+	if !thr.DoesViolate(15) {
+		t.Fatalf("expected true, got false")
+	}
+	if !thr.DoesViolate(20) {
+		t.Fatalf("expected true, got false")
+	}
+	if thr.DoesViolate(9) {
+		t.Fatalf("expected false, got true")
+	}
+	if thr.DoesViolate(-1) {
+		t.Fatalf("expected false, got true")
+	}
+	if thr.DoesViolate(20.1) {
+		t.Fatalf("expected false, got true")
+	}
+	if thr.DoesViolate(3000) {
+		t.Fatalf("expected false, got true")
+	}
 }
 
 func TestFormatFloat(t *testing.T) {
-	assert.Equal(t, "1000000000000", FormatFloat(1000000000000))
-	assert.Equal(t, "1000000000", FormatFloat(1000000000))
-	assert.Equal(t, "1234567890.988", FormatFloat(1234567890.9877))
-
-	assert.Equal(t, "-Inf", FormatFloat(NegInf))
-	assert.Equal(t, "+Inf", FormatFloat(PosInf))
+	if FormatFloat(1000000000000) != "1000000000000" {
+		t.Fatalf("expected '1000000000000', got %s", FormatFloat(1000000000000))
+	}
+	if FormatFloat(1000000000) != "1000000000" {
+		t.Fatalf("expected '1000000000', got %s", FormatFloat(1000000000))
+	}
+	if FormatFloat(1234567890.9877) != "1234567890.988" {
+		t.Fatalf("expected '1234567890.988', got %s", FormatFloat(1234567890.9877))
+	}
+	if FormatFloat(math.Inf(-1)) != "-Inf" {
+		t.Fatalf("expected '-Inf', got %s", FormatFloat(math.Inf(-1)))
+	}
+	if FormatFloat(math.Inf(1)) != "+Inf" {
+		t.Fatalf("expected '+Inf', got %s", FormatFloat(math.Inf(1)))
+	}
 }

@@ -32,7 +32,7 @@ func TestStatusText(t *testing.T) {
 			actual := StatusText(tc.input)
 
 			if actual != tc.expected {
-				t.Error("\nActual: ", actual, "\nExpected: ", tc.expected)
+				t.Fatalf("expected %v, got %v", tc.expected, actual)
 			}
 		})
 	}

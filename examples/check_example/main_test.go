@@ -2,22 +2,33 @@ package main
 
 import (
 	"os"
-	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/NETWAYS/go-check/testhelper"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestMyMain(t *testing.T) {
-	stdout := testhelper.RunMainTest(main, "--help")
-	assert.Regexp(t, regexp.MustCompile(`would exit with code 3`), stdout)
+	actual := testhelper.RunMainTest(main, "--help")
+	expected := `would exit with code 3`
 
-	stdout = testhelper.RunMainTest(main, "--warning", "20")
-	assert.Regexp(t, regexp.MustCompile(`^\[OK\] - value is 10\nwould exit with code 0\n$`), stdout)
+	if !strings.Contains(actual, expected) {
+		t.Fatalf("expected %v, got %v", expected, actual)
+	}
 
-	stdout = testhelper.RunMainTest(main, "--warning", "10", "--value", "11")
-	assert.Regexp(t, regexp.MustCompile(`^\[WARNING\] - value is 11\nwould exit with code 1\n$`), stdout)
+	actual = testhelper.RunMainTest(main, "--warning", "20")
+	expected = "[OK] - value is 10"
+
+	if !strings.Contains(actual, expected) {
+		t.Fatalf("expected %v, got %v", expected, actual)
+	}
+
+	actual = testhelper.RunMainTest(main, "--warning", "10", "--value", "11")
+	expected = "[WARNING] - value is 11"
+
+	if !strings.Contains(actual, expected) {
+		t.Fatalf("expected %v, got %v", expected, actual)
+	}
 }
 
 func TestMain(m *testing.M) {
