@@ -1,43 +1,54 @@
+version: "2"
 run:
-  timeout: 5m
   tests: false
-issues.exclude-files:
-    - 'testhelper/for_main.go'
-issues:
-  exclude-rules:
-    - path: 'result/overall.go'
-      linters:
-        - nestif
-    - path: 'convert/bytes_common.go'
-      linters:
-        - ireturn
 linters:
-   enable-all: true
-   disable:
-     - cyclop
-     - depguard
-     - exhaustruct
-     - forbidigo
-     - forcetypeassert
-     - gci
-     - gochecknoglobals
-     - gochecknoinits
-     - godox
-     - godot
-     - err113
-     - gofumpt
-     - gomnd
-     - lll
-     - musttag
-     - nakedret
-     - nlreturn
-     - nolintlint
-     - nonamedreturns
-     - tagliatelle
-     - varnamelen
-     - wrapcheck
-linters-settings:
-   estif:
-     min-complexity: 4
-   maligned:
-     suggest-new: true
+  default: all
+  disable:
+    - cyclop
+    - depguard
+    - err113
+    - exhaustruct
+    - forbidigo
+    - forcetypeassert
+    - gochecknoglobals
+    - gochecknoinits
+    - godot
+    - godox
+    - lll
+    - mnd
+    - musttag
+    - nakedret
+    - nlreturn
+    - nolintlint
+    - nonamedreturns
+    - tagliatelle
+    - varnamelen
+    - wrapcheck
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - nestif
+        path: result/overall.go
+      - linters:
+          - ireturn
+        path: convert/bytes_common.go
+    paths:
+      - third_party$
+      - builtin$
+      - examples/
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

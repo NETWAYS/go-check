@@ -23,7 +23,8 @@ func ParseBytes(value string) (ByteAny, error) {
 	value = strings.TrimSpace(value)
 
 	// Split number and unit by first non-numeric rune
-	firstNonNumeric := func(c rune) bool { return !(c >= '0' && c <= '9' || c == '.') }
+	firstNonNumeric := func(c rune) bool { return !(c >= '0' && c <= '9' || c == '.') } //nolint: staticcheck
+
 	i := strings.IndexFunc(value, firstNonNumeric)
 
 	var unit string

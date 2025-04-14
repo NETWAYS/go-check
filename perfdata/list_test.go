@@ -15,7 +15,7 @@ func ExamplePerfdataList() {
 	fmt.Println(list)
 
 	// Output:
-	// test1=23 test2=42
+	// [test1=23 test2=42]
 }
 
 func TestPerfdataListFormating(t *testing.T) {

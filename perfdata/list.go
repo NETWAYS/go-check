@@ -9,10 +9,10 @@ import (
 type PerfdataList []*Perfdata
 
 // String returns string representations of all Perfdata
-func (l PerfdataList) String() string {
+func (l *PerfdataList) String() string {
 	var out strings.Builder
 
-	for _, p := range l {
+	for _, p := range *l {
 		pfDataString, err := p.ValidatedString()
 
 		// Ignore perfdata points which fail to format

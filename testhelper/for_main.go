@@ -15,7 +15,7 @@ func RunMainTest(f func(), args ...string) string {
 	base := []string{"check_with_go_test"}
 	origArgs := os.Args
 
-	os.Args = append(base, args...)
+	os.Args = append(base, args...) //nolint: gocritic
 	stdout := CaptureStdout(f)
 	os.Args = origArgs
 
