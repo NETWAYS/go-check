@@ -69,37 +69,37 @@ func TestOverall_GetStatus_GetSummary(t *testing.T) {
 	testcases := []struct {
 		actual          Overall
 		expectedSummary string
-		expectedStatus  int
+		expectedStatus  check.Status
 	}{
 		{
 			actual:          Overall{},
 			expectedSummary: "No status information",
-			expectedStatus:  3,
+			expectedStatus:  check.Unknown,
 		},
 		{
 			actual:          Overall{oks: 1, stateSetExplicitly: true},
 			expectedSummary: "states: ok=1",
-			expectedStatus:  0,
+			expectedStatus:  check.OK,
 		},
 		{
 			actual:          Overall{criticals: 2, oks: 1, warnings: 2, unknowns: 1, stateSetExplicitly: true},
 			expectedSummary: "states: critical=2 unknown=1 warning=2 ok=1",
-			expectedStatus:  2,
+			expectedStatus:  check.Critical,
 		},
 		{
 			actual:          Overall{unknowns: 2, oks: 1, warnings: 2, stateSetExplicitly: true},
 			expectedSummary: "states: unknown=2 warning=2 ok=1",
-			expectedStatus:  3,
+			expectedStatus:  check.Unknown,
 		},
 		{
 			actual:          Overall{oks: 1, warnings: 2, stateSetExplicitly: true},
 			expectedSummary: "states: warning=2 ok=1",
-			expectedStatus:  1,
+			expectedStatus:  check.Warning,
 		},
 		{
 			actual:          Overall{Summary: "foobar"},
 			expectedSummary: "foobar",
-			expectedStatus:  3,
+			expectedStatus:  check.Unknown,
 		},
 	}
 
@@ -176,7 +176,7 @@ func ExampleOverall_GetStatus() {
 	overall.Add(check.Critical, "The other is critical")
 
 	fmt.Println(overall.GetStatus())
-	// Output: 2
+	// Output: CRITICAL
 }
 
 func ExampleOverall_withSubchecks() {

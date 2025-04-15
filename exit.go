@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"runtime/debug"
-	"strconv"
 	"strings"
 )
 
@@ -21,7 +20,7 @@ var PrintStack = true
 // Output is the formatting string, and the rest of the arguments help adding values.
 //
 // Also see fmt package: https://golang.org/pkg/fmt
-func Exitf(rc int, output string, args ...interface{}) {
+func Exitf(rc Status, output string, args ...interface{}) {
 	ExitRaw(rc, fmt.Sprintf(output, args...))
 }
 
@@ -30,10 +29,10 @@ func Exitf(rc int, output string, args ...interface{}) {
 // Example:
 //
 //	OK - everything is fine
-func ExitRaw(rc int, output ...string) {
+func ExitRaw(rc Status, output ...string) {
 	var text strings.Builder
 
-	text.WriteString("[" + StatusText(rc) + "] -")
+	text.WriteString("[" + rc.String() + "] -")
 
 	for _, s := range output {
 		text.WriteString(" " + s)
@@ -49,12 +48,12 @@ func ExitRaw(rc int, output ...string) {
 // BaseExit exits the process with a given return code.
 //
 // Can be controlled with the global AllowExit
-func BaseExit(rc int) {
+func BaseExit(rc Status) {
 	if AllowExit {
-		os.Exit(rc)
+		os.Exit(int(rc))
 	}
 
-	_, _ = os.Stdout.WriteString("would exit with code " + strconv.Itoa(rc) + "\n")
+	_, _ = os.Stdout.WriteString(fmt.Sprintf("would exit with code %d\n", rc))
 }
 
 // ExitError exists with an Unknown state while reporting the error

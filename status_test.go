@@ -6,30 +6,31 @@ import (
 
 func TestStatusText(t *testing.T) {
 	testcases := map[string]struct {
-		input    int
+		input    Status
 		expected string
 	}{
 		"OK": {
-			input:    0,
+			input:    OK,
 			expected: "OK",
 		},
 		"WARNING": {
-			input:    1,
+			input:    Warning,
 			expected: "WARNING",
 		},
 		"CRITICAL": {
-			input:    2,
+			input:    Critical,
 			expected: "CRITICAL",
 		},
 		"UNKNOWN": {
-			input:    3,
+			input:    Unknown,
 			expected: "UNKNOWN",
 		},
 	}
 
 	for name, tc := range testcases {
 		t.Run(name, func(t *testing.T) {
-			actual := StatusText(tc.input)
+
+			actual := tc.input.String()
 
 			if actual != tc.expected {
 				t.Fatalf("expected %v, got %v", tc.expected, actual)

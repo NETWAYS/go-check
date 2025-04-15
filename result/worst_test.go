@@ -2,6 +2,8 @@ package result
 
 import (
 	"testing"
+
+	"github.com/NETWAYS/go-check"
 )
 
 func TestWorstState2(t *testing.T) {
@@ -43,9 +45,10 @@ func BenchmarkWorstState(b *testing.B) {
 	b.ReportAllocs()
 
 	// Initialize slice for benchmarking
-	states := make([]int, 0, 100)
+	states := make([]check.Status, 0, 100)
 	for i := 0; i < 100; i++ {
-		states = append(states, i%4)
+		s, _ := check.NewStatusFromInt(i % 4)
+		states = append(states, s)
 	}
 
 	for i := 0; i < b.N; i++ {
