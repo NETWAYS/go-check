@@ -3,8 +3,6 @@ package perfdata
 import (
 	"fmt"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func ExamplePerfdataList() {
@@ -23,7 +21,12 @@ func TestPerfdataListFormating(t *testing.T) {
 	list.Add(&Perfdata{Label: "test1", Value: 23})
 	list.Add(&Perfdata{Label: "test2", Value: 42})
 
-	assert.Equal(t, "test1=23 test2=42", list.String())
+	actual := list.String()
+	expected := "test1=23 test2=42"
+
+	if actual != expected {
+		t.Fatalf("expected %v, got %v", expected, actual)
+	}
 }
 
 func BenchmarkPerfdataListFormating(b *testing.B) {

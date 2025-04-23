@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/NETWAYS/go-check"
-	"github.com/stretchr/testify/assert"
 )
 
 func BenchmarkPerfdataString(b *testing.B) {
@@ -88,23 +87,33 @@ func TestRenderPerfdata(t *testing.T) {
 	for name, tc := range testcases {
 		t.Run(name, func(t *testing.T) {
 			pfVal, err := tc.perf.ValidatedString()
-			assert.NoError(t, err)
-			assert.Equal(t, tc.expected, pfVal)
+			if err != nil {
+				t.Fatalf("expected no error, got %v", err)
+			}
+
+			if tc.expected != pfVal {
+				t.Fatalf("expected %v, got %v", tc.expected, pfVal)
+			}
 		})
 	}
 
 	for name, tc := range testcasesWithErrors {
 		t.Run(name, func(t *testing.T) {
 			pfVal, err := tc.perf.ValidatedString()
-			assert.Error(t, err)
-			assert.Equal(t, tc.expected, pfVal)
+			if err == nil {
+				t.Fatalf("expected error, got none")
+			}
+
+			if tc.expected != pfVal {
+				t.Fatalf("expected %v, got %v", tc.expected, pfVal)
+			}
 		})
 	}
 }
 
 type pfFormatTest struct {
 	Result     string
-	InputValue interface{}
+	InputValue any
 }
 
 func TestFormatNumeric(t *testing.T) {
@@ -137,7 +146,12 @@ func TestFormatNumeric(t *testing.T) {
 
 	for _, val := range testdata {
 		formatted, err := formatNumeric(val.InputValue)
-		assert.NoError(t, err)
-		assert.Equal(t, val.Result, formatted)
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+
+		if val.Result != formatted {
+			t.Fatalf("expected %v, got %v", formatted, val.Result)
+		}
 	}
 }

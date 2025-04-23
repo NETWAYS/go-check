@@ -3,8 +3,6 @@ package check
 import (
 	"os"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func ExampleConfig() {
@@ -37,11 +35,21 @@ func TestLoadFromEnv(t *testing.T) {
 	err := os.Setenv("EXAMPLE", "foobar")
 	defer os.Unsetenv("EXAMPLE") // just to not create any side effects
 
-	assert.NoError(t, err)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
 
 	LoadFromEnv(&c)
 
-	assert.Equal(t, "foobar", c.Bearer)
-	assert.Equal(t, "", c.Auth)
-	assert.Equal(t, "", c.OneMoreThanTags)
+	if c.Bearer != "foobar" {
+		t.Fatalf("expected %v, got %v", c.Bearer, "foobar")
+	}
+
+	if c.Auth != "" {
+		t.Fatalf("expected %v, got %v", c.Auth, "")
+	}
+
+	if c.OneMoreThanTags != "" {
+		t.Fatalf("expected %v, got %v", c.OneMoreThanTags, "")
+	}
 }

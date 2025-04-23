@@ -5,13 +5,12 @@ import (
 	"testing"
 
 	"github.com/NETWAYS/go-check/testhelper"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestMyMain(t *testing.T) {
-	stdout := testhelper.RunMainTest(main)
+	actual := testhelper.RunMainTest(main)
 
-	resultString := `[WARNING] - states: warning=1 ok=1
+	expected := `[WARNING] - states: warning=1 ok=1
 \_ [OK] Check1
 \_ [WARNING] Check2
 |foo=23 bar=42 'foo2 bar'=46
@@ -19,7 +18,9 @@ func TestMyMain(t *testing.T) {
 would exit with code 1
 `
 
-	assert.Equal(t, resultString, stdout)
+	if actual != expected {
+		t.Fatalf("expected %v, got %v", expected, actual)
+	}
 }
 
 func TestMain(m *testing.M) {
