@@ -262,39 +262,6 @@ func (o *Overall) GetOutput() string {
 	return output.String()
 }
 
-// getPerfdata returns all subsequent perfdata as a concatenated string
-func (s *PartialResult) getPerfdata() string {
-	var output strings.Builder
-
-	if len(s.Perfdata) > 0 {
-		output.WriteString(s.Perfdata.String())
-	}
-
-	if s.PartialResults != nil {
-		for _, ss := range s.PartialResults {
-			output.WriteString(" " + ss.getPerfdata())
-		}
-	}
-
-	return strings.TrimSpace(output.String())
-}
-
-// getOutput generates indented output for all subsequent PartialResults
-func (s *PartialResult) getOutput(indentLevel int) string {
-	var output strings.Builder
-
-	prefix := strings.Repeat("  ", indentLevel)
-	output.WriteString(prefix + "\\_ " + s.String() + "\n")
-
-	if s.PartialResults != nil {
-		for _, ss := range s.PartialResults {
-			output.WriteString(ss.getOutput(indentLevel + indentationOffset))
-		}
-	}
-
-	return output.String()
-}
-
 // SetDefaultState sets a new default state for a PartialResult
 func (s *PartialResult) SetDefaultState(state int) error {
 	if state < check.OK || state > check.Unknown {
@@ -341,4 +308,37 @@ func (s *PartialResult) GetStatus() int {
 	}
 
 	return WorstState(states...)
+}
+
+// getPerfdata returns all subsequent perfdata as a concatenated string
+func (s *PartialResult) getPerfdata() string {
+	var output strings.Builder
+
+	if len(s.Perfdata) > 0 {
+		output.WriteString(s.Perfdata.String())
+	}
+
+	if s.PartialResults != nil {
+		for _, ss := range s.PartialResults {
+			output.WriteString(" " + ss.getPerfdata())
+		}
+	}
+
+	return strings.TrimSpace(output.String())
+}
+
+// getOutput generates indented output for all subsequent PartialResults
+func (s *PartialResult) getOutput(indentLevel int) string {
+	var output strings.Builder
+
+	prefix := strings.Repeat("  ", indentLevel)
+	output.WriteString(prefix + "\\_ " + s.String() + "\n")
+
+	if s.PartialResults != nil {
+		for _, ss := range s.PartialResults {
+			output.WriteString(ss.getOutput(indentLevel + indentationOffset))
+		}
+	}
+
+	return output.String()
 }
