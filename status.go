@@ -1,5 +1,9 @@
 package check
 
+import (
+	"strings"
+)
+
 const (
 	// OK means everything is fine
 	OK       = 0
@@ -28,4 +32,23 @@ func StatusText(status int) string {
 	}
 
 	return UnknownString
+}
+
+// StatusText returns a state corresponding to its
+// common string representation
+func StatusInt(status string) int {
+	status = strings.ToUpper(status)
+
+	switch status {
+	case OKString, "0":
+		return OK
+	case WarningString, "1":
+		return Warning
+	case CriticalString, "2":
+		return Critical
+	case UnknownString, "3":
+		return Unknown
+	default:
+		return Unknown
+	}
 }
