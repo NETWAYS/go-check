@@ -19,6 +19,7 @@ See the [documentation on pkg.go.dev](https://pkg.go.dev/github.com/NETWAYS/go-c
 package main
 
 import (
+    "fmt"
 	"github.com/NETWAYS/go-check"
 )
 
@@ -33,7 +34,7 @@ func main() {
 	config.ParseArguments()
 
 	// Some checking should be done here, when --help is not passed
-	check.Exitf(check.OK, "Everything is fine - answer=%d", 42)
+	check.Exit(check.OK, fmt.Sprintf("Everything is fine - answer=%d", 42))
 	// Output:
 	// OK - Everything is fine - answer=42
 }
@@ -42,9 +43,9 @@ func main() {
 ## Exit Codes
 
 ```
-check.Exitf(OK, "Everything is fine - value=%d", 42) // OK, 0
+check.Exit(OK, fmt.Sprintf("Everything is fine - value=%d", 42)) // OK, 0
 
-check.ExitRaw(check.Critical, "CRITICAL", "|", "percent_packet_loss=100") // CRITICAL, 2
+check.Exit(check.Critical, "CRITICAL", "|", "percent_packet_loss=100") // CRITICAL, 2
 
 err := fmt.Errorf("connection to %s has been timed out", "localhost:12345")
 

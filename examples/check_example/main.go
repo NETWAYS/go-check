@@ -1,8 +1,10 @@
 package main
 
 import (
-	"github.com/NETWAYS/go-check"
+	"fmt"
 	"log"
+
+	"github.com/NETWAYS/go-check"
 )
 
 func main() {
@@ -25,10 +27,10 @@ func main() {
 	// time.Sleep(20 * time.Second)
 
 	if *value > *critical {
-		check.Exitf(check.Critical, "value is %d", *value)
+		check.Exit(check.Critical, fmt.Sprintf("value is %d", *value))
 	} else if *value > *warning {
-		check.Exitf(check.Warning, "value is %d", *value)
+		check.Exit(check.Warning, fmt.Sprintf("value is %d", *value))
 	} else {
-		check.Exitf(check.OK, "value is %d", *value)
+		check.Exit(check.OK, fmt.Sprintf("value is %d", *value))
 	}
 }
