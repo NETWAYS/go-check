@@ -46,5 +46,5 @@ func main() {
 	overall.AddSubcheck(check1)
 	overall.AddSubcheck(check2)
 
-	check.ExitRaw(overall.GetStatus(), overall.GetOutput())
+	check.Exit(overall.GetStatus(), overall.GetOutput())
 }

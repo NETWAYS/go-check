@@ -1,6 +1,7 @@
 package check
 
 import (
+	"fmt"
 	"os"
 	"testing"
 )
@@ -17,7 +18,7 @@ func ExampleConfig() {
 
 	// Some checking should be done here
 
-	Exitf(OK, "Everything is fine - answer=%d", 42)
+	Exit(OK, fmt.Sprintf("Everything is fine - answer=%d", 42))
 
 	// Output: [OK] - Everything is fine - answer=42
 	// would exit with code 0
