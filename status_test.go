@@ -71,37 +71,3 @@ func TestStatus_FromString(t *testing.T) {
 		})
 	}
 }
-
-func TestStatus_FromInt(t *testing.T) {
-	testcases := map[string]struct {
-		expected Status
-		input    int
-	}{
-		"OK": {
-			input:    0,
-			expected: OK,
-		},
-		"WARNING": {
-			input:    1,
-			expected: Warning,
-		},
-		"CRITICAL": {
-			input:    2,
-			expected: Critical,
-		},
-		"UNKNOWN": {
-			input:    3,
-			expected: Unknown,
-		},
-	}
-
-	for name, tc := range testcases {
-		t.Run(name, func(t *testing.T) {
-			actual, _ := NewStatus(tc.input)
-
-			if actual != tc.expected {
-				t.Fatalf("expected %v, got %v", tc.expected, actual)
-			}
-		})
-	}
-}

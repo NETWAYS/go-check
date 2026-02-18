@@ -68,7 +68,7 @@ func (o *Overall) Add(state check.Status, output string) {
 		o.warnings++
 	case check.Critical:
 		o.criticals++
-	default:
+	case check.Unknown:
 		o.unknowns++
 	}
 

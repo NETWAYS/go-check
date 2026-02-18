@@ -9,7 +9,9 @@ import "github.com/NETWAYS/go-check"
 //
 // Order of preference: Critical, Unknown, Warning, Ok
 func WorstState(states ...check.Status) check.Status {
-	overall := check.Invalid
+	var overall check.Status
+
+	overall = check.OK
 	// nolint: gocritic
 	for _, state := range states {
 		if state == check.Critical {
@@ -21,10 +23,6 @@ func WorstState(states ...check.Status) check.Status {
 		} else if state > overall {
 			overall = state
 		}
-	}
-
-	if overall < 0 || overall > 3 {
-		overall = check.Unknown
 	}
 
 	return overall

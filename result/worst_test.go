@@ -46,7 +46,19 @@ func BenchmarkWorstState(b *testing.B) {
 	// Initialize slice for benchmarking
 	states := make([]check.Status, 0, 100)
 	for i := range 100 {
-		st, _ := check.NewStatus(i % 4)
+		var st check.Status
+
+		switch i % 4 {
+		case 0:
+			st = check.OK
+		case 1:
+			st = check.Warning
+		case 2:
+			st = check.Critical
+		case 3:
+			st = check.Unknown
+		}
+
 		states = append(states, st)
 	}
 
