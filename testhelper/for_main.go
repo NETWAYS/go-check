@@ -8,7 +8,7 @@ import (
 	"github.com/NETWAYS/go-check"
 )
 
-// Execute main function from a main package, while capturing its stdout
+// RunMainTest executes main function from a main package, while capturing its stdout
 //
 // You will need to pass `main`, since the function won't have access to the package's namespace
 func RunMainTest(f func(), args ...string) string {
@@ -22,7 +22,7 @@ func RunMainTest(f func(), args ...string) string {
 	return stdout
 }
 
-// Enable test mode by disabling the default exit behavior, so go test won't fail with plugin states
+// EnableTestMode enables test mode by disabling the default exit behavior, so go test won't fail with plugin states
 func EnableTestMode() {
 	// disable actual exit
 	check.AllowExit = false
@@ -31,7 +31,7 @@ func EnableTestMode() {
 	check.PrintStack = false
 }
 
-// Disable test mode behavior again
+// DisableTestMode disables the test mode behavior again
 //
 // Optional after testing has been done
 func DisableTestMode() {
@@ -42,7 +42,7 @@ func DisableTestMode() {
 	check.PrintStack = true
 }
 
-// Capture the output of the go program while running function f
+// CaptureStdout captures the output of the go program while running function f
 //
 // Source https://gist.github.com/mindscratch/0faa78bd3c0005d080bf
 func CaptureStdout(f func()) string {
@@ -57,6 +57,7 @@ func CaptureStdout(f func()) string {
 	os.Stdout = old
 
 	var buf bytes.Buffer
+
 	_, _ = io.Copy(&buf, r)
 
 	return buf.String()

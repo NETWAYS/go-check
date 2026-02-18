@@ -6,29 +6,28 @@ import (
 )
 
 const (
-	// Invalid is not a valid status
-	InvalidString = "Invalid"
-	// OK means everything is fine
-	OKString = "OK"
-	// Warning means there is a problem the admin should review
-	WarningString = "WARNING"
-	// Critical means there is a problem that requires immediate action
+	OKString       = "OK"
+	WarningString  = "WARNING"
 	CriticalString = "CRITICAL"
-	// Unknown means the status can not be determined, probably due to an error or something missing
-	UnknownString = "UNKNOWN"
+	UnknownString  = "UNKNOWN"
 )
 
 type Status int
 
 const (
+	// Invalid is strictly internal and returned if something broke
 	Invalid Status = iota - 1
+	// OK means everything is fine
 	OK
+	// Warning means there is a problem the admin should review
 	Warning
+	// Critical means there is a problem that requires immediate action
 	Critical
+	// Unknown means the status can not be determined, probably due to an error or something missing
 	Unknown
 )
 
-// NewStatusFromString returns a state corresponding to its
+// NewStatus returns a state corresponding to its
 // common string representation
 func NewStatus(status int) (Status, error) {
 	switch status {

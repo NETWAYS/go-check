@@ -10,12 +10,12 @@ import (
 
 var timeoutEnabled bool
 
-// Start the timeout and signal handler in a goroutine
+// EnableTimeoutHandler starts the timeout and signal handler in a goroutine
 func (c *Config) EnableTimeoutHandler() {
 	go HandleTimeout(c.Timeout)
 }
 
-// Helper for a goroutine, to wait for signals and timeout, and exit with a proper code
+// HandleTimeout is a helper for a goroutine, to wait for signals and timeout, and exit with a proper code
 func HandleTimeout(timeout int) {
 	if timeoutEnabled {
 		// signal handling has already been set up

@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// Defining a threshold for any numeric value
+// Threshold defines a threshold for any numeric value
 //
 // Format: [@]start:end
 //
@@ -34,7 +34,7 @@ var (
 	NegInf = math.Inf(-1)
 )
 
-// Parse a Threshold from a string.
+// ParseThreshold parses a threshold from a string.
 //
 // See Threshold for details.
 func ParseThreshold(spec string) (t *Threshold, err error) {
@@ -102,7 +102,7 @@ func (t Threshold) String() (s string) {
 	return
 }
 
-// Compares a value against the threshold, and returns true if the value violates the threshold.
+// DoesViolate compares a value against the threshold, and returns true if the value violates the threshold.
 func (t Threshold) DoesViolate(value float64) bool {
 	if t.Inside {
 		return value >= t.Lower && value <= t.Upper

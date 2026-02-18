@@ -43,7 +43,7 @@ type PartialResult struct {
 	defaultStateSet    bool         // nolint: unused
 }
 
-// Initializer for a PartialResult with "sane" defaults
+// NewPartialResult is a initializer for a PartialResult with "sane" defaults
 // Notable default compared to the nil object: the default state is set to Unknown
 func NewPartialResult() PartialResult {
 	return PartialResult{

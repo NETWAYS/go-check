@@ -105,7 +105,7 @@ func (c *Config) addDefaultFlags() {
 //	type Config struct {
 //		Token    string `env:"BEARER_TOKEN"`
 //	}
-func LoadFromEnv(config interface{}) {
+func LoadFromEnv(config any) {
 	configValue := reflect.ValueOf(config).Elem()
 	configType := configValue.Type()
 
