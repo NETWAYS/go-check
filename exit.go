@@ -21,7 +21,7 @@ var PrintStack = true
 // Output is the formatting string, and the rest of the arguments help adding values.
 //
 // Also see fmt package: https://golang.org/pkg/fmt
-func Exitf(rc int, output string, args ...interface{}) {
+func Exitf(rc int, output string, args ...any) {
 	ExitRaw(rc, fmt.Sprintf(output, args...))
 }
 

@@ -44,7 +44,7 @@ func BenchmarkWorstState(b *testing.B) {
 
 	// Initialize slice for benchmarking
 	states := make([]int, 0, 100)
-	for i := 0; i < 100; i++ {
+	for i := range 100 {
 		states = append(states, i%4)
 	}
 
