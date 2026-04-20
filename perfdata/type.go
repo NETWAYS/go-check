@@ -19,7 +19,7 @@ var replacer = strings.NewReplacer("=", "_", "`", "_", "'", "_", "\"", "_")
 // represent a valid measurement, e.g INF for floats
 // This error can probably ignored in most cases and the perfdata point omitted,
 // but silently dropping the value and returning the empty strings seems like bad style
-func formatNumeric(value interface{}) (string, error) {
+func formatNumeric(value any) (string, error) {
 	switch v := value.(type) {
 	case float64:
 		if math.IsInf(v, 0) {
@@ -61,13 +61,13 @@ func formatNumeric(value interface{}) (string, error) {
 // https://icinga.com/docs/icinga-2/latest/doc/05-service-monitoring/#unit-of-measurement-uom
 type Perfdata struct {
 	Label string
-	Value interface{}
+	Value any
 	// Uom is the unit-of-measurement, see links above for details.
 	Uom  string
 	Warn *check.Threshold
 	Crit *check.Threshold
-	Min  interface{}
-	Max  interface{}
+	Min  any
+	Max  any
 }
 
 // String returns the proper format for the plugin output
@@ -109,7 +109,7 @@ func (p Perfdata) ValidatedString() (string, error) {
 	}
 
 	// Limits
-	for _, value := range []interface{}{p.Min, p.Max} {
+	for _, value := range []any{p.Min, p.Max} {
 		sb.WriteString(";")
 
 		if value != nil {
