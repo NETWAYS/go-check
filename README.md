@@ -144,10 +144,10 @@ fmt.Println(o.GetOutput())
 
 A few plugins using go-check:
 
-* [check_cloud_aws](https://github.com/NETWAYS/check_cloud_aws)
+* [check_prometheus](https://github.com/NETWAYS/check_prometheus)
+* [check_system_basics](https://github.com/NETWAYS/check_system_basics)
 * [check_logstash](https://github.com/NETWAYS/check_logstash)
 * [check_sentinelone](https://github.com/NETWAYS/check_sentinelone)
-* [check_sophos_central](https://github.com/NETWAYS/check_sophos_central)
 
 # License
 
