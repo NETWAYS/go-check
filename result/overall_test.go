@@ -9,6 +9,14 @@ import (
 	"github.com/NETWAYS/go-check/perfdata"
 )
 
+func TestOverall_NewPartialResult(t *testing.T) {
+	actual := NewPartialResult()
+
+	if actual.String() != "[UNKNOWN] " {
+		t.Fatalf("expected '[UNKNOWN] ', got %s", actual.String())
+	}
+}
+
 func TestOverall_AddOK(t *testing.T) {
 	overall := Overall{}
 	overall.Add(0, "test ok")
