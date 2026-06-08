@@ -2,7 +2,7 @@ name: golangci-lint
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
 
 jobs:
@@ -15,4 +15,4 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v9
         with:
-          version: v2.1.6
+          version: v2.12.2

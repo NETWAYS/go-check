@@ -2,7 +2,7 @@ package result
 
 import "github.com/NETWAYS/go-check"
 
-// Determines the worst state from a list of states
+// WorstState determines the worst state from a list of states
 //
 // Helps combining an overall states, only based on a
 // few numbers for various checks.
