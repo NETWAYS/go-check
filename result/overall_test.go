@@ -66,51 +66,53 @@ func TestOverall_AddUnknown(t *testing.T) {
 }
 
 func TestOverall_GetStatus_GetSummary(t *testing.T) {
-	testcases := []struct {
+	testcases := map[string]struct {
 		actual          Overall
 		expectedSummary string
-		expectedStatus  int
+		expectedStatus  check.Status
 	}{
-		{
+		"No status information": {
 			actual:          Overall{},
 			expectedSummary: "No status information",
-			expectedStatus:  3,
+			expectedStatus:  check.Unknown,
 		},
-		{
+		"states: ok=1": {
 			actual:          Overall{oks: 1, stateSetExplicitly: true},
 			expectedSummary: "states: ok=1",
-			expectedStatus:  0,
+			expectedStatus:  check.OK,
 		},
-		{
+		"states: critical=2 unknown=1 warning=2 ok=1": {
 			actual:          Overall{criticals: 2, oks: 1, warnings: 2, unknowns: 1, stateSetExplicitly: true},
 			expectedSummary: "states: critical=2 unknown=1 warning=2 ok=1",
-			expectedStatus:  2,
+			expectedStatus:  check.Critical,
 		},
-		{
+		"states: unknown=2 warning=2 ok=1": {
 			actual:          Overall{unknowns: 2, oks: 1, warnings: 2, stateSetExplicitly: true},
 			expectedSummary: "states: unknown=2 warning=2 ok=1",
-			expectedStatus:  3,
+			expectedStatus:  check.Unknown,
 		},
-		{
+		"states: warning=2 ok=1": {
 			actual:          Overall{oks: 1, warnings: 2, stateSetExplicitly: true},
 			expectedSummary: "states: warning=2 ok=1",
-			expectedStatus:  1,
+			expectedStatus:  check.Warning,
 		},
-		{
+		"foobar": {
 			actual:          Overall{Summary: "foobar"},
 			expectedSummary: "foobar",
-			expectedStatus:  3,
+			expectedStatus:  check.Unknown,
 		},
 	}
 
-	for _, test := range testcases {
-		if test.expectedStatus != test.actual.GetStatus() {
-			t.Fatalf("expected %d, got %d", test.expectedStatus, test.actual.GetStatus())
-		}
+	for name, test := range testcases {
+		t.Run(name, func(t *testing.T) {
+			if test.expectedSummary != test.actual.GetSummary() {
+				t.Fatalf("expected summary %s, got %s", test.expectedSummary, test.actual.GetSummary())
+			}
 
-		if test.expectedSummary != test.actual.GetSummary() {
-			t.Fatalf("expected %s, got %s", test.expectedSummary, test.actual.GetSummary())
-		}
+			if test.expectedStatus != test.actual.GetStatus() {
+				t.Fatalf("expected status %d, got %d", test.expectedStatus, test.actual.GetStatus())
+			}
+		})
 	}
 }
 
@@ -176,7 +178,7 @@ func ExampleOverall_GetStatus() {
 	overall.Add(check.Critical, "The other is critical")
 
 	fmt.Println(overall.GetStatus())
-	// Output: 2
+	// Output: CRITICAL
 }
 
 func ExampleOverall_withSubchecks() {

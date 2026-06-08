@@ -8,8 +8,13 @@ import "github.com/NETWAYS/go-check"
 // few numbers for various checks.
 //
 // Order of preference: Critical, Unknown, Warning, Ok
-func WorstState(states ...int) int {
-	overall := -1
+func WorstState(states ...check.Status) check.Status {
+	if len(states) < 1 {
+		return check.Unknown
+	}
+
+	overall := check.OK
+
 	// nolint: gocritic
 	for _, state := range states {
 		if state == check.Critical {

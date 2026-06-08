@@ -7,20 +7,8 @@ import (
 )
 
 func ExampleExit() {
-	Exitf(OK, "Everything is fine - value=%d", 42)
+	Exit(OK, fmt.Sprintf("Everything is fine - value=%d", 42))
 	// Output: [OK] - Everything is fine - value=42
-	// would exit with code 0
-}
-
-func ExampleExitf() {
-	Exitf(OK, "Everything is fine - value=%d", 42)
-	// Output: [OK] - Everything is fine - value=42
-	// would exit with code 0
-}
-
-func ExampleExitRaw() {
-	ExitRaw(OK, "Everything is fine")
-	// Output: [OK] - Everything is fine
 	// would exit with code 0
 }
 

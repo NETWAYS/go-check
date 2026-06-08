@@ -3,7 +3,6 @@ package result
 import (
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/NETWAYS/go-check"
@@ -38,10 +37,10 @@ type PartialResult struct {
 	Perfdata           perfdata.PerfdataList
 	PartialResults     []PartialResult
 	Output             string
-	state              int  // Result state, either set explicitly or derived from partialResults
-	defaultState       int  // Default result state, if no partial results are available and no state is set explicitly
-	stateSetExplicitly bool // nolint: unused
-	defaultStateSet    bool // nolint: unused
+	state              check.Status // Result state, either set explicitly or derived from partialResults
+	defaultState       check.Status // Default result state, if no partial results are available and no state is set explicitly
+	stateSetExplicitly bool         // nolint: unused
+	defaultStateSet    bool         // nolint: unused
 }
 
 // NewPartialResult initializer with "sane" defaults
@@ -55,13 +54,13 @@ func NewPartialResult() PartialResult {
 
 // String returns the status and output of the PartialResult
 func (s *PartialResult) String() string {
-	return fmt.Sprintf("[%s] %s", check.StatusText(s.GetStatus()), s.Output)
+	return fmt.Sprintf("[%s] %s", s.GetStatus(), s.Output)
 }
 
 // Add adds a return state explicitly
 //
 // Hint: This will set stateSetExplicitly to true
-func (o *Overall) Add(state int, output string) {
+func (o *Overall) Add(state check.Status, output string) {
 	switch state {
 	case check.OK:
 		o.oks++
@@ -69,6 +68,8 @@ func (o *Overall) Add(state int, output string) {
 		o.warnings++
 	case check.Critical:
 		o.criticals++
+	case check.Unknown:
+		o.unknowns++
 	default:
 		o.unknowns++
 	}
@@ -76,7 +77,7 @@ func (o *Overall) Add(state int, output string) {
 	// TODO: Might be a bit obscure that the Add method also sets stateSetExplicitly
 	o.stateSetExplicitly = true
 
-	o.Outputs = append(o.Outputs, fmt.Sprintf("[%s] %s", check.StatusText(state), output))
+	o.Outputs = append(o.Outputs, fmt.Sprintf("[%s] %s", state, output))
 }
 
 // AddSubcheck adds a PartialResult to the Overall
@@ -90,7 +91,7 @@ func (s *PartialResult) AddSubcheck(subcheck PartialResult) {
 }
 
 // GetStatus returns the current state (ok, warning, critical, unknown) of the Overall
-func (o *Overall) GetStatus() int {
+func (o *Overall) GetStatus() check.Status {
 	if o.stateSetExplicitly {
 		// nolint: gocritic
 		if o.criticals > 0 {
@@ -262,9 +263,9 @@ func (o *Overall) GetOutput() string {
 }
 
 // SetDefaultState sets a new default state for a PartialResult
-func (s *PartialResult) SetDefaultState(state int) error {
+func (s *PartialResult) SetDefaultState(state check.Status) error {
 	if state < check.OK || state > check.Unknown {
-		return errors.New("Default State is not a valid result state. Got " + strconv.Itoa(state) + " which is not valid")
+		return errors.New("Default State is not a valid result state. Got " + state.String() + " which is not valid")
 	}
 
 	s.defaultState = state
@@ -274,9 +275,9 @@ func (s *PartialResult) SetDefaultState(state int) error {
 }
 
 // SetState sets a state for a PartialResult
-func (s *PartialResult) SetState(state int) error {
+func (s *PartialResult) SetState(state check.Status) error {
 	if state < check.OK || state > check.Unknown {
-		return errors.New("Default State is not a valid result state. Got " + strconv.Itoa(state) + " which is not valid")
+		return errors.New("Default State is not a valid result state. Got " + state.String() + " which is not valid")
 	}
 
 	s.state = state
@@ -287,7 +288,7 @@ func (s *PartialResult) SetState(state int) error {
 
 // GetStatus returns the current state (ok, warning, critical, unknown) of the PartialResult
 // nolint: unused
-func (s *PartialResult) GetStatus() int {
+func (s *PartialResult) GetStatus() check.Status {
 	if s.stateSetExplicitly {
 		return s.state
 	}
@@ -300,7 +301,7 @@ func (s *PartialResult) GetStatus() int {
 		return check.Unknown
 	}
 
-	states := make([]int, len(s.PartialResults))
+	states := make([]check.Status, len(s.PartialResults))
 
 	for i := range s.PartialResults {
 		states[i] = s.PartialResults[i].GetStatus()
