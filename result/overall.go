@@ -61,7 +61,6 @@ func (s *PartialResult) String() string {
 //
 // Hint: This will set stateSetExplicitly to true
 func (o *Overall) Add(state check.Status, output string) {
-	//nolint: exhaustive
 	switch state {
 	case check.OK:
 		o.oks++
@@ -121,7 +120,6 @@ func (o *Overall) GetStatus() check.Status {
 	)
 
 	for _, sc := range o.PartialResults {
-		//nolint: exhaustive
 		switch sc.GetStatus() {
 		case check.Critical:
 			criticals++
@@ -201,7 +199,6 @@ func (o *Overall) GetSummary() string {
 		)
 
 		for _, sc := range o.PartialResults {
-			//nolint: exhaustive
 			switch sc.GetStatus() {
 			case check.Critical:
 				criticals++

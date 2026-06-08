@@ -6,38 +6,86 @@ import (
 	"github.com/NETWAYS/go-check"
 )
 
-func TestWorstState2(t *testing.T) {
-	if WorstState(check.Unknown) != check.Unknown {
-		t.Fatalf("expected 3, got %d", WorstState(check.Unknown))
-	}
-	if WorstState(check.Critical) != check.Critical {
-		t.Fatalf("expected 2, got %d", WorstState(check.Critical))
-	}
-	if WorstState(check.Warning) != check.Warning {
-		t.Fatalf("expected 1, got %d", WorstState(check.Warning))
-	}
-	if WorstState(check.OK) != check.OK {
-		t.Fatalf("expected 0, got %d", WorstState(check.OK))
-	}
-	if WorstState(check.OK, check.Warning, check.Critical, check.Unknown) != check.Critical {
-		t.Fatalf("expected 2, got %d", WorstState(check.OK, check.Warning, check.Critical, check.Unknown))
-	}
-	if WorstState(check.OK, check.Warning, check.Unknown) != check.Unknown {
-		t.Fatalf("expected 3, got %d", WorstState(check.OK, check.Warning, check.Unknown))
-	}
-	if WorstState(check.Warning, check.OK, check.OK) != check.Warning {
-		t.Fatalf("expected 1, got %d", WorstState(check.Warning, check.OK, check.OK))
-	}
-	if WorstState(check.OK, check.OK, check.OK) != check.OK {
-		t.Fatalf("expected 0, got %d", WorstState(check.OK, check.OK, check.OK))
+func TestWorstState(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    []check.Status
+		expected check.Status
+	}{
+		{
+			name:     "Unknown",
+			input:    []check.Status{check.Unknown},
+			expected: check.Unknown,
+		},
+		{
+			name:     "Unknown",
+			input:    []check.Status{check.Unknown},
+			expected: check.Unknown,
+		},
+		{
+			name:     "Critical",
+			input:    []check.Status{check.Critical},
+			expected: check.Critical,
+		},
+		{
+			name:     "Warning",
+			input:    []check.Status{check.Warning},
+			expected: check.Warning,
+		},
+		{
+			name:     "OK",
+			input:    []check.Status{check.OK},
+			expected: check.OK,
+		},
+		{
+			name:     "Mixed with Critical",
+			input:    []check.Status{check.OK, check.Warning, check.Critical, check.Unknown},
+			expected: check.Critical,
+		},
+		{
+			name:     "Mixed order with Critical",
+			input:    []check.Status{check.OK, check.Critical, check.Warning, check.Unknown},
+			expected: check.Critical,
+		},
+		{
+			name:     "Mixed with Unknown",
+			input:    []check.Status{check.OK, check.Warning, check.Unknown},
+			expected: check.Unknown,
+		},
+		{
+			name:     "Mixed order with Unknown",
+			input:    []check.Status{check.OK, check.Unknown, check.Warning},
+			expected: check.Unknown,
+		},
+		{
+			name:     "Warning with OKs",
+			input:    []check.Status{check.Warning, check.OK, check.OK},
+			expected: check.Warning,
+		},
+		{
+			name:     "Warning orderwith OKs",
+			input:    []check.Status{check.OK, check.Warning, check.OK},
+			expected: check.Warning,
+		},
+		{
+			name:     "All OK",
+			input:    []check.Status{check.OK, check.OK, check.OK},
+			expected: check.OK,
+		},
+		{
+			name:     "Empty",
+			input:    []check.Status{},
+			expected: check.Unknown,
+		},
 	}
 
-	// if WorstState(-1) != 3 {
-	// 	t.Fatalf("expected 3, got %d", WorstState(-1))
-	// }
-	// if WorstState(4) != 3 {
-	// 	t.Fatalf("expected 3, got %d", WorstState(4))
-	// }
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := WorstState(tt.input...); got != tt.expected {
+				t.Errorf("WorstState(%v) is: %v, expected %v", tt.input, got, tt.expected)
+			}
+		})
+	}
 }
 
 func BenchmarkWorstState(b *testing.B) {

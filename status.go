@@ -6,8 +6,6 @@ import (
 )
 
 const (
-	// InvalidString is not a valid status
-	InvalidString = "Invalid"
 	// OKString means everything is fine
 	OKString = "OK"
 	// WarningString means there is a problem the admin should review
@@ -21,8 +19,7 @@ const (
 type Status int
 
 const (
-	Invalid Status = iota - 1
-	OK
+	OK Status = iota
 	Warning
 	Critical
 	Unknown
@@ -42,13 +39,12 @@ func NewStatus(status int) (Status, error) {
 		return Unknown, nil
 	}
 
-	return Invalid, fmt.Errorf("%d is not a valid state", status)
+	return Unknown, fmt.Errorf("%d is not a valid state", status)
 }
 
 // NewStatusFromString returns a state corresponding to its
 // common string representation
 func NewStatusFromString(status string) (Status, error) {
-	//nolint: exhaustive
 	switch status {
 	case OKString:
 		return OK, nil
@@ -60,7 +56,7 @@ func NewStatusFromString(status string) (Status, error) {
 		return Unknown, nil
 	}
 
-	return Invalid, errors.New(status + " is not a valid state")
+	return Unknown, errors.New(status + " is not a valid state")
 }
 
 // String returns the string corresponding to a state
@@ -74,9 +70,7 @@ func (s Status) String() string {
 		return CriticalString
 	case Unknown:
 		return UnknownString
-	case Invalid:
-		return InvalidString
 	}
 
-	return InvalidString
+	return UnknownString
 }

@@ -14,9 +14,8 @@ var AllowExit = true
 // PrintStack prints the error stack when recovering from a panic with CatchPanic()
 var PrintStack = true
 
-// Example:
-//
-//	OK - everything is fine
+// Exit exits the process with a given return code and output
+// Example: [OK] - everything is fine
 func Exit(rc Status, output ...string) {
 	var text strings.Builder
 
