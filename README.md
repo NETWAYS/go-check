@@ -43,7 +43,7 @@ func main() {
 
 The library provides predefined return or exit codes:
 
-```
+```go
 check.OK
 check.Warning
 check.Critical
@@ -67,7 +67,7 @@ See also: https://www.monitoring-plugins.org/doc/guidelines.html#AEN74
 
 The `Exit` function can be used to cause an exit with the given status code.
 
-```
+```go
 check.Exit(check.OK, fmt.Sprintf("Everything is fine - value=%d", 42)) // OK, 0
 
 // With perfdata
@@ -76,18 +76,20 @@ check.Exit(check.Critical, "CRITICAL", "|", "percent_packet_loss=100") // CRITIC
 
 `ExitError` can be used to cause an exit with the given error.
 
-```
+```go
 err := fmt.Errorf("connection to %s has been timed out", "localhost:12345")
 
-check.ExitError(err) // UNKNOWN, 3
+check.ExitError(err)
+// UNKNOWN, 3
 ```
 
 ## Timeout Handling
 
 HandleTimeout is a helper for a goroutine, to wait for signals and timeout, and exit with a proper code.
 
-```
+```go
 checkPluginTimeoutInSeconds := 10
+
 go check.HandleTimeout(checkPluginTimeoutInSeconds)
 ```
 
@@ -97,7 +99,7 @@ Threshold objects represent monitoring plugin thresholds that have methods to ev
 
 They can be created with the ParseThreshold parser.
 
-```
+```go
 warnThreshold, err := check.ParseThreshold("~:3")
 
 if err != nil {
@@ -115,7 +117,7 @@ See also: https://www.monitoring-plugins.org/doc/guidelines.html#THRESHOLDFORMAT
 
 The `Perfdata` object represents monitoring plugin performance data that relates to the actual execution of a host or service check.
 
-```
+```go
 var pl perfdata.PerfdataList
 
 pl.Add(&perfdata.Perfdata{
@@ -136,7 +138,7 @@ See also: https://www.monitoring-plugins.org/doc/guidelines.html#AEN197
 
 The `WorstState` helper can be used to determine the worst exit status from a set of exit states.
 
-```
+```go
 allStates = []check.Status{check.OK, check.Critical, check.Warning, check.Unknown}
 
 rc := result.WorstState(allStates...)
@@ -148,7 +150,7 @@ The `Overall` and `PartialResult` objects can be used to represent a simple pare
 
 An `Overall` can contain multiple subchecks. The final exit of the `Overall` will be automatically determined by the worst state of a `PartialResult`.
 
-```
+```go
 o := Overall{}
 o.Add(0, "Something is OK")
 
@@ -167,6 +169,42 @@ fmt.Println(o.GetOutput())
 // states: ok=1
 // [OK] Something is OK
 // \_ [OK] My Subcheck
+```
+
+## Human-readable bytes
+
+`convert.BytesIEC` and `convert.BytesSI` can be used to represent a byte value with human-readable string output.
+
+```go
+b := convert.BytesIEC(999)
+
+fmt.Println(b)
+// "999B"
+
+b := convert.BytesIEC(999 * 1024)
+
+fmt.Println(b)
+// "999KiB"
+
+b := convert.BytesIEC(999 * 1024 * 1024 * 1024 * 1024)
+
+fmt.Println(b)
+// "999TiB"
+
+b := convert.BytesSI(999)
+
+fmt.Println(b)
+// "999B"
+
+b := convert.BytesSI(999 * 1000)
+
+fmt.Println(b)
+// "999KB"
+
+b := convert.BytesSI(999 * 1000 * 1000 * 1000 * 1000)
+
+fmt.Println(b)
+// "999TB"
 ```
 
 # Examples
