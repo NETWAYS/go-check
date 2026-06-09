@@ -3,6 +3,7 @@ package check
 import (
 	"errors"
 	"fmt"
+	"strings"
 )
 
 const (
@@ -45,7 +46,8 @@ func NewStatus(status int) (Status, error) {
 // NewStatusFromString returns a state corresponding to its
 // common string representation
 func NewStatusFromString(status string) (Status, error) {
-	switch status {
+	s := strings.ToUpper(status)
+	switch s {
 	case OKString:
 		return OK, nil
 	case WarningString:
@@ -70,7 +72,7 @@ func (s Status) String() string {
 		return CriticalString
 	case Unknown:
 		return UnknownString
+	default:
+		return UnknownString
 	}
-
-	return UnknownString
 }

@@ -51,12 +51,24 @@ func TestStatus_FromString(t *testing.T) {
 			input:    "WARNING",
 			expected: Warning,
 		},
+		"WaRnInG": {
+			input:    "WaRnInG",
+			expected: Warning,
+		},
 		"CRITICAL": {
 			input:    "CRITICAL",
 			expected: Critical,
 		},
+		"Critical": {
+			input:    "Critical",
+			expected: Critical,
+		},
 		"UNKNOWN": {
 			input:    "UNKNOWN",
+			expected: Unknown,
+		},
+		"unknown": {
+			input:    "unknown",
 			expected: Unknown,
 		},
 	}
@@ -69,6 +81,18 @@ func TestStatus_FromString(t *testing.T) {
 				t.Fatalf("expected %v, got %v", tc.expected, actual)
 			}
 		})
+	}
+}
+
+func TestStatus_FromString_WithErr(t *testing.T) {
+	actual, err := NewStatusFromString("unittest")
+
+	if err == nil {
+		t.Fatalf("expected error, got nil")
+	}
+
+	if actual != Unknown {
+		t.Fatalf("expected Unknown, got %v", actual)
 	}
 }
 
@@ -103,5 +127,17 @@ func TestStatus_FromInt(t *testing.T) {
 				t.Fatalf("expected %v, got %v", tc.expected, actual)
 			}
 		})
+	}
+}
+
+func TestStatus_FromInt_WithErr(t *testing.T) {
+	actual, err := NewStatus(1337)
+
+	if err == nil {
+		t.Fatalf("expected error, got nil")
+	}
+
+	if actual != Unknown {
+		t.Fatalf("expected Unknown, got %v", actual)
 	}
 }
