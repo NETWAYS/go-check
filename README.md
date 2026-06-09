@@ -139,16 +139,7 @@ The `WorstState` helper can be used to determine the worst exit status from a se
 ```
 allStates = []check.Status{check.OK, check.Critical, check.Warning, check.Unknown}
 
-switch result.WorstState(allStates...) {
-case 0:
-    rc = check.OK
-case 1:
-    rc = check.Warning
-case 2:
-    rc = check.Critical
-default:
-    rc = check.Unknown
-}
+rc := result.WorstState(allStates...)
 ```
 
 ## Overall and Partial Results
