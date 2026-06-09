@@ -255,7 +255,7 @@ func TestOverall_withEnhancedSubchecks(t *testing.T) {
 	overall.AddSubcheck(subcheck2)
 
 	resString := overall.GetOutput()
-	//nolint:lll
+
 	expectedString := `states: warning=1 ok=1
 \_ [OK] Subcheck1 Test
 \_ [WARNING] Subcheck2 Test
