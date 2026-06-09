@@ -39,8 +39,8 @@ type PartialResult struct {
 	Output             string
 	state              check.Status // Result state, either set explicitly or derived from partialResults
 	defaultState       check.Status // Default result state, if no partial results are available and no state is set explicitly
-	stateSetExplicitly bool         // nolint: unused
-	defaultStateSet    bool         // nolint: unused
+	stateSetExplicitly bool
+	defaultStateSet    bool
 }
 
 // NewPartialResult initializer with "sane" defaults
@@ -93,18 +93,18 @@ func (s *PartialResult) AddSubcheck(subcheck PartialResult) {
 // GetStatus returns the current state (ok, warning, critical, unknown) of the Overall
 func (o *Overall) GetStatus() check.Status {
 	if o.stateSetExplicitly {
-		// nolint: gocritic
-		if o.criticals > 0 {
+		switch {
+		case o.criticals > 0:
 			return check.Critical
-		} else if o.unknowns > 0 {
+		case o.unknowns > 0:
 			return check.Unknown
-		} else if o.warnings > 0 {
+		case o.warnings > 0:
 			return check.Warning
-		} else if o.oks > 0 {
+		case o.oks > 0:
 			return check.OK
+		default:
+			return check.Unknown
 		}
-
-		return check.Unknown
 	}
 
 	// state not set explicitly!
@@ -287,7 +287,6 @@ func (s *PartialResult) SetState(state check.Status) error {
 }
 
 // GetStatus returns the current state (ok, warning, critical, unknown) of the PartialResult
-// nolint: unused
 func (s *PartialResult) GetStatus() check.Status {
 	if s.stateSetExplicitly {
 		return s.state
