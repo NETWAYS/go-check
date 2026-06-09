@@ -10,7 +10,7 @@ import (
 
 func TestMyMain(t *testing.T) {
 	actual := testhelper.RunMainTest(main, "--help")
-	expected := `would exit with code 3`
+	expected := `pflag: help requested`
 
 	if !strings.Contains(actual, expected) {
 		t.Fatalf("expected %v, got %v", expected, actual)
