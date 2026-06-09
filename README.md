@@ -1,13 +1,7 @@
 go-check
 ========
 
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/NETWAYS/go-check?label=version)](https://github.com/NETWAYS/go-check/releases)
-[![GoDoc](https://img.shields.io/static/v1?label=godoc&message=reference&color=blue)](https://pkg.go.dev/github.com/NETWAYS/go-check)
-[![Test Status](https://github.com/NETWAYS/go-check/workflows/Go/badge.svg)](https://github.com/NETWAYS/go-check/actions?query=workflow%3AGo)
-![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/NETWAYS/go-check)
-![GitHub](https://img.shields.io/github/license/NETWAYS/go-check?color=green)
-
-go-check is a library to help with development of monitoring plugins for tools like Icinga.
+go-check is a Golang library to help with development of monitoring plugins for tools like Icinga.
 
 See the [documentation on pkg.go.dev](https://pkg.go.dev/github.com/NETWAYS/go-check) for more details and examples.
 
@@ -15,44 +9,82 @@ See the [documentation on pkg.go.dev](https://pkg.go.dev/github.com/NETWAYS/go-c
 
 ## Simple Example
 
+go-check includes everything to quickly create a CLI monitoring plugin:
+
 ```go
 package main
 
 import (
     "fmt"
-	"github.com/NETWAYS/go-check"
+
+    "github.com/NETWAYS/go-check"
 )
 
 func main() {
+    // Global configuration of the plugin
 	config := check.NewConfig()
 	config.Name = "check_test"
 	config.Readme = `Test Plugin`
 	config.Version = "1.0.0"
 
+    // Command line arguments
 	_ = config.FlagSet.StringP("hostname", "H", "localhost", "Hostname to check")
 
 	config.ParseArguments()
 
-	// Some checking should be done here, when --help is not passed
+	// Handle exit with the desired exit code
 	check.Exit(check.OK, fmt.Sprintf("Everything is fine - answer=%d", 42))
 	// Output:
-	// OK - Everything is fine - answer=42
+	// [OK] - Everything is fine - answer=42
 }
 ```
 
-## Exit Codes
+## Return Codes
+
+The library provides predefined return or exit codes:
 
 ```
-check.Exit(OK, fmt.Sprintf("Everything is fine - value=%d", 42)) // OK, 0
+check.OK
+check.Warning
+check.Critical
+check.Unknown
 
+// These exit codes implement the Stringer interface
+fmt.Println(check.OK)
+```
+
+To convert an integer or string into an exit code
+
+```
+unknown, err := NewStatus(3)
+
+warning, err := NewStatusFromString("Warning")
+```
+
+See also: https://www.monitoring-plugins.org/doc/guidelines.html#AEN74
+
+## Exit
+
+The `Exit` function can be used to cause an exit with the given status code.
+
+```
+check.Exit(check.OK, fmt.Sprintf("Everything is fine - value=%d", 42)) // OK, 0
+
+// With perfdata
 check.Exit(check.Critical, "CRITICAL", "|", "percent_packet_loss=100") // CRITICAL, 2
+```
 
+`ExitError` can be used to cause an exit with the given error.
+
+```
 err := fmt.Errorf("connection to %s has been timed out", "localhost:12345")
 
 check.ExitError(err) // UNKNOWN, 3
 ```
 
 ## Timeout Handling
+
+HandleTimeout is a helper for a goroutine, to wait for signals and timeout, and exit with a proper code.
 
 ```
 checkPluginTimeoutInSeconds := 10
@@ -65,13 +97,11 @@ Threshold objects represent monitoring plugin thresholds that have methods to ev
 
 They can be created with the ParseThreshold parser.
 
-https://github.com/monitoring-plugins/monitoring-plugin-guidelines/blob/main/definitions/01.range_expressions.md
-
 ```
 warnThreshold, err := check.ParseThreshold("~:3")
 
 if err != nil {
-    return t, err
+    // Handle the error
 }
 
 if warnThreshold.DoesViolate(3.6) {
@@ -79,11 +109,11 @@ if warnThreshold.DoesViolate(3.6) {
 }
 ```
 
-## Perfdata
+See also: https://www.monitoring-plugins.org/doc/guidelines.html#THRESHOLDFORMAT
 
-The Perfdata object represents monitoring plugin performance data that relates to the actual execution of a host or service check.
+## Performance data
 
-https://github.com/monitoring-plugins/monitoring-plugin-guidelines/blob/main/monitoring_plugins_interface/03.Output.md#performance-data
+The `Perfdata` object represents monitoring plugin performance data that relates to the actual execution of a host or service check.
 
 ```
 var pl perfdata.PerfdataList
@@ -100,10 +130,14 @@ pl.Add(&perfdata.Perfdata{
 fmt.Println(pl.String())
 ```
 
-## Results
+See also: https://www.monitoring-plugins.org/doc/guidelines.html#AEN197
+
+## WorstState
+
+The `WorstState` helper can be used to determine the worst exit status from a set of exit states.
 
 ```
-allStates = []int{0,2,3,0,1,2}
+allStates = []check.Status{check.OK, check.Critical, check.Warning, check.Unknown}
 
 switch result.WorstState(allStates...) {
 case 0:
@@ -117,7 +151,11 @@ default:
 }
 ```
 
-## Partial Results
+## Overall and Partial Results
+
+The `Overall` and `PartialResult` objects can be used to represent a simple parent-child relationship.
+
+An `Overall` can contain multiple subchecks. The final exit of the `Overall` will be automatically determined by the worst state of a `PartialResult`.
 
 ```
 o := Overall{}
@@ -139,7 +177,6 @@ fmt.Println(o.GetOutput())
 // [OK] Something is OK
 // \_ [OK] My Subcheck
 ```
-
 
 # Examples
 
