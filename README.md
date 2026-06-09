@@ -22,20 +22,20 @@ import (
 
 func main() {
     // Global configuration of the plugin
-	config := check.NewConfig()
-	config.Name = "check_test"
-	config.Readme = `Test Plugin`
-	config.Version = "1.0.0"
+    config := check.NewConfig()
+    config.Name = "check_test"
+    config.Readme = `Test Plugin`
+    config.Version = "1.0.0"
 
     // Command line arguments
-	_ = config.FlagSet.StringP("hostname", "H", "localhost", "Hostname to check")
+    _ = config.FlagSet.StringP("hostname", "H", "localhost", "Hostname to check")
 
-	config.ParseArguments()
+    config.ParseArguments()
 
-	// Handle exit with the desired exit code
-	check.Exit(check.OK, fmt.Sprintf("Everything is fine - answer=%d", 42))
-	// Output:
-	// [OK] - Everything is fine - answer=42
+    // Handle exit with the desired exit code
+    check.Exit(check.OK, fmt.Sprintf("Everything is fine - answer=%d", 42))
+    // Output:
+    // [OK] - Everything is fine - answer=42
 }
 ```
 
