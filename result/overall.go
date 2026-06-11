@@ -140,26 +140,28 @@ func (o *Overall) GetSummary() string {
 		return o.Summary
 	}
 
+	var summary string
+
 	// Was the state set explicitly?
 	if o.stateSetExplicitly {
 		// Yes, so lets generate it from the sum of the overall states
 		if o.criticals > 0 {
-			o.Summary += fmt.Sprintf("critical=%d ", o.criticals)
+			summary += fmt.Sprintf("critical=%d ", o.criticals)
 		}
 
 		if o.unknowns > 0 {
-			o.Summary += fmt.Sprintf("unknown=%d ", o.unknowns)
+			summary += fmt.Sprintf("unknown=%d ", o.unknowns)
 		}
 
 		if o.warnings > 0 {
-			o.Summary += fmt.Sprintf("warning=%d ", o.warnings)
+			summary += fmt.Sprintf("warning=%d ", o.warnings)
 		}
 
 		if o.oks > 0 {
-			o.Summary += fmt.Sprintf("ok=%d ", o.oks)
+			summary += fmt.Sprintf("ok=%d ", o.oks)
 		}
 
-		if o.Summary == "" {
+		if summary == "" {
 			o.Summary = "No status information"
 			return o.Summary
 		}
@@ -176,23 +178,23 @@ func (o *Overall) GetSummary() string {
 		oks, warnings, criticals, unknowns := o.countPartialStates()
 
 		if criticals > 0 {
-			o.Summary += fmt.Sprintf("critical=%d ", criticals)
+			summary += fmt.Sprintf("critical=%d ", criticals)
 		}
 
 		if unknowns > 0 {
-			o.Summary += fmt.Sprintf("unknown=%d ", unknowns)
+			summary += fmt.Sprintf("unknown=%d ", unknowns)
 		}
 
 		if warnings > 0 {
-			o.Summary += fmt.Sprintf("warning=%d ", warnings)
+			summary += fmt.Sprintf("warning=%d ", warnings)
 		}
 
 		if oks > 0 {
-			o.Summary += fmt.Sprintf("ok=%d ", oks)
+			summary += fmt.Sprintf("ok=%d ", oks)
 		}
 	}
 
-	o.Summary = "states: " + strings.TrimSpace(o.Summary)
+	o.Summary = "states: " + strings.TrimSpace(summary)
 
 	return o.Summary
 }
@@ -313,6 +315,9 @@ func (s *PartialResult) getOutput(indentLevel int) string {
 	var output strings.Builder
 
 	prefix := strings.Repeat("  ", indentLevel)
+	// The final result will look like this:
+	// [OK] Overall is OK
+	// \_ [OK] My PartialResult
 	output.WriteString(prefix + "\\_ " + s.String() + "\n")
 
 	if s.PartialResults != nil {
