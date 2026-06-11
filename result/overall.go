@@ -112,25 +112,7 @@ func (o *Overall) GetStatus() check.Status {
 		return check.Unknown
 	}
 
-	var (
-		criticals int
-		warnings  int
-		oks       int
-		unknowns  int
-	)
-
-	for _, sc := range o.PartialResults {
-		switch sc.GetStatus() {
-		case check.Critical:
-			criticals++
-		case check.Warning:
-			warnings++
-		case check.Unknown:
-			unknowns++
-		case check.OK:
-			oks++
-		}
-	}
+	oks, warnings, criticals, unknowns := o.countPartialStates()
 
 	if criticals > 0 {
 		return check.Critical
@@ -191,32 +173,14 @@ func (o *Overall) GetSummary() string {
 			return o.Summary
 		}
 
-		var (
-			criticals int
-			warnings  int
-			oks       int
-			unknowns  int
-		)
-
-		for _, sc := range o.PartialResults {
-			switch sc.GetStatus() {
-			case check.Critical:
-				criticals++
-			case check.Warning:
-				warnings++
-			case check.Unknown:
-				unknowns++
-			case check.OK:
-				oks++
-			}
-		}
+		oks, warnings, criticals, unknowns := o.countPartialStates()
 
 		if criticals > 0 {
 			o.Summary += fmt.Sprintf("critical=%d ", criticals)
 		}
 
 		if unknowns > 0 {
-			o.Summary += fmt.Sprintf("unknowns=%d ", unknowns)
+			o.Summary += fmt.Sprintf("unknown=%d ", unknowns)
 		}
 
 		if warnings > 0 {
@@ -277,7 +241,7 @@ func (s *PartialResult) SetDefaultState(state check.Status) error {
 // SetState sets a state for a PartialResult
 func (s *PartialResult) SetState(state check.Status) error {
 	if state < check.OK || state > check.Unknown {
-		return errors.New("Default State is not a valid result state. Got " + state.String() + " which is not valid")
+		return errors.New("State is not a valid result state. Got " + state.String() + " which is not valid")
 	}
 
 	s.state = state
@@ -307,6 +271,24 @@ func (s *PartialResult) GetStatus() check.Status {
 	}
 
 	return WorstState(states...)
+}
+
+// countPartialStates returns the current count of states
+func (o *Overall) countPartialStates() (oks, warnings, criticals, unknowns int) {
+	for _, sc := range o.PartialResults {
+		switch sc.GetStatus() {
+		case check.Critical:
+			criticals++
+		case check.Warning:
+			warnings++
+		case check.Unknown:
+			unknowns++
+		case check.OK:
+			oks++
+		}
+	}
+
+	return
 }
 
 // getPerfdata returns all subsequent perfdata as a concatenated string
