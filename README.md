@@ -173,7 +173,17 @@ fmt.Println(o.GetOutput())
 
 ## Human-readable bytes
 
-`convert.BytesIEC` and `convert.BytesSI` can be used to represent a byte value with human-readable string output.
+`ParseBytes` is a helper that can be used to parse string containering IEC or SI bytes into the number of bytes.
+
+```go
+b, err := ParseBytes("2MiB")
+// uint64 2 * 1024 * 1024
+
+b, err := ParseBytes("1MB")
+// uint64 1000 * 1000
+```
+
+`BytesIEC` and `BytesSI` can be used to format a byte value with human-readable string output.
 
 ```go
 b := convert.BytesIEC(999)
