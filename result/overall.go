@@ -11,6 +11,14 @@ import (
 // The "width" of the indentation which is added on every level
 const indentationOffset = 2
 
+// statusCount is used to count the overall states
+type statusCount struct {
+	OK       int
+	Warning  int
+	Critical int
+	Unknown  int
+}
+
 // Overall is a singleton for a monitoring plugin that has several partial results (or sub-results)
 //
 // Design decisions: A check plugin has a single Overall (singleton),
@@ -23,31 +31,6 @@ const indentationOffset = 2
 type Overall struct {
 	Summary        string
 	PartialResults []PartialResult
-}
-
-// PartialResult represents a sub-result for an Overall struct
-type PartialResult struct {
-	Perfdata           perfdata.PerfdataList
-	PartialResults     []PartialResult
-	Output             string
-	state              check.Status // Result state, either set explicitly or derived from partialResults
-	defaultState       check.Status // Default result state, if no partial results are available and no state is set explicitly
-	stateSetExplicitly bool
-	defaultStateSet    bool
-}
-
-// NewPartialResult initializer with "sane" defaults
-// Notable default compared to the nil object: the default state is set to Unknown
-func NewPartialResult() PartialResult {
-	return PartialResult{
-		stateSetExplicitly: false,
-		defaultState:       check.Unknown,
-	}
-}
-
-// String returns the status and output of the PartialResult
-func (s *PartialResult) String() string {
-	return fmt.Sprintf("[%s] %s", s.GetStatus(), s.Output)
 }
 
 // Add adds a return state explicitly
@@ -66,21 +49,9 @@ func (o *Overall) AddSubcheck(subcheck PartialResult) {
 	o.PartialResults = append(o.PartialResults, subcheck)
 }
 
-// AddSubcheck adds a PartialResult to the PartialResult
-func (s *PartialResult) AddSubcheck(subcheck PartialResult) {
-	s.PartialResults = append(s.PartialResults, subcheck)
-}
-
-type statusCount struct {
-	OK       int
-	Warning  int
-	Critical int
-	Unknown  int
-}
-
 // GetStatus returns the current state (ok, warning, critical, unknown) of the Overall
 func (o *Overall) GetStatus() check.Status {
-	statuses := o.getStatuses()
+	statuses := o.getStatusCount()
 
 	if statuses.Critical > 0 {
 		return check.Critical
@@ -114,7 +85,7 @@ func (o *Overall) GetSummary() string {
 		return o.Summary
 	}
 
-	stats := o.getStatuses()
+	stats := o.getStatusCount()
 
 	if stats.Critical > 0 {
 		o.Summary += fmt.Sprintf("critical=%d ", stats.Critical)
@@ -162,10 +133,77 @@ func (o *Overall) GetOutput() string {
 	return output.String()
 }
 
+func (o *Overall) getStatusCount() statusCount {
+	result := statusCount{
+		OK:       0,
+		Warning:  0,
+		Critical: 0,
+		Unknown:  0,
+	}
+
+	if len(o.PartialResults) == 0 {
+		return result
+	}
+
+	for _, sc := range o.PartialResults {
+		switch sc.GetStatus() {
+		case check.Critical:
+			result.Critical++
+		case check.Warning:
+			result.Warning++
+		case check.Unknown:
+			result.Unknown++
+		case check.OK:
+			result.OK++
+		}
+	}
+
+	return result
+}
+
+// PartialResult represents a sub-result for an Overall struct
+type PartialResult struct {
+	Perfdata       perfdata.PerfdataList
+	PartialResults []PartialResult
+	Output         string
+
+	// Result state, either set explicitly or derived from partialResults
+	state check.Status
+	// Default result state, if no partial results are available and no state is set explicitly
+	defaultState check.Status
+
+	// stateSetExplicitly indicates that SetState was called directly. When true,
+	// GetStatus returns s.state unconditionally, bypassing PartialResults entirely.
+	stateSetExplicitly bool
+	// defaultStateSetExplicitly indicates that SetDefaultState was called. When true
+	// and no PartialResults exist and no explicit state is set, GetStatus returns
+	// s.defaultState instead of check.Unknown.
+	defaultStateSetExplicitly bool
+}
+
+// NewPartialResult initializer with "sane" defaults
+// Notable default compared to the nil object: the default state is set to Unknown
+func NewPartialResult() PartialResult {
+	return PartialResult{
+		stateSetExplicitly: false,
+		defaultState:       check.Unknown,
+	}
+}
+
+// AddSubcheck adds a PartialResult to the PartialResult
+func (s *PartialResult) AddSubcheck(subcheck PartialResult) {
+	s.PartialResults = append(s.PartialResults, subcheck)
+}
+
+// String returns the status and output of the PartialResult
+func (s *PartialResult) String() string {
+	return fmt.Sprintf("[%s] %s", s.GetStatus(), s.Output)
+}
+
 // SetDefaultState sets a new default state for a PartialResult
 func (s *PartialResult) SetDefaultState(state check.Status) error {
 	s.defaultState = state
-	s.defaultStateSet = true
+	s.defaultStateSetExplicitly = true
 
 	return nil
 }
@@ -185,7 +223,7 @@ func (s *PartialResult) GetStatus() check.Status {
 	}
 
 	if len(s.PartialResults) == 0 {
-		if s.defaultStateSet {
+		if s.defaultStateSetExplicitly {
 			return s.defaultState
 		}
 
@@ -221,12 +259,10 @@ func (s *PartialResult) getPerfdata() string {
 // getOutput generates indented output for all subsequent PartialResults
 func (s *PartialResult) getOutput(indentLevel int) string {
 	var output strings.Builder
-
-	prefix := strings.Repeat("  ", indentLevel)
 	// The final result will look like this:
 	// [OK] Overall is OK
 	// \_ [OK] My PartialResult
-	output.WriteString(prefix + "\\_ " + s.String() + "\n")
+	output.WriteString(strings.Repeat("  ", indentLevel) + "\\_ " + s.String() + "\n")
 
 	if s.PartialResults != nil {
 		for _, ss := range s.PartialResults {
@@ -235,32 +271,4 @@ func (s *PartialResult) getOutput(indentLevel int) string {
 	}
 
 	return output.String()
-}
-
-func (o *Overall) getStatuses() statusCount {
-	result := statusCount{
-		OK:       0,
-		Warning:  0,
-		Critical: 0,
-		Unknown:  0,
-	}
-
-	if len(o.PartialResults) == 0 {
-		return result
-	}
-
-	for _, sc := range o.PartialResults {
-		switch sc.GetStatus() {
-		case check.Critical:
-			result.Critical++
-		case check.Warning:
-			result.Warning++
-		case check.Unknown:
-			result.Unknown++
-		case check.OK:
-			result.OK++
-		}
-	}
-
-	return result
 }

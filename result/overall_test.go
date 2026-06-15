@@ -21,10 +21,10 @@ func TestOverall_AddOK(t *testing.T) {
 	overall := Overall{}
 	overall.Add(0, "test ok")
 
-	statuses := overall.getStatuses()
+	counts := overall.getStatusCount()
 
-	if statuses.OK != 1 && statuses.Critical != 0 && statuses.Warning != 0 && statuses.Unknown != 0 {
-		t.Fatalf("expected 1, got %d", statuses.OK)
+	if counts.OK != 1 && counts.Critical != 0 && counts.Warning != 0 && counts.Unknown != 0 {
+		t.Fatalf("expected 1, got %d", counts.OK)
 	}
 
 	expectedOutput := "states: ok=1\n\\_ [OK] test ok\n"
@@ -37,10 +37,10 @@ func TestOverall_AddWarning(t *testing.T) {
 	overall := Overall{}
 	overall.Add(1, "test warning")
 
-	statuses := overall.getStatuses()
+	counts := overall.getStatusCount()
 
-	if statuses.OK != 0 && statuses.Critical != 0 && statuses.Warning != 1 && statuses.Unknown != 0 {
-		t.Fatalf("expected 1, got %d", statuses.Warning)
+	if counts.OK != 0 && counts.Critical != 0 && counts.Warning != 1 && counts.Unknown != 0 {
+		t.Fatalf("expected 1, got %d", counts.Warning)
 	}
 
 	expectedOutput := "states: warning=1\n\\_ [WARNING] test warning\n"
@@ -53,10 +53,10 @@ func TestOverall_AddCritical(t *testing.T) {
 	overall := Overall{}
 	overall.Add(2, "test critical")
 
-	statuses := overall.getStatuses()
+	counts := overall.getStatusCount()
 
-	if statuses.OK != 0 && statuses.Critical != 1 && statuses.Warning != 0 && statuses.Unknown != 0 {
-		t.Fatalf("expected 1, got %d", statuses.Critical)
+	if counts.OK != 0 && counts.Critical != 1 && counts.Warning != 0 && counts.Unknown != 0 {
+		t.Fatalf("expected 1, got %d", counts.Critical)
 	}
 
 	expectedOutputs := "states: critical=1\n\\_ [CRITICAL] test critical\n"
@@ -69,10 +69,10 @@ func TestOverall_AddUnknown(t *testing.T) {
 	overall := Overall{}
 	overall.Add(3, "test unknown")
 
-	statuses := overall.getStatuses()
+	counts := overall.getStatusCount()
 
-	if statuses.OK != 0 && statuses.Critical != 0 && statuses.Warning != 0 && statuses.Unknown != 1 {
-		t.Fatalf("expected 1, got %d", statuses.Unknown)
+	if counts.OK != 0 && counts.Critical != 0 && counts.Warning != 0 && counts.Unknown != 1 {
+		t.Fatalf("expected 1, got %d", counts.Unknown)
 	}
 
 	expectedOutputs := "states: unknown=1\n\\_ [UNKNOWN] test unknown\n"
