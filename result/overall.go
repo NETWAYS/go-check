@@ -69,15 +69,15 @@ func (s *PartialResult) AddSubcheck(subcheck PartialResult) {
 	s.PartialResults = append(s.PartialResults, subcheck)
 }
 
-type checkStatuses struct {
+type statusCount struct {
 	OK       int
 	Warning  int
 	Critical int
 	Unknown  int
 }
 
-func (o *Overall) getStatuses() checkStatuses {
-	result := checkStatuses{
+func (o *Overall) getStatuses() statusCount {
+	result := statusCount{
 		OK:       0,
 		Warning:  0,
 		Critical: 0,
@@ -141,40 +141,22 @@ func (o *Overall) GetSummary() string {
 		return o.Summary
 	}
 
-	var (
-		criticals int
-		warnings  int
-		oks       int
-		unknowns  int
-	)
+	stats := o.getStatuses()
 
-	for _, sc := range o.PartialResults {
-		switch sc.GetStatus() {
-		case check.Critical:
-			criticals++
-		case check.Warning:
-			warnings++
-		case check.Unknown:
-			unknowns++
-		case check.OK:
-			oks++
-		}
+	if stats.Critical > 0 {
+		o.Summary += fmt.Sprintf("critical=%d ", stats.Critical)
 	}
 
-	if criticals > 0 {
-		o.Summary += fmt.Sprintf("critical=%d ", criticals)
+	if stats.Unknown > 0 {
+		o.Summary += fmt.Sprintf("unknown=%d ", stats.Unknown)
 	}
 
-	if unknowns > 0 {
-		o.Summary += fmt.Sprintf("unknown=%d ", unknowns)
+	if stats.Warning > 0 {
+		o.Summary += fmt.Sprintf("warning=%d ", stats.Warning)
 	}
 
-	if warnings > 0 {
-		o.Summary += fmt.Sprintf("warning=%d ", warnings)
-	}
-
-	if oks > 0 {
-		o.Summary += fmt.Sprintf("ok=%d ", oks)
+	if stats.OK > 0 {
+		o.Summary += fmt.Sprintf("ok=%d ", stats.OK)
 	}
 
 	o.Summary = "states: " + strings.TrimSpace(o.Summary)
