@@ -1,7 +1,6 @@
 package result
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
@@ -250,6 +249,9 @@ func (s *PartialResult) getOutput(indentLevel int) string {
 	var output strings.Builder
 
 	prefix := strings.Repeat("  ", indentLevel)
+	// The final result will look like this:
+	// [OK] Overall is OK
+	// \_ [OK] My PartialResult
 	output.WriteString(prefix + "\\_ " + s.String() + "\n")
 
 	if s.PartialResults != nil {
