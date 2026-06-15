@@ -267,7 +267,6 @@ func (o *Overall) getSummary() string {
 }
 
 func (o *Overall) getGenericSummary() string {
-	// OK state, but no Ok_summary set
 	stats := o.getStatusCount()
 	result := ""
 
