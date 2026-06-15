@@ -191,10 +191,6 @@ func (o *Overall) GetOutput() string {
 
 // SetDefaultState sets a new default state for a PartialResult
 func (s *PartialResult) SetDefaultState(state check.Status) error {
-	if state < check.OK || state > check.Unknown {
-		return errors.New("Default State is not a valid result state. Got " + state.String() + " which is not valid")
-	}
-
 	s.defaultState = state
 	s.defaultStateSet = true
 
@@ -203,10 +199,6 @@ func (s *PartialResult) SetDefaultState(state check.Status) error {
 
 // SetState sets a state for a PartialResult
 func (s *PartialResult) SetState(state check.Status) error {
-	if state < check.OK || state > check.Unknown {
-		return errors.New("Default State is not a valid result state. Got " + state.String() + " which is not valid")
-	}
-
 	s.state = state
 	s.stateSetExplicitly = true
 
