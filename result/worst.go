@@ -17,18 +17,12 @@ func WorstState(states ...check.Status) check.Status {
 
 	// nolint: gocritic
 	for _, state := range states {
-		if state == check.Critical {
-			overall = check.Critical
-		} else if state == check.Unknown {
-			if overall != check.Critical {
-				overall = check.Unknown
-			}
-		} else if state > overall {
+		if check.Compare(overall, state) > 0 {
 			overall = state
 		}
 	}
 
-	if overall < 0 || overall > 3 {
+	if overall < check.OK || overall > check.Unknown {
 		overall = check.Unknown
 	}
 

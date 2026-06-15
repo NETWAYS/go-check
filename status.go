@@ -76,3 +76,49 @@ func (s Status) String() string {
 		return UnknownString
 	}
 }
+
+func Compare(a Status, b Status) int {
+	switch a {
+	case OK:
+		switch b {
+		case OK:
+			return 0
+		case Warning:
+		case Unknown:
+		case Critical:
+			return 1
+		}
+	case Warning:
+		switch b {
+		case OK:
+			return -1
+		case Warning:
+			return 0
+		case Unknown:
+		case Critical:
+			return 1
+		}
+	case Unknown:
+		switch b {
+		case OK:
+		case Warning:
+			return -1
+		case Unknown:
+			return 0
+		case Critical:
+			return 1
+		}
+	case Critical:
+		switch b {
+		case OK:
+		case Warning:
+		case Unknown:
+			return -1
+		case Critical:
+			return 0
+		}
+	}
+
+	// should not be possible to land here
+	return 0
+}
