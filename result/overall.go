@@ -52,10 +52,13 @@ func (s *PartialResult) String() string {
 
 // Add adds a return state explicitly
 func (o *Overall) Add(state check.Status, output string) {
-	var new PartialResult
-	new.SetState(state)
-	new.Output = output
-	o.AddSubcheck(new)
+	var result PartialResult
+	if result.SetState(state) != nil {
+		panic("failed to set state in new PartialResult")
+	}
+
+	result.Output = output
+	o.AddSubcheck(result)
 }
 
 // AddSubcheck adds a PartialResult to the Overall
@@ -75,37 +78,8 @@ type statusCount struct {
 	Unknown  int
 }
 
-func (o *Overall) getStatuses() statusCount {
-	result := statusCount{
-		OK:       0,
-		Warning:  0,
-		Critical: 0,
-		Unknown:  0,
-	}
-
-	if len(o.PartialResults) == 0 {
-		return result
-	}
-
-	for _, sc := range o.PartialResults {
-		switch sc.GetStatus() {
-		case check.Critical:
-			result.Critical++
-		case check.Warning:
-			result.Warning++
-		case check.Unknown:
-			result.Unknown++
-		case check.OK:
-			result.OK++
-		}
-	}
-
-	return result
-}
-
 // GetStatus returns the current state (ok, warning, critical, unknown) of the Overall
 func (o *Overall) GetStatus() check.Status {
-
 	statuses := o.getStatuses()
 
 	if statuses.Critical > 0 {
@@ -261,4 +235,32 @@ func (s *PartialResult) getOutput(indentLevel int) string {
 	}
 
 	return output.String()
+}
+
+func (o *Overall) getStatuses() statusCount {
+	result := statusCount{
+		OK:       0,
+		Warning:  0,
+		Critical: 0,
+		Unknown:  0,
+	}
+
+	if len(o.PartialResults) == 0 {
+		return result
+	}
+
+	for _, sc := range o.PartialResults {
+		switch sc.GetStatus() {
+		case check.Critical:
+			result.Critical++
+		case check.Warning:
+			result.Warning++
+		case check.Unknown:
+			result.Unknown++
+		case check.OK:
+			result.OK++
+		}
+	}
+
+	return result
 }
