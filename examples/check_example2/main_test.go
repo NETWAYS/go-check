@@ -10,7 +10,7 @@ import (
 func TestMyMain(t *testing.T) {
 	actual := testhelper.RunMainTest(main)
 
-	expected := `[WARNING] - states: warning=1 ok=1
+	expected := `[WARNING] - Check2
 \_ [OK] Check1
 \_ [WARNING] Check2
 |foo=23 bar=42 'foo2 bar'=46

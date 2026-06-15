@@ -29,7 +29,7 @@ type statusCount struct {
 // one suffices, but one fails, the whole check might be OK and only the subcheck
 // Warning or Critical.
 type Overall struct {
-	Summary        string
+	OKSummary      string
 	PartialResults []PartialResult
 }
 
@@ -69,46 +69,11 @@ func (o *Overall) GetStatus() check.Status {
 	return check.Unknown
 }
 
-// GetSummary returns a text representation of the current state of the Overall
-func (o *Overall) GetSummary() string {
-	if o.Summary != "" {
-		return o.Summary
-	}
-
-	if len(o.PartialResults) == 0 {
-		// Oh, we actually don't have those either
-		o.Summary = "No status information"
-		return o.Summary
-	}
-
-	stats := o.getStatusCount()
-
-	if stats.Critical > 0 {
-		o.Summary += fmt.Sprintf("critical=%d ", stats.Critical)
-	}
-
-	if stats.Unknown > 0 {
-		o.Summary += fmt.Sprintf("unknown=%d ", stats.Unknown)
-	}
-
-	if stats.Warning > 0 {
-		o.Summary += fmt.Sprintf("warning=%d ", stats.Warning)
-	}
-
-	if stats.OK > 0 {
-		o.Summary += fmt.Sprintf("ok=%d ", stats.OK)
-	}
-
-	o.Summary = "states: " + strings.TrimSpace(o.Summary)
-
-	return o.Summary
-}
-
 // GetOutput returns a text representation of the current outputs of the Overall
 func (o *Overall) GetOutput() string {
 	var output strings.Builder
 
-	output.WriteString(o.GetSummary() + "\n")
+	output.WriteString(o.getSummary() + "\n")
 
 	if o.PartialResults != nil {
 		var pdata strings.Builder
@@ -263,4 +228,84 @@ func (s *PartialResult) getOutput(indentLevel int) string {
 	}
 
 	return output.String()
+}
+
+// GetSummary returns a text representation of the current state of the Overall
+func (o *Overall) getSummary() string {
+	checkState := o.GetStatus()
+
+	if checkState == check.OK && o.OKSummary != "" {
+		return o.OKSummary
+	}
+
+	if len(o.PartialResults) == 0 {
+		// Oh, we actually don't have those either
+		return "No status information"
+	}
+
+	if checkState == check.OK {
+		return o.getGenericSummary()
+	}
+
+	// Non-OK result
+	// get worst-first non-ok PartialResults output
+	result := ""
+	worstState := check.OK
+
+	for _, partRes := range o.PartialResults {
+		if check.Compare(worstState, partRes.GetStatus()) > 0 {
+			result = partRes.getPartialResultFailedOutput()
+		}
+	}
+
+	if result == "" {
+		// No output in PartialResults ...
+		result = o.getGenericSummary()
+	}
+
+	return result
+}
+
+func (o *Overall) getGenericSummary() string {
+	// OK state, but no Ok_summary set
+	stats := o.getStatusCount()
+	result := ""
+
+	if stats.Critical > 0 {
+		result += fmt.Sprintf("critical=%d ", stats.Critical)
+	}
+
+	if stats.Unknown > 0 {
+		result += fmt.Sprintf("unknown=%d ", stats.Unknown)
+	}
+
+	if stats.Warning > 0 {
+		result += fmt.Sprintf("warning=%d ", stats.Warning)
+	}
+
+	if stats.OK > 0 {
+		result += fmt.Sprintf("ok=%d ", stats.OK)
+	}
+
+	result = "states: " + strings.TrimSpace(result)
+
+	return result
+}
+
+func (s *PartialResult) getPartialResultFailedOutput() string {
+	if len(s.PartialResults) == 0 {
+		// this is a leave node
+		return s.Output
+	}
+
+	worstState := check.OK
+	result := ""
+
+	for _, partRes := range s.PartialResults {
+		if check.Compare(worstState, partRes.GetStatus()) > 0 {
+			result = partRes.getPartialResultFailedOutput()
+		}
+	}
+
+	return result
 }

@@ -43,9 +43,9 @@ func TestOverall_AddWarning(t *testing.T) {
 		t.Fatalf("expected 1, got %d", counts.Warning)
 	}
 
-	expectedOutput := "states: warning=1\n\\_ [WARNING] test warning\n"
+	expectedOutput := "test warning\n\\_ [WARNING] test warning\n"
 	if !reflect.DeepEqual(overall.GetOutput(), expectedOutput) {
-		t.Fatalf("expected \n%v\n, got \n%v", expectedOutput, overall.GetOutput())
+		t.Fatalf("expected %q\n, got %q", expectedOutput, overall.GetOutput())
 	}
 }
 
@@ -59,7 +59,7 @@ func TestOverall_AddCritical(t *testing.T) {
 		t.Fatalf("expected 1, got %d", counts.Critical)
 	}
 
-	expectedOutputs := "states: critical=1\n\\_ [CRITICAL] test critical\n"
+	expectedOutputs := "test critical\n\\_ [CRITICAL] test critical\n"
 	if !reflect.DeepEqual(overall.GetOutput(), expectedOutputs) {
 		t.Fatalf("expected %q, got %q", expectedOutputs, overall.GetOutput())
 	}
@@ -75,7 +75,7 @@ func TestOverall_AddUnknown(t *testing.T) {
 		t.Fatalf("expected 1, got %d", counts.Unknown)
 	}
 
-	expectedOutputs := "states: unknown=1\n\\_ [UNKNOWN] test unknown\n"
+	expectedOutputs := "test unknown\n\\_ [UNKNOWN] test unknown\n"
 	if !reflect.DeepEqual(overall.GetOutput(), expectedOutputs) {
 		t.Fatalf("expected %q, got %q", expectedOutputs, overall.GetOutput())
 	}
@@ -107,9 +107,9 @@ func TestOverall_GetOutput(t *testing.T) {
 	overall = Overall{}
 	overall.Add(0, "First OK")
 	overall.Add(2, "Second Critical")
-	overall.Summary = "Custom Summary"
+	overall.OKSummary = "Custom Summary"
 
-	expected = "Custom Summary\n\\_ [OK] First OK\n\\_ [CRITICAL] Second Critical\n"
+	expected = "Second Critical\n\\_ [OK] First OK\n\\_ [CRITICAL] Second Critical\n"
 
 	if expected != overall.GetOutput() {
 		t.Fatalf("expected %q, got %q", expected, overall.GetOutput())
@@ -131,7 +131,7 @@ func ExampleOverall_GetOutput() {
 
 	fmt.Println(overall.GetOutput())
 	// Output:
-	// states: critical=1 ok=1
+	// The other is critical
 	// \_ [OK] One element is good
 	// \_ [CRITICAL] The other is critical
 }
@@ -212,7 +212,7 @@ func TestOverall_withEnhancedSubchecks(t *testing.T) {
 
 	resString := overall.GetOutput()
 
-	expectedString := `states: warning=1 ok=1
+	expectedString := `Subcheck2 Test
 \_ [OK] Subcheck1 Test
 \_ [WARNING] Subcheck2 Test
 |pd_test=5s pd_test2=1099511627776kB;@3.14:7036874417766;549755813887:1208925819614629174706176;;18446744073709551615 kl;jr2if;l2rkjasdf=5m asdf=18446744073709551615B
@@ -344,7 +344,7 @@ func TestOverall_withSubchecks_PartialResult(t *testing.T) {
 
 	overall.AddSubcheck(subcheck)
 
-	res := `states: critical=1
+	res := `SubSubSubcheck
 \_ [CRITICAL] PartialResult
     \_ [CRITICAL] SubSubcheck
         \_ [CRITICAL] SubSubSubcheck
@@ -434,7 +434,7 @@ func TestSubchecksPerfdata(t *testing.T) {
 	overall.AddSubcheck(check1)
 	overall.AddSubcheck(check2)
 
-	resultString := "states: warning=1 ok=1\n\\_ [OK] Check1\n\\_ [WARNING] Check2\n|foo=23 bar=42 'foo2 bar'=46\n"
+	resultString := "Check2\n\\_ [OK] Check1\n\\_ [WARNING] Check2\n|foo=23 bar=42 'foo2 bar'=46\n"
 
 	if resultString != overall.GetOutput() {
 		t.Fatalf("expected %s, got %s", resultString, overall.GetOutput())
