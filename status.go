@@ -83,9 +83,7 @@ func Compare(a Status, b Status) int {
 		switch b {
 		case OK:
 			return 0
-		case Warning:
-		case Unknown:
-		case Critical:
+		case Warning, Unknown, Critical:
 			return 1
 		}
 	case Warning:
@@ -94,14 +92,12 @@ func Compare(a Status, b Status) int {
 			return -1
 		case Warning:
 			return 0
-		case Unknown:
-		case Critical:
+		case Unknown, Critical:
 			return 1
 		}
 	case Unknown:
 		switch b {
-		case OK:
-		case Warning:
+		case OK, Warning:
 			return -1
 		case Unknown:
 			return 0
@@ -110,9 +106,7 @@ func Compare(a Status, b Status) int {
 		}
 	case Critical:
 		switch b {
-		case OK:
-		case Warning:
-		case Unknown:
+		case OK, Warning, Unknown:
 			return -1
 		case Critical:
 			return 0

@@ -141,3 +141,20 @@ func TestStatus_FromInt_WithErr(t *testing.T) {
 		t.Fatalf("expected Unknown, got %v", actual)
 	}
 }
+
+func TestCompareStatus(t *testing.T) {
+	inputList := []Status{OK, Warning, Unknown, Critical}
+
+	for _, val := range inputList {
+		if Compare(val, val) != 0 {
+			t.Fatalf("Equal comparison failed with %d and %d", val, val)
+		}
+	}
+
+	if Compare(OK, Warning) <= 0 {
+		t.Fatalf("Comparison failed with OK and Warning, got %d", Compare(OK, Warning))
+	}
+	if Compare(Warning, OK) >= 0 {
+		t.Fatalf("Comparison failed with OK and Warning, got %d", Compare(Warning, OK))
+	}
+}
