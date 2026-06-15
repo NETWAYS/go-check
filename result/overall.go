@@ -36,10 +36,7 @@ type Overall struct {
 // Add adds a return state explicitly
 func (o *Overall) Add(state check.Status, output string) {
 	var result PartialResult
-	if result.SetState(state) != nil {
-		panic("failed to set state in new PartialResult")
-	}
-
+	result.SetState(state)
 	result.Output = output
 	o.AddSubcheck(result)
 }
@@ -73,7 +70,6 @@ func (o *Overall) GetStatus() check.Status {
 }
 
 // GetSummary returns a text representation of the current state of the Overall
-// nolint: funlen
 func (o *Overall) GetSummary() string {
 	if o.Summary != "" {
 		return o.Summary
@@ -181,8 +177,8 @@ type PartialResult struct {
 	defaultStateSetExplicitly bool
 }
 
-// NewPartialResult initializer with "sane" defaults
-// Notable default compared to the nil object: the default state is set to Unknown
+// NewPartialResult initializer with defaults. It is recommended to use NewPartialResult.
+// The default compared to the nil object is the default state is set to Unknown.
 func NewPartialResult() PartialResult {
 	return PartialResult{
 		stateSetExplicitly: false,
@@ -201,19 +197,15 @@ func (s *PartialResult) String() string {
 }
 
 // SetDefaultState sets a new default state for a PartialResult
-func (s *PartialResult) SetDefaultState(state check.Status) error {
+func (s *PartialResult) SetDefaultState(state check.Status) {
 	s.defaultState = state
 	s.defaultStateSetExplicitly = true
-
-	return nil
 }
 
 // SetState sets a state for a PartialResult
-func (s *PartialResult) SetState(state check.Status) error {
+func (s *PartialResult) SetState(state check.Status) {
 	s.state = state
 	s.stateSetExplicitly = true
-
-	return nil
 }
 
 // GetStatus returns the current state (ok, warning, critical, unknown) of the PartialResult
