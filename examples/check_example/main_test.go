@@ -20,14 +20,14 @@ func TestMyMain(t *testing.T) {
 	expected = "[OK] - value is 10"
 
 	if !strings.Contains(actual, expected) {
-		t.Fatalf("expected %v, got %v", expected, actual)
+		t.Fatalf("expected %q, got %q", expected, actual)
 	}
 
 	actual = testhelper.RunMainTest(main, "--warning", "10", "--value", "11")
 	expected = "[WARNING] - value is 11"
 
 	if !strings.Contains(actual, expected) {
-		t.Fatalf("expected %v, got %v", expected, actual)
+		t.Fatalf("expected %q\n, got %q", expected, actual)
 	}
 }
 

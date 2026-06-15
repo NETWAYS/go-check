@@ -19,7 +19,7 @@ would exit with code 1
 `
 
 	if actual != expected {
-		t.Fatalf("expected %v, got %v", expected, actual)
+		t.Fatalf("expected %q\n, got %q", expected, actual)
 	}
 }
 

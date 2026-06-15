@@ -11,7 +11,7 @@ func main() {
 
 	var overall result.Overall
 
-	check1 := result.PartialResult{}
+	check1 := result.NewPartialResult()
 
 	check1.Output = "Check1"
 	check1.SetState(check.OK)
@@ -21,7 +21,9 @@ func main() {
 		Value: 23,
 	})
 
-	check2 := result.PartialResult{}
+	overall.AddSubcheck(check1)
+
+	check2 := result.NewPartialResult()
 
 	check2.Output = "Check2"
 	check2.SetState(check.Warning)
@@ -35,7 +37,6 @@ func main() {
 		Value: 46,
 	})
 
-	overall.AddSubcheck(check1)
 	overall.AddSubcheck(check2)
 
 	check.Exit(overall.GetStatus(), overall.GetOutput())
