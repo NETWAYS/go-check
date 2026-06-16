@@ -29,7 +29,7 @@ type statusCount struct {
 // one suffices, but one fails, the whole check might be OK and only the subcheck
 // Warning or Critical.
 type Overall struct {
-	OKSummary      string
+	OKSummary      string // default summary (first line of output) if everything is ok. Has to be set in a plugin
 	PartialResults []PartialResult
 }
 
