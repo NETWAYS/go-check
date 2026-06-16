@@ -39,5 +39,8 @@ func main() {
 
 	overall.AddSubcheck(check2)
 
+	overall.Add(check.Warning, "Check3")
+	overall.Add(check.OK, "Check4")
+
 	check.Exit(overall.GetStatus(), overall.GetOutput())
 }
