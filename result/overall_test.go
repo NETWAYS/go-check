@@ -518,19 +518,57 @@ func TestOverallOutputWithMultiLayerPartials(t *testing.T) {
 	}
 }
 
-func TestGetSummary_Worststate(t *testing.T) {
+func TestOverallGetOutput_WithSingleState(t *testing.T) {
 	o := Overall{}
-	o.Add(check.Warning, "WARN1")
+	o.Add(check.Warning, "WARN")
+
+	output := o.GetOutput()
+
+	first_line := strings.Split(output, "\n")[0]
+
+	if !strings.Contains(first_line, "WARN") {
+		t.Fatalf("expected %s in first line, but output was %q", "WARN", output)
+	}
+}
+
+func TestOverallGetOutput_WithMultipleStates(t *testing.T) {
+	o := Overall{}
+	o.Add(check.Warning, "WARN")
 
 	critString := "CRIT"
-	o.Add(check.Critical, critString)
-	o.Add(check.Warning, "WARN2")
 
-	output := o.GetOutput() // Should be CRIT
+	o.Add(check.Critical, critString)
+	o.Add(check.Warning, "WARN")
+
+	output := o.GetOutput()
 
 	first_line := strings.Split(output, "\n")[0]
 
 	if !strings.Contains(first_line, critString) {
 		t.Fatalf("expected %s in first line, but output was %q", critString, output)
+	}
+}
+
+func TestOverallGetOutput_WithMultipleStatesMultipleTimes(t *testing.T) {
+	o := Overall{}
+	o.Add(check.OK, "1")
+	o.Add(check.OK, "2")
+
+	output := o.GetOutput()
+
+	o.Add(check.Warning, "3")
+	o.Add(check.Warning, "4")
+
+	output = o.GetOutput()
+
+	o.Add(check.Unknown, "5")
+	o.Add(check.Critical, "WANT")
+
+	output = o.GetOutput()
+
+	first_line := strings.Split(output, "\n")[0]
+
+	if !strings.Contains(first_line, "WANT") {
+		t.Fatalf("expected %s in first line, but output was %q", "WANT", output)
 	}
 }

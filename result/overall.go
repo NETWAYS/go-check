@@ -247,11 +247,10 @@ func (o *Overall) getSummary() string {
 		return o.getGenericSummary()
 	}
 
-	// Non-OK result
-	// get worst-first non-ok PartialResults output
 	result := ""
 	worstState := check.OK
 
+	// Get the worst non-ok PartialResults output
 	for _, partRes := range o.PartialResults {
 		if check.Compare(worstState, partRes.GetStatus()) > 0 {
 			result = partRes.getPartialResultFailedOutput()
@@ -260,7 +259,7 @@ func (o *Overall) getSummary() string {
 	}
 
 	if result == "" {
-		// No output in PartialResults ...
+		// No output in PartialResults thus we generate the generic summary
 		result = o.getGenericSummary()
 	}
 
@@ -298,9 +297,10 @@ func (s *PartialResult) getPartialResultFailedOutput() string {
 		return s.Output
 	}
 
-	worstState := check.OK
 	result := ""
+	worstState := check.OK
 
+	// Get the worst non-ok PartialResults output
 	for _, partRes := range s.PartialResults {
 		if check.Compare(worstState, partRes.GetStatus()) > 0 {
 			result = partRes.getPartialResultFailedOutput()

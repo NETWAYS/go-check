@@ -158,12 +158,18 @@ func TestCompareStatus(t *testing.T) {
 	}
 
 	ComparisonTests := []CompareSet{
+		{OK, Critical, 1},
 		{OK, Warning, 1},
-		{Warning, OK, -1},
-		{Critical, Warning, -1},
+		{OK, Unknown, 1},
 		{Warning, Critical, 1},
-		{Critical, Unknown, -1},
+		{Warning, Unknown, 1},
+		{Warning, OK, -1},
 		{Unknown, Critical, 1},
+		{Unknown, OK, -1},
+		{Unknown, Warning, -1},
+		{Critical, OK, -1},
+		{Critical, Warning, -1},
+		{Critical, Unknown, -1},
 	}
 
 	for _, set := range ComparisonTests {
