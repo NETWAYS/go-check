@@ -255,6 +255,7 @@ func (o *Overall) getSummary() string {
 	for _, partRes := range o.PartialResults {
 		if check.Compare(worstState, partRes.GetStatus()) > 0 {
 			result = partRes.getPartialResultFailedOutput()
+			worstState = partRes.GetStatus()
 		}
 	}
 
@@ -303,6 +304,7 @@ func (s *PartialResult) getPartialResultFailedOutput() string {
 	for _, partRes := range s.PartialResults {
 		if check.Compare(worstState, partRes.GetStatus()) > 0 {
 			result = partRes.getPartialResultFailedOutput()
+			worstState = partRes.GetStatus()
 		}
 	}
 
