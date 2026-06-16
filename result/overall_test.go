@@ -3,6 +3,7 @@ package result
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/NETWAYS/go-check"
@@ -514,5 +515,22 @@ func TestOverallOutputWithMultiLayerPartials(t *testing.T) {
 
 	if check.Critical != overall.GetStatus() {
 		t.Fatalf("expected %d, got %d", check.Critical, overall.GetStatus())
+	}
+}
+
+func TestGetSummary_Worststate(t *testing.T) {
+	o := Overall{}
+	o.Add(check.Warning, "WARN1")
+
+	critString := "CRIT"
+	o.Add(check.Critical, critString)
+	o.Add(check.Warning, "WARN2")
+
+	output := o.GetOutput() // Should be CRIT
+
+	first_line := strings.Split(output, "\n")[0]
+
+	if !strings.Contains(first_line, critString) {
+		t.Fatalf("expected %s in first line, but output was %q", critString, output)
 	}
 }
