@@ -76,3 +76,47 @@ func (s Status) String() string {
 		return UnknownString
 	}
 }
+
+// Compare compares two Status types
+// if the left one (a) is worse than the right one (b), the result is < 0
+// if they are equal, the result is 0
+// if the right one (b) is worse than the left one (a), the result is > 0
+func Compare(a Status, b Status) int {
+	switch a {
+	case OK:
+		switch b {
+		case OK:
+			return 0
+		case Warning, Unknown, Critical:
+			return 1
+		}
+	case Warning:
+		switch b {
+		case OK:
+			return -1
+		case Warning:
+			return 0
+		case Unknown, Critical:
+			return 1
+		}
+	case Unknown:
+		switch b {
+		case OK, Warning:
+			return -1
+		case Unknown:
+			return 0
+		case Critical:
+			return 1
+		}
+	case Critical:
+		switch b {
+		case OK, Warning, Unknown:
+			return -1
+		case Critical:
+			return 0
+		}
+	}
+
+	// should not be possible to land here
+	return 0
+}

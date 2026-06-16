@@ -3,6 +3,7 @@ package result
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/NETWAYS/go-check"
@@ -21,13 +22,15 @@ func TestOverall_AddOK(t *testing.T) {
 	overall := Overall{}
 	overall.Add(0, "test ok")
 
-	if overall.oks != 1 {
-		t.Fatalf("expected 1, got %d", overall.oks)
+	counts := overall.getStatusCount()
+
+	if counts.OK != 1 && counts.Critical != 0 && counts.Warning != 0 && counts.Unknown != 0 {
+		t.Fatalf("expected 1, got %d", counts.OK)
 	}
 
-	expectedOutputs := []string{"[OK] test ok"}
-	if !reflect.DeepEqual(overall.Outputs, expectedOutputs) {
-		t.Fatalf("expected %v, got %v", expectedOutputs, overall.Outputs)
+	expectedOutput := "states: ok=1\n\\_ [OK] test ok\n"
+	if !reflect.DeepEqual(overall.GetOutput(), expectedOutput) {
+		t.Fatalf("expected \n%q\n, got \n%q\n", expectedOutput, overall.GetOutput())
 	}
 }
 
@@ -35,13 +38,15 @@ func TestOverall_AddWarning(t *testing.T) {
 	overall := Overall{}
 	overall.Add(1, "test warning")
 
-	if overall.warnings != 1 {
-		t.Fatalf("expected 1, got %d", overall.warnings)
+	counts := overall.getStatusCount()
+
+	if counts.OK != 0 && counts.Critical != 0 && counts.Warning != 1 && counts.Unknown != 0 {
+		t.Fatalf("expected 1, got %d", counts.Warning)
 	}
 
-	expectedOutputs := []string{"[WARNING] test warning"}
-	if !reflect.DeepEqual(overall.Outputs, expectedOutputs) {
-		t.Fatalf("expected %v, got %v", expectedOutputs, overall.Outputs)
+	expectedOutput := "test warning\n\\_ [WARNING] test warning\n"
+	if !reflect.DeepEqual(overall.GetOutput(), expectedOutput) {
+		t.Fatalf("expected %q\n, got %q", expectedOutput, overall.GetOutput())
 	}
 }
 
@@ -49,13 +54,15 @@ func TestOverall_AddCritical(t *testing.T) {
 	overall := Overall{}
 	overall.Add(2, "test critical")
 
-	if overall.criticals != 1 {
-		t.Fatalf("expected 1, got %d", overall.criticals)
+	counts := overall.getStatusCount()
+
+	if counts.OK != 0 && counts.Critical != 1 && counts.Warning != 0 && counts.Unknown != 0 {
+		t.Fatalf("expected 1, got %d", counts.Critical)
 	}
 
-	expectedOutputs := []string{"[CRITICAL] test critical"}
-	if !reflect.DeepEqual(overall.Outputs, expectedOutputs) {
-		t.Fatalf("expected %v, got %v", expectedOutputs, overall.Outputs)
+	expectedOutputs := "test critical\n\\_ [CRITICAL] test critical\n"
+	if !reflect.DeepEqual(overall.GetOutput(), expectedOutputs) {
+		t.Fatalf("expected %q, got %q", expectedOutputs, overall.GetOutput())
 	}
 }
 
@@ -63,64 +70,15 @@ func TestOverall_AddUnknown(t *testing.T) {
 	overall := Overall{}
 	overall.Add(3, "test unknown")
 
-	if overall.unknowns != 1 {
-		t.Fatalf("expected 1, got %d", overall.unknowns)
+	counts := overall.getStatusCount()
+
+	if counts.OK != 0 && counts.Critical != 0 && counts.Warning != 0 && counts.Unknown != 1 {
+		t.Fatalf("expected 1, got %d", counts.Unknown)
 	}
 
-	expectedOutputs := []string{"[UNKNOWN] test unknown"}
-	if !reflect.DeepEqual(overall.Outputs, expectedOutputs) {
-		t.Fatalf("expected %v, got %v", expectedOutputs, overall.Outputs)
-	}
-}
-
-func TestOverall_GetStatus_GetSummary(t *testing.T) {
-	testcases := map[string]struct {
-		actual          Overall
-		expectedSummary string
-		expectedStatus  check.Status
-	}{
-		"No status information": {
-			actual:          Overall{},
-			expectedSummary: "No status information",
-			expectedStatus:  check.Unknown,
-		},
-		"states: ok=1": {
-			actual:          Overall{oks: 1, stateSetExplicitly: true},
-			expectedSummary: "states: ok=1",
-			expectedStatus:  check.OK,
-		},
-		"states: critical=2 unknown=1 warning=2 ok=1": {
-			actual:          Overall{criticals: 2, oks: 1, warnings: 2, unknowns: 1, stateSetExplicitly: true},
-			expectedSummary: "states: critical=2 unknown=1 warning=2 ok=1",
-			expectedStatus:  check.Critical,
-		},
-		"states: unknown=2 warning=2 ok=1": {
-			actual:          Overall{unknowns: 2, oks: 1, warnings: 2, stateSetExplicitly: true},
-			expectedSummary: "states: unknown=2 warning=2 ok=1",
-			expectedStatus:  check.Unknown,
-		},
-		"states: warning=2 ok=1": {
-			actual:          Overall{oks: 1, warnings: 2, stateSetExplicitly: true},
-			expectedSummary: "states: warning=2 ok=1",
-			expectedStatus:  check.Warning,
-		},
-		"foobar": {
-			actual:          Overall{Summary: "foobar"},
-			expectedSummary: "foobar",
-			expectedStatus:  check.Unknown,
-		},
-	}
-
-	for name, test := range testcases {
-		t.Run(name, func(t *testing.T) {
-			if test.expectedSummary != test.actual.GetSummary() {
-				t.Fatalf("expected summary %s, got %s", test.expectedSummary, test.actual.GetSummary())
-			}
-
-			if test.expectedStatus != test.actual.GetStatus() {
-				t.Fatalf("expected status %d, got %d", test.expectedStatus, test.actual.GetStatus())
-			}
-		})
+	expectedOutputs := "test unknown\n\\_ [UNKNOWN] test unknown\n"
+	if !reflect.DeepEqual(overall.GetOutput(), expectedOutputs) {
+		t.Fatalf("expected %q, got %q", expectedOutputs, overall.GetOutput())
 	}
 }
 
@@ -131,31 +89,31 @@ func TestOverall_GetOutput(t *testing.T) {
 	overall.Add(0, "First OK")
 	overall.Add(0, "Second OK")
 
-	expected := "states: ok=2\n[OK] First OK\n[OK] Second OK\n"
+	expected := "states: ok=2\n\\_ [OK] First OK\n\\_ [OK] Second OK\n"
 
 	if expected != overall.GetOutput() {
-		t.Fatalf("expected %s, got %s", expected, overall.GetOutput())
+		t.Fatalf("expected %q, got %q", expected, overall.GetOutput())
 	}
 
 	overall = Overall{}
 	overall.Add(0, "State OK")
 
-	expected = "states: ok=1\n[OK] State OK\n"
+	expected = "states: ok=1\n\\_ [OK] State OK\n"
 
 	if expected != overall.GetOutput() {
-		t.Fatalf("expected %s, got %s", expected, overall.GetOutput())
+		t.Fatalf("expected %q, got %q", expected, overall.GetOutput())
 	}
 
 	// TODO: compress when only one state
 	overall = Overall{}
 	overall.Add(0, "First OK")
 	overall.Add(2, "Second Critical")
-	overall.Summary = "Custom Summary"
+	overall.OKSummary = "Custom Summary"
 
-	expected = "Custom Summary\n[OK] First OK\n[CRITICAL] Second Critical\n"
+	expected = "Second Critical\n\\_ [OK] First OK\n\\_ [CRITICAL] Second Critical\n"
 
 	if expected != overall.GetOutput() {
-		t.Fatalf("expected %s, got %s", expected, overall.GetOutput())
+		t.Fatalf("expected %q, got %q", expected, overall.GetOutput())
 	}
 }
 
@@ -164,8 +122,7 @@ func ExampleOverall_Add() {
 	overall.Add(check.OK, "One element is good")
 	overall.Add(check.Critical, "The other is critical")
 
-	fmt.Printf("%#v\n", overall)
-	// Output: result.Overall{oks:1, warnings:0, criticals:1, unknowns:0, Summary:"", stateSetExplicitly:true, Outputs:[]string{"[OK] One element is good", "[CRITICAL] The other is critical"}, PartialResults:[]result.PartialResult(nil)}
+	fmt.Printf("%s", overall.GetOutput())
 }
 
 func ExampleOverall_GetOutput() {
@@ -175,9 +132,9 @@ func ExampleOverall_GetOutput() {
 
 	fmt.Println(overall.GetOutput())
 	// Output:
-	// states: critical=1 ok=1
-	// [OK] One element is good
-	// [CRITICAL] The other is critical
+	// The other is critical
+	// \_ [OK] One element is good
+	// \_ [CRITICAL] The other is critical
 }
 
 func ExampleOverall_GetStatus() {
@@ -204,13 +161,13 @@ func ExampleOverall_withSubchecks() {
 	subcheck.SetState(check.OK)
 
 	overall.AddSubcheck(subcheck)
-	overall.Add(0, "bla")
+	overall.Add(check.OK, "bla")
 
 	fmt.Println(overall.GetOutput())
 	// Output:
-	// states: ok=1
-	// [OK] bla
+	// states: ok=2
 	// \_ [OK] Subcheck1 Test
+	// \_ [OK] bla
 	// |pd_test=5s
 }
 
@@ -256,7 +213,7 @@ func TestOverall_withEnhancedSubchecks(t *testing.T) {
 
 	resString := overall.GetOutput()
 
-	expectedString := `states: warning=1 ok=1
+	expectedString := `Subcheck2 Test
 \_ [OK] Subcheck1 Test
 \_ [WARNING] Subcheck2 Test
 |pd_test=5s pd_test2=1099511627776kB;@3.14:7036874417766;549755813887:1208925819614629174706176;;18446744073709551615 kl;jr2if;l2rkjasdf=5m asdf=18446744073709551615B
@@ -388,7 +345,7 @@ func TestOverall_withSubchecks_PartialResult(t *testing.T) {
 
 	overall.AddSubcheck(subcheck)
 
-	res := `states: critical=1
+	res := `SubSubSubcheck
 \_ [CRITICAL] PartialResult
     \_ [CRITICAL] SubSubcheck
         \_ [CRITICAL] SubSubSubcheck
@@ -478,7 +435,7 @@ func TestSubchecksPerfdata(t *testing.T) {
 	overall.AddSubcheck(check1)
 	overall.AddSubcheck(check2)
 
-	resultString := "states: warning=1 ok=1\n\\_ [OK] Check1\n\\_ [WARNING] Check2\n|foo=23 bar=42 'foo2 bar'=46\n"
+	resultString := "Check2\n\\_ [OK] Check1\n\\_ [WARNING] Check2\n|foo=23 bar=42 'foo2 bar'=46\n"
 
 	if resultString != overall.GetOutput() {
 		t.Fatalf("expected %s, got %s", resultString, overall.GetOutput())
@@ -558,5 +515,60 @@ func TestOverallOutputWithMultiLayerPartials(t *testing.T) {
 
 	if check.Critical != overall.GetStatus() {
 		t.Fatalf("expected %d, got %d", check.Critical, overall.GetStatus())
+	}
+}
+
+func TestOverallGetOutput_WithSingleState(t *testing.T) {
+	o := Overall{}
+	o.Add(check.Warning, "WARN")
+
+	output := o.GetOutput()
+
+	first_line := strings.Split(output, "\n")[0]
+
+	if !strings.Contains(first_line, "WARN") {
+		t.Fatalf("expected %s in first line, but output was %q", "WARN", output)
+	}
+}
+
+func TestOverallGetOutput_WithMultipleStates(t *testing.T) {
+	o := Overall{}
+	o.Add(check.Warning, "WARN")
+
+	critString := "CRIT"
+
+	o.Add(check.Critical, critString)
+	o.Add(check.Warning, "WARN")
+
+	output := o.GetOutput()
+
+	first_line := strings.Split(output, "\n")[0]
+
+	if !strings.Contains(first_line, critString) {
+		t.Fatalf("expected %s in first line, but output was %q", critString, output)
+	}
+}
+
+func TestOverallGetOutput_WithMultipleStatesMultipleTimes(t *testing.T) {
+	o := Overall{}
+	o.Add(check.OK, "1")
+	o.Add(check.OK, "2")
+
+	output := o.GetOutput()
+
+	o.Add(check.Warning, "3")
+	o.Add(check.Warning, "4")
+
+	output = o.GetOutput()
+
+	o.Add(check.Unknown, "5")
+	o.Add(check.Critical, "WANT")
+
+	output = o.GetOutput()
+
+	first_line := strings.Split(output, "\n")[0]
+
+	if !strings.Contains(first_line, "WANT") {
+		t.Fatalf("expected %s in first line, but output was %q", "WANT", output)
 	}
 }

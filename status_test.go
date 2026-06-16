@@ -141,3 +141,40 @@ func TestStatus_FromInt_WithErr(t *testing.T) {
 		t.Fatalf("expected Unknown, got %v", actual)
 	}
 }
+
+type CompareSet struct {
+	Left   Status
+	Right  Status
+	Result int
+}
+
+func TestCompareStatus(t *testing.T) {
+	inputList := []Status{OK, Warning, Unknown, Critical}
+
+	for _, val := range inputList {
+		if Compare(val, val) != 0 {
+			t.Fatalf("Equal comparison failed with %d and %d", val, val)
+		}
+	}
+
+	ComparisonTests := []CompareSet{
+		{OK, Critical, 1},
+		{OK, Warning, 1},
+		{OK, Unknown, 1},
+		{Warning, Critical, 1},
+		{Warning, Unknown, 1},
+		{Warning, OK, -1},
+		{Unknown, Critical, 1},
+		{Unknown, OK, -1},
+		{Unknown, Warning, -1},
+		{Critical, OK, -1},
+		{Critical, Warning, -1},
+		{Critical, Unknown, -1},
+	}
+
+	for _, set := range ComparisonTests {
+		if Compare(set.Left, set.Right) != set.Result {
+			t.Fatalf("Comparison failed with %s and %s, got %d", set.Left, set.Right, Compare(set.Left, set.Right))
+		}
+	}
+}
