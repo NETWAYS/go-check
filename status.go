@@ -77,6 +77,10 @@ func (s Status) String() string {
 	}
 }
 
+// Compare compares two Status types
+// if the left one (a) is worse than the right one (b), the result is < 0
+// if they are equal, the result is 0
+// if the right one (b) is worse than the left one (a), the result is > 0
 func Compare(a Status, b Status) int {
 	switch a {
 	case OK:
