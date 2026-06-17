@@ -4,11 +4,11 @@ import (
 	"strings"
 )
 
-// PerfdataList can store multiple perfdata and brings a simple fmt.Stringer interface
-// nolint: revive
-type PerfdataList []*Perfdata
+// PerfdataList can store multiple perfdata and implements the fmt.Stringer interface
+// to provide formated output for the performance data
+type PerfdataList []*Perfdata //nolint: revive
 
-// String returns string representations of all Perfdata
+// String returns string representations of all Perfdata added to the list
 func (l *PerfdataList) String() string {
 	var out strings.Builder
 
@@ -25,7 +25,7 @@ func (l *PerfdataList) String() string {
 	return strings.Trim(out.String(), " ")
 }
 
-// Add adds a Perfdata pointer to the list
+// Add adds a Perfdata pointer to the list. Note that, it's not concurrency safe.
 func (l *PerfdataList) Add(p *Perfdata) {
 	*l = append(*l, p)
 }
