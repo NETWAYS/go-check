@@ -1,3 +1,4 @@
+// Package convert provides function to convert and humanize units
 package convert
 
 import (

@@ -27,7 +27,9 @@ const (
 )
 
 // NewStatus returns a state corresponding to its
-// common string representation
+// common string representation.
+// When an invalid parameter is passed an error and
+// an Unknown status will be returned
 func NewStatus(status int) (Status, error) {
 	switch status {
 	case 0:
@@ -44,7 +46,9 @@ func NewStatus(status int) (Status, error) {
 }
 
 // NewStatusFromString returns a state corresponding to its
-// common string representation
+// common string representation.
+// When an invalid parameter is passed an error and
+// an Unknown status will be returned
 func NewStatusFromString(status string) (Status, error) {
 	s := strings.ToUpper(status)
 	switch s {
@@ -77,10 +81,38 @@ func (s Status) String() string {
 	}
 }
 
-// Compare compares two Status types
-// if the left one (a) is worse than the right one (b), the result is < 0
-// if they are equal, the result is 0
-// if the right one (b) is worse than the left one (a), the result is > 0
+// WorstState determines the worst state from a list of states
+//
+// Helps combining an overall states, only based on a
+// few numbers for various checks.
+//
+// Order of preference: Critical, Unknown, Warning, Ok
+func WorstState(states ...Status) Status {
+	if len(states) < 1 {
+		return Unknown
+	}
+
+	overall := OK
+
+	for _, state := range states {
+		if Compare(overall, state) > 0 {
+			overall = state
+		}
+	}
+
+	if overall < OK || overall > Unknown {
+		overall = Unknown
+	}
+
+	return overall
+}
+
+// Compare compares two Status types.
+// If the left one (a) is worse than the right one (b), the result is < 0
+//
+// # If they are equal, the result is 0
+//
+// If the right one (b) is worse than the left one (a), the result is > 0
 func Compare(a Status, b Status) int {
 	switch a {
 	case OK:

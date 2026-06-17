@@ -36,7 +36,7 @@ var (
 
 // ParseThreshold parses a Threshold from a string.
 //
-// See Threshold for details.
+// See the Threshold type for details.
 func ParseThreshold(spec string) (t *Threshold, err error) {
 	t = &Threshold{}
 

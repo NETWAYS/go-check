@@ -178,3 +178,101 @@ func TestCompareStatus(t *testing.T) {
 		}
 	}
 }
+
+func TestWorstState(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    []Status
+		expected Status
+	}{
+		{
+			name:     "Unknown",
+			input:    []Status{Unknown},
+			expected: Unknown,
+		},
+		{
+			name:     "Unknown",
+			input:    []Status{Unknown},
+			expected: Unknown,
+		},
+		{
+			name:     "Critical",
+			input:    []Status{Critical},
+			expected: Critical,
+		},
+		{
+			name:     "Warning",
+			input:    []Status{Warning},
+			expected: Warning,
+		},
+		{
+			name:     "OK",
+			input:    []Status{OK},
+			expected: OK,
+		},
+		{
+			name:     "Mixed with Critical",
+			input:    []Status{OK, Warning, Critical, Unknown},
+			expected: Critical,
+		},
+		{
+			name:     "Mixed order with Critical",
+			input:    []Status{OK, Critical, Warning, Unknown},
+			expected: Critical,
+		},
+		{
+			name:     "Mixed with Unknown",
+			input:    []Status{OK, Warning, Unknown},
+			expected: Unknown,
+		},
+		{
+			name:     "Mixed order with Unknown",
+			input:    []Status{OK, Unknown, Warning},
+			expected: Unknown,
+		},
+		{
+			name:     "Warning with OKs",
+			input:    []Status{Warning, OK, OK},
+			expected: Warning,
+		},
+		{
+			name:     "Warning orderwith OKs",
+			input:    []Status{OK, Warning, OK},
+			expected: Warning,
+		},
+		{
+			name:     "All OK",
+			input:    []Status{OK, OK, OK},
+			expected: OK,
+		},
+		{
+			name:     "Empty",
+			input:    []Status{},
+			expected: Unknown,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := WorstState(tt.input...); got != tt.expected {
+				t.Errorf("WorstState(%v) is: %v, expected %v", tt.input, got, tt.expected)
+			}
+		})
+	}
+}
+
+func BenchmarkWorstState(b *testing.B) {
+	b.ReportAllocs()
+
+	// Initialize slice for benchmarking
+	states := make([]Status, 0, 100)
+	for i := range 100 {
+		st, _ := NewStatus(i % 4)
+		states = append(states, st)
+	}
+
+	for i := 0; i < b.N; i++ {
+		s := WorstState(states...)
+		_ = s
+	}
+}
