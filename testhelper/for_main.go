@@ -1,3 +1,4 @@
+// Package testhelper is used in testing. Don't use this package
 package testhelper
 
 import (
