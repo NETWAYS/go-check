@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// AllowExit lets you disable the call to os.Exit() in ExitXxx() functions of this package.
+// AllowExit lets you disable the call to os.Exit() in the BaseExit function of this package.
 // This should be used carefully and most likely only for testing.
 var AllowExit = true
 

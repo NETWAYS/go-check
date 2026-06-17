@@ -77,6 +77,33 @@ func (s Status) String() string {
 	}
 }
 
+// WorstState determines the worst state from a list of states
+//
+// Helps combining an overall states, only based on a
+// few numbers for various checks.
+//
+// Order of preference: Critical, Unknown, Warning, Ok
+func WorstState(states ...Status) Status {
+	if len(states) < 1 {
+		return Unknown
+	}
+
+	overall := OK
+
+	// nolint: gocritic
+	for _, state := range states {
+		if Compare(overall, state) > 0 {
+			overall = state
+		}
+	}
+
+	if overall < OK || overall > Unknown {
+		overall = Unknown
+	}
+
+	return overall
+}
+
 // Compare compares two Status types
 // if the left one (a) is worse than the right one (b), the result is < 0
 // if they are equal, the result is 0

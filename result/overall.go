@@ -193,7 +193,7 @@ func (s *PartialResult) GetStatus() check.Status {
 		states[i] = s.PartialResults[i].GetStatus()
 	}
 
-	return WorstState(states...)
+	return check.WorstState(states...)
 }
 
 // getPerfdata returns all subsequent perfdata as a concatenated string
