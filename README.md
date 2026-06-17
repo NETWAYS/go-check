@@ -124,8 +124,8 @@ pl.Add(&perfdata.Perfdata{
     Label: "process.cpu.percent",
     Value: 25,
     Uom:   "%",
-    Warn:  50,
-    Crit:  90,
+    Warn:  &check.Threshold{Lower: check.NegInf, Upper: 50 },
+    Crit:  &check.Threshold{Lower: check.NegInf, Upper: 90},
     Min:   0,
     Max:   100})
 
