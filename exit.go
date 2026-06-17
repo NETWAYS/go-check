@@ -14,8 +14,13 @@ var AllowExit = true
 // PrintStack prints the error stack when recovering from a panic with CatchPanic()
 var PrintStack = true
 
-// Exit exits the process with a given return code and output
+// Exit exits the process with a given return code determined from the given Status
+// and a text representation to stdout.
+//
 // Example: [OK] - everything is fine
+// exit 0
+// Example: [UNKNOWN] - not sure what happened
+// exit 3
 func Exit(rc Status, output ...string) {
 	var text strings.Builder
 
@@ -34,7 +39,8 @@ func Exit(rc Status, output ...string) {
 
 // BaseExit exits the process with a given return code.
 //
-// Can be controlled with the global AllowExit
+// Can be controlled with the global AllowExit.
+// This should be used carefully and most likely only for testing.
 func BaseExit(rc Status) {
 	if AllowExit {
 		os.Exit(int(rc))
@@ -45,6 +51,8 @@ func BaseExit(rc Status) {
 }
 
 // ExitError exists with an Unknown state while reporting the error
+// The Unknown state is used, since the plugin likely could not determine
+// the actual status of whatever was meant to be checked.
 func ExitError(err error) {
 	Exit(Unknown, fmt.Sprintf("%s (%T)", err.Error(), err))
 }
