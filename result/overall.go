@@ -187,6 +187,9 @@ func (s *PartialResult) String() string {
 
 // SetDefaultState sets a new default state for a PartialResult
 func (s *PartialResult) SetDefaultState(state check.Status) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	s.defaultState = state
 	s.defaultStateSetExplicitly = true
 }

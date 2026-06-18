@@ -670,3 +670,17 @@ func TestPartialResult_AddSubcheck_WithRace(t *testing.T) {
 	}
 	wg.Wait()
 }
+
+func TestPartialResult_SetDefaultState_WithRace(t *testing.T) {
+	pr := NewPartialResult()
+
+	var wg sync.WaitGroup
+	for range 5 {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			pr.SetDefaultState(check.Warning)
+		}()
+	}
+	wg.Wait()
+}
