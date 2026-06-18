@@ -59,7 +59,7 @@ func (o *Overall) AddSubcheck(subcheck *PartialResult) {
 }
 
 // GetStatus returns the current state (ok, warning, critical, unknown) of the Overall.
-// Add is concurrency-safe
+// GetStatus is concurrency-safe
 func (o *Overall) GetStatus() check.Status {
 	o.mu.RLock()
 	defer o.mu.RUnlock()
