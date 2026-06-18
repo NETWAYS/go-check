@@ -36,7 +36,7 @@ type Overall struct {
 	// The results that are associated with this overall
 	PartialResults []*PartialResult
 
-        // We use a Mutex to make sure PartialResults can be added and evaluated concurrently
+	// We use a Mutex to make sure PartialResults can be added and evaluated concurrently
 	mu sync.RWMutex
 }
 
@@ -50,7 +50,7 @@ func (o *Overall) Add(state check.Status, output string) {
 }
 
 // AddSubcheck adds a PartialResult to the Overall.
-// Add is concurrency-safe
+// AddSubcheck is concurrency-safe
 func (o *Overall) AddSubcheck(subcheck *PartialResult) {
 	o.mu.Lock()
 	defer o.mu.Unlock()
