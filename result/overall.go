@@ -1,3 +1,4 @@
+// Package result provides types and functions to organize results in a check plugin
 package result
 
 import (
