@@ -171,6 +171,8 @@ fmt.Println(o.GetOutput())
 // \_ [OK] My Subcheck
 ```
 
+Overall is concurrency-safe.
+
 ## Human-readable bytes
 
 `ParseBytes` is a helper that can be used to parse string containering IEC or SI bytes into the number of bytes.

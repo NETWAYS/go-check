@@ -4,6 +4,7 @@ package result
 import (
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/NETWAYS/go-check"
 	"github.com/NETWAYS/go-check/perfdata"
@@ -30,25 +31,39 @@ type statusCount struct {
 // one suffices, but one fails, the whole check might be OK and only the subcheck
 // Warning or Critical.
 type Overall struct {
-	OKSummary      string // default summary (first line of output) if everything is ok. Has to be set in a plugin
-	PartialResults []PartialResult
+	// default summary (first line of output) if everything is ok. Has to be set in a plugin
+	OKSummary string
+	// The results that are associated with this overall
+	PartialResults []*PartialResult
+
+	// We use a Mutex to make sure PartialResults can be added and evaluated concurrently
+	mu sync.RWMutex
 }
 
-// Add adds a return state explicitly
+// Add adds a return state explicitly.
+// Add is concurrency-safe
 func (o *Overall) Add(state check.Status, output string) {
 	var result PartialResult
 	result.SetState(state)
 	result.Output = output
-	o.AddSubcheck(result)
+	o.AddSubcheck(&result)
 }
 
-// AddSubcheck adds a PartialResult to the Overall
-func (o *Overall) AddSubcheck(subcheck PartialResult) {
+// AddSubcheck adds a PartialResult to the Overall.
+// AddSubcheck is concurrency-safe
+func (o *Overall) AddSubcheck(subcheck *PartialResult) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+
 	o.PartialResults = append(o.PartialResults, subcheck)
 }
 
-// GetStatus returns the current state (ok, warning, critical, unknown) of the Overall
+// GetStatus returns the current state (ok, warning, critical, unknown) of the Overall.
+// GetStatus is concurrency-safe
 func (o *Overall) GetStatus() check.Status {
+	o.mu.RLock()
+	defer o.mu.RUnlock()
+
 	statuses := o.getStatusCount()
 
 	if statuses.Critical > 0 {
@@ -70,8 +85,12 @@ func (o *Overall) GetStatus() check.Status {
 	return check.Unknown
 }
 
-// GetOutput returns a text representation of the current outputs of the Overall
+// GetOutput returns a text representation of the current outputs of the Overall.
+// GetOutput is concurrency-safe
 func (o *Overall) GetOutput() string {
+	o.mu.RLock()
+	defer o.mu.RUnlock()
+
 	var output strings.Builder
 
 	output.WriteString(o.getSummary() + "\n")
@@ -126,7 +145,7 @@ func (o *Overall) getStatusCount() statusCount {
 // PartialResult represents a sub-result for an Overall struct
 type PartialResult struct {
 	Perfdata       perfdata.PerfdataList
-	PartialResults []PartialResult
+	PartialResults []*PartialResult
 	Output         string
 
 	// Result state, either set explicitly or derived from partialResults
@@ -141,19 +160,24 @@ type PartialResult struct {
 	// and no PartialResults exist and no explicit state is set, GetStatus returns
 	// s.defaultState instead of check.Unknown.
 	defaultStateSetExplicitly bool
+
+	mu sync.RWMutex
 }
 
 // NewPartialResult initializer with defaults. It is recommended to use NewPartialResult.
 // The default compared to the nil object is the default state is set to Unknown.
-func NewPartialResult() PartialResult {
-	return PartialResult{
+func NewPartialResult() *PartialResult {
+	return &PartialResult{
 		stateSetExplicitly: false,
 		defaultState:       check.Unknown,
 	}
 }
 
 // AddSubcheck adds a PartialResult to the PartialResult
-func (s *PartialResult) AddSubcheck(subcheck PartialResult) {
+func (s *PartialResult) AddSubcheck(subcheck *PartialResult) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	s.PartialResults = append(s.PartialResults, subcheck)
 }
 
@@ -164,18 +188,27 @@ func (s *PartialResult) String() string {
 
 // SetDefaultState sets a new default state for a PartialResult
 func (s *PartialResult) SetDefaultState(state check.Status) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	s.defaultState = state
 	s.defaultStateSetExplicitly = true
 }
 
 // SetState sets a state for a PartialResult
 func (s *PartialResult) SetState(state check.Status) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	s.state = state
 	s.stateSetExplicitly = true
 }
 
 // GetStatus returns the current state (ok, warning, critical, unknown) of the PartialResult
 func (s *PartialResult) GetStatus() check.Status {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
 	if s.stateSetExplicitly {
 		return s.state
 	}
