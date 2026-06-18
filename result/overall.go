@@ -85,7 +85,7 @@ func (o *Overall) GetStatus() check.Status {
 }
 
 // GetOutput returns a text representation of the current outputs of the Overall.
-// Add is concurrency-safe
+// GetOutput is concurrency-safe
 func (o *Overall) GetOutput() string {
 	o.mu.RLock()
 	defer o.mu.RUnlock()
