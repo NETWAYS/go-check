@@ -83,10 +83,12 @@ func (s Status) String() string {
 
 // WorstState determines the worst state from a list of states
 //
-// Helps combining an overall states, only based on a
-// few numbers for various checks.
-//
+// This can be used to combine multiple states into a one state.
 // Order of preference: Critical, Unknown, Warning, Ok
+//
+// Note that, this precedence was decided for this package since
+// there is no specification for the preference.
+// See also: https://www.monitoring-plugins.org/doc/guidelines.html#AEN74
 func WorstState(states ...Status) Status {
 	if len(states) < 1 {
 		return Unknown

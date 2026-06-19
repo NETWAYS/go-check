@@ -19,7 +19,7 @@ import (
 // 10:20      < 10 or > 20, (outside the range of {10 .. 20})
 // @10:20     ≥ 10 and ≤ 20, (inside the range of {10 .. 20})
 //
-// Reference: https://www.monitoring-plugins.org/doc/guidelines.html#THRESHOLDFORMAT
+// See also: https://www.monitoring-plugins.org/doc/guidelines.html#THRESHOLDFORMAT
 type Threshold struct {
 	Inside bool
 	Lower  float64

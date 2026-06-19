@@ -78,14 +78,11 @@ func formatNumeric(value any) (string, error) {
 // Perfdata represents all properties of performance data for Icinga
 //
 // Implements fmt.Stringer to return the plaintext format for a plugin output.
+// See also: https://www.monitoring-plugins.org/doc/guidelines.html#AEN201
 //
 // For examples of Uom see:
-//
-// https://www.monitoring-plugins.org/doc/guidelines.html#AEN201
-//
-// https://github.com/Icinga/icinga2/blob/master/lib/base/perfdatavalue.cpp
-//
-// https://icinga.com/docs/icinga-2/latest/doc/05-service-monitoring/#unit-of-measurement-uom
+// - https://github.com/Icinga/icinga2/blob/master/lib/base/perfdatavalue.cpp
+// - https://icinga.com/docs/icinga-2/latest/doc/05-service-monitoring/#unit-of-measurement-uom
 type Perfdata struct {
 	Label string
 	Value any
