@@ -10,6 +10,8 @@ import (
 	"github.com/NETWAYS/go-check"
 )
 
+const PerfdataSeparatorSymbol = "|"
+
 // PerfdataList can store multiple perfdata and implements the fmt.Stringer interface
 // to provide formated output for the performance data
 type PerfdataList []*Perfdata //nolint: revive

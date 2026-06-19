@@ -12,6 +12,12 @@ func ExampleExit() {
 	// would exit with code 0
 }
 
+func ExampleExit_withVerticalBar() {
+	Exit(OK, fmt.Sprintf("Everything|is|fine - value=%d", 42))
+	// Output: [OK] - Everything is fine - value=42
+	// would exit with code 0
+}
+
 func ExampleExitError() {
 	err := fmt.Errorf("connection to %s has been timed out", "localhost:12345")
 	ExitError(err)

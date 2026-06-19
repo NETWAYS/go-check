@@ -100,14 +100,14 @@ func (o *Overall) GetOutput() string {
 
 		// Generate indeted output and perfdata for all partialResults
 		for i := range o.PartialResults {
-			output.WriteString(o.PartialResults[i].getOutput(0))
+			output.WriteString(strings.ReplaceAll(o.PartialResults[i].getOutput(0), perfdata.PerfdataSeparatorSymbol, " "))
 			pdata.WriteString(" " + o.PartialResults[i].getPerfdata())
 		}
 
 		pdataString := strings.Trim(pdata.String(), " ")
 
 		if len(pdataString) > 0 {
-			output.WriteString("|" + pdataString + "\n")
+			output.WriteString(perfdata.PerfdataSeparatorSymbol + pdataString + "\n")
 		}
 	}
 
@@ -183,7 +183,7 @@ func (s *PartialResult) AddSubcheck(subcheck *PartialResult) {
 
 // String returns the status and output of the PartialResult
 func (s *PartialResult) String() string {
-	return fmt.Sprintf("[%s] %s", s.GetStatus(), s.Output)
+	return fmt.Sprintf("[%s] %s", s.GetStatus(), strings.ReplaceAll(s.Output, perfdata.PerfdataSeparatorSymbol, " "))
 }
 
 // SetDefaultState sets a new default state for a PartialResult
@@ -269,7 +269,7 @@ func (o *Overall) getSummary() string {
 	checkState := o.GetStatus()
 
 	if checkState == check.OK && o.OKSummary != "" {
-		return o.OKSummary
+		return strings.ReplaceAll(o.OKSummary, perfdata.PerfdataSeparatorSymbol, " ")
 	}
 
 	if len(o.PartialResults) == 0 {

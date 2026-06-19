@@ -172,6 +172,33 @@ func ExampleOverall_withSubchecks() {
 	// |pd_test=5s
 }
 
+func ExampleOverall_withVerticalbar() {
+	var overall Overall
+
+	overall.OKSummary = "unit|test"
+
+	example_perfdata := perfdata.Perfdata{Label: "pd_test", Value: 5, Uom: "s"}
+	pd_list := perfdata.PerfdataList{}
+	pd_list.Add(&example_perfdata)
+
+	subcheck := &PartialResult{
+		Output:   "vertical|bar",
+		Perfdata: pd_list,
+	}
+
+	subcheck.SetState(check.OK)
+
+	overall.AddSubcheck(subcheck)
+	overall.Add(check.OK, "another|bar")
+
+	fmt.Println(overall.GetOutput())
+	// Output:
+	// unit test
+	// \_ [OK] vertical bar
+	// \_ [OK] another bar
+	// |pd_test=5s
+}
+
 func TestOverall_withEnhancedSubchecks(t *testing.T) {
 	var overall Overall
 
