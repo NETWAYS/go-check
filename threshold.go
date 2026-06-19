@@ -34,6 +34,12 @@ var (
 	NegInf = math.Inf(-1)
 )
 
+const (
+	NegativeInfinitySymbol = "~"
+	RangeSeparatorSymbol   = ":"
+	RangeStartSymbol       = "@"
+)
+
 // ParseThreshold parses a Threshold from a string.
 //
 // See the Threshold type for details.
@@ -51,7 +57,7 @@ func ParseThreshold(spec string) (*Threshold, error) {
 	}
 
 	// Lower bound
-	if parts[2] == "~" {
+	if parts[2] == NegativeInfinitySymbol {
 		t.Lower = NegInf
 	} else if parts[2] != "" {
 		v, errParseLow := strconv.ParseFloat(parts[2], 64)
@@ -63,7 +69,7 @@ func ParseThreshold(spec string) (*Threshold, error) {
 	}
 
 	// Upper bound
-	if parts[3] == "~" || (parts[3] == "" && parts[2] != "") {
+	if parts[3] == NegativeInfinitySymbol || (parts[3] == "" && parts[2] != "") {
 		t.Upper = PosInf
 	} else if parts[3] != "" {
 		v, errParseUp := strconv.ParseFloat(parts[3], 64)
@@ -82,16 +88,16 @@ func (t Threshold) String() string {
 	s := BoundaryToString(t.Upper)
 
 	// remove upper ~, which is the default
-	if s == "~" {
+	if s == NegativeInfinitySymbol {
 		s = ""
 	}
 
 	if t.Lower != 0 {
-		s = BoundaryToString(t.Lower) + ":" + s
+		s = BoundaryToString(t.Lower) + RangeSeparatorSymbol + s
 	}
 
 	if t.Inside {
-		s = "@" + s
+		s = RangeStartSymbol + s
 	}
 
 	return s
@@ -112,7 +118,7 @@ func BoundaryToString(value float64) string {
 
 	// In the threshold context, the sign derives from lower and upper bound, we only need the ~ notation
 	if s == "+Inf" || s == "-Inf" {
-		s = "~"
+		s = NegativeInfinitySymbol
 	}
 
 	return s
