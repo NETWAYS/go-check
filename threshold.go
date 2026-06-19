@@ -37,13 +37,12 @@ var (
 // ParseThreshold parses a Threshold from a string.
 //
 // See the Threshold type for details.
-func ParseThreshold(spec string) (t *Threshold, err error) {
-	t = &Threshold{}
+func ParseThreshold(spec string) (*Threshold, error) {
+	t := &Threshold{}
 
 	parts := thresholdRe.FindStringSubmatch(spec)
 	if spec == "" || len(parts) == 0 {
-		err = fmt.Errorf("could not parse threshold: %s", spec)
-		return
+		return t, fmt.Errorf("could not parse threshold: %s", spec)
 	}
 
 	// @ at the beginning
@@ -51,16 +50,13 @@ func ParseThreshold(spec string) (t *Threshold, err error) {
 		t.Inside = true
 	}
 
-	var v float64
-
 	// Lower bound
 	if parts[2] == "~" {
 		t.Lower = NegInf
 	} else if parts[2] != "" {
-		v, err = strconv.ParseFloat(parts[2], 64)
-		if err != nil {
-			err = fmt.Errorf("can not parse lower bound '%s': %w", parts[2], err)
-			return
+		v, errParseLow := strconv.ParseFloat(parts[2], 64)
+		if errParseLow != nil {
+			return t, fmt.Errorf("can not parse lower bound '%s': %w", parts[2], errParseLow)
 		}
 
 		t.Lower = v
@@ -70,21 +66,20 @@ func ParseThreshold(spec string) (t *Threshold, err error) {
 	if parts[3] == "~" || (parts[3] == "" && parts[2] != "") {
 		t.Upper = PosInf
 	} else if parts[3] != "" {
-		v, err = strconv.ParseFloat(parts[3], 64)
-		if err != nil {
-			err = fmt.Errorf("can not parse upper bound '%s': %w", parts[3], err)
-			return
+		v, errParseUp := strconv.ParseFloat(parts[3], 64)
+		if errParseUp != nil {
+			return t, fmt.Errorf("can not parse upper bound '%s': %w", parts[3], errParseUp)
 		}
 
 		t.Upper = v
 	}
 
-	return
+	return t, nil
 }
 
 // String returns the plain representation of the Threshold
-func (t Threshold) String() (s string) {
-	s = BoundaryToString(t.Upper)
+func (t Threshold) String() string {
+	s := BoundaryToString(t.Upper)
 
 	// remove upper ~, which is the default
 	if s == "~" {
@@ -99,7 +94,7 @@ func (t Threshold) String() (s string) {
 		s = "@" + s
 	}
 
-	return
+	return s
 }
 
 // DoesViolate compares a value against the threshold, and returns true if the value violates the threshold.
@@ -112,15 +107,15 @@ func (t Threshold) DoesViolate(value float64) bool {
 }
 
 // BoundaryToString returns the string representation of a Threshold boundary.
-func BoundaryToString(value float64) (s string) {
-	s = FormatFloat(value)
+func BoundaryToString(value float64) string {
+	s := FormatFloat(value)
 
 	// In the threshold context, the sign derives from lower and upper bound, we only need the ~ notation
 	if s == "+Inf" || s == "-Inf" {
 		s = "~"
 	}
 
-	return
+	return s
 }
 
 // FormatFloat returns a string representation of floats, avoiding scientific notation and removes trailing zeros.
