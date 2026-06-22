@@ -50,7 +50,7 @@ func BaseExit(rc Status) {
 	_, _ = os.Stdout.WriteString(o)
 }
 
-// ExitError exists with an Unknown state while reporting the error
+// ExitError exits with an Unknown state while reporting the error
 // The Unknown state is used, since the plugin likely could not determine
 // the actual status of whatever was meant to be checked.
 func ExitError(err error) {
