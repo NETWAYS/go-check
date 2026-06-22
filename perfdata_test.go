@@ -1,11 +1,9 @@
-package perfdata
+package check
 
 import (
 	"fmt"
 	"math"
 	"testing"
-
-	"github.com/NETWAYS/go-check"
 )
 
 func ExamplePerfdataList() {
@@ -52,8 +50,8 @@ func BenchmarkPerfdataString(b *testing.B) {
 		Label: "test test=test",
 		Value: 10.1,
 		Uom:   "%",
-		Warn:  &check.Threshold{Upper: 80},
-		Crit:  &check.Threshold{Upper: 90},
+		Warn:  &Threshold{Upper: 80},
+		Crit:  &Threshold{Upper: 90},
 		Min:   0,
 		Max:   100}
 
@@ -102,8 +100,8 @@ func TestRenderPerfdata(t *testing.T) {
 				Label: "foo bar",
 				Value: 2.76,
 				Uom:   "m",
-				Warn:  &check.Threshold{Lower: 10, Upper: 25, Inside: true},
-				Crit:  &check.Threshold{Lower: 15, Upper: 20, Inside: false},
+				Warn:  &Threshold{Lower: 10, Upper: 25, Inside: true},
+				Crit:  &Threshold{Lower: 15, Upper: 20, Inside: false},
 			},
 			expected: "'foo bar'=2.76m;@10:25;15:20",
 		},

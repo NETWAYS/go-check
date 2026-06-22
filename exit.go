@@ -27,7 +27,7 @@ func Exit(rc Status, output ...string) {
 	text.WriteString("[" + rc.String() + "] -")
 
 	for _, s := range output {
-		text.WriteString(" " + strings.ReplaceAll(s, "|", " "))
+		text.WriteString(" " + strings.ReplaceAll(s, PerfdataSeparatorSymbol, " "))
 	}
 
 	text.WriteString("\n")

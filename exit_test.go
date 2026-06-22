@@ -13,9 +13,16 @@ func ExampleExit() {
 }
 
 func ExampleExit_withVerticalBar() {
-	Exit(OK, fmt.Sprintf("Everything|is|fine - value=%d", 42))
-	// Output: [OK] - Everything is fine - value=42
-	// would exit with code 0
+	Exit(Warning, fmt.Sprintf("Something|is|wrong - value=%d", 42))
+	// Output: [WARNING] - Something is wrong - value=42
+	// would exit with code 1
+}
+
+// TODO: How to handle this?
+func ExampleExit_withPerfdata() {
+	Exit(Critical, "Everything is broken", "|", "percent_packet_loss=100")
+	// Output: [CRITICAL] - Everything is broken | percent_packet_loss=100
+	// would exit with code 2
 }
 
 func ExampleExitError() {

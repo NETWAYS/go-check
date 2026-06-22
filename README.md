@@ -118,9 +118,9 @@ See also: https://www.monitoring-plugins.org/doc/guidelines.html#THRESHOLDFORMAT
 The `Perfdata` object represents monitoring plugin performance data that relates to the actual execution of a host or service check.
 
 ```go
-var pl perfdata.PerfdataList
+var pl check.PerfdataList
 
-pl.Add(&perfdata.Perfdata{
+pl.Add(&check.Perfdata{
     Label: "process.cpu.percent",
     Value: 25,
     Uom:   "%",

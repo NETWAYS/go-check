@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/NETWAYS/go-check"
-	"github.com/NETWAYS/go-check/perfdata"
 )
 
 func TestOverall_NewPartialResult(t *testing.T) {
@@ -150,8 +149,8 @@ func ExampleOverall_GetStatus() {
 func ExampleOverall_withSubchecks() {
 	var overall Overall
 
-	example_perfdata := perfdata.Perfdata{Label: "pd_test", Value: 5, Uom: "s"}
-	pd_list := perfdata.PerfdataList{}
+	example_perfdata := check.Perfdata{Label: "pd_test", Value: 5, Uom: "s"}
+	pd_list := check.PerfdataList{}
 	pd_list.Add(&example_perfdata)
 
 	subcheck := &PartialResult{
@@ -177,8 +176,8 @@ func ExampleOverall_withVerticalbar() {
 
 	overall.OKSummary = "unit|test"
 
-	example_perfdata := perfdata.Perfdata{Label: "pd_test", Value: 5, Uom: "s"}
-	pd_list := perfdata.PerfdataList{}
+	example_perfdata := check.Perfdata{Label: "pd_test", Value: 5, Uom: "s"}
+	pd_list := check.PerfdataList{}
 	pd_list.Add(&example_perfdata)
 
 	subcheck := &PartialResult{
@@ -202,8 +201,8 @@ func ExampleOverall_withVerticalbar() {
 func TestOverall_withEnhancedSubchecks(t *testing.T) {
 	var overall Overall
 
-	example_perfdata := perfdata.Perfdata{Label: "pd_test", Value: 5, Uom: "s"}
-	example_perfdata2 := perfdata.Perfdata{
+	example_perfdata := check.Perfdata{Label: "pd_test", Value: 5, Uom: "s"}
+	example_perfdata2 := check.Perfdata{
 		Label: "pd_test2",
 		Value: 1099511627776,
 		Uom:   "kB",
@@ -211,14 +210,14 @@ func TestOverall_withEnhancedSubchecks(t *testing.T) {
 		Crit:  &check.Threshold{Inside: false, Lower: 07777777777777, Upper: 0xFFFFFFFFFFFFFFFFFFFF},
 		Max:   uint64(18446744073709551615),
 	}
-	example_perfdata3 := perfdata.Perfdata{Label: "kl;jr2if;l2rkjasdf", Value: 5, Uom: "m"}
-	example_perfdata4 := perfdata.Perfdata{Label: "asdf", Value: uint64(18446744073709551615), Uom: "B"}
+	example_perfdata3 := check.Perfdata{Label: "kl;jr2if;l2rkjasdf", Value: 5, Uom: "m"}
+	example_perfdata4 := check.Perfdata{Label: "asdf", Value: uint64(18446744073709551615), Uom: "B"}
 
-	pd_list := perfdata.PerfdataList{}
+	pd_list := check.PerfdataList{}
 	pd_list.Add(&example_perfdata)
 	pd_list.Add(&example_perfdata2)
 
-	pd_list2 := perfdata.PerfdataList{}
+	pd_list2 := check.PerfdataList{}
 	pd_list2.Add(&example_perfdata3)
 	pd_list2.Add(&example_perfdata4)
 
@@ -302,11 +301,11 @@ func TestOverall_withSubchecks_Perfdata(t *testing.T) {
 
 	subcheck.SetState(check.OK)
 
-	perf1 := perfdata.Perfdata{
+	perf1 := check.Perfdata{
 		Label: "foo",
 		Value: 3,
 	}
-	perf2 := perfdata.Perfdata{
+	perf2 := check.Perfdata{
 		Label: "bar",
 		Value: 300,
 		Uom:   "%",
@@ -350,16 +349,16 @@ func TestOverall_withSubchecks_PartialResult(t *testing.T) {
 		Output: "PartialResult",
 	}
 
-	perf1 := perfdata.Perfdata{
+	perf1 := check.Perfdata{
 		Label: "foo",
 		Value: 3,
 	}
-	perf2 := perfdata.Perfdata{
+	perf2 := check.Perfdata{
 		Label: "bar",
 		Value: 300,
 		Uom:   "%",
 	}
-	perf3 := perfdata.Perfdata{
+	perf3 := check.Perfdata{
 		Label: "baz",
 		Value: 23,
 		Uom:   "B",
@@ -434,12 +433,12 @@ func TestSubchecksPerfdata(t *testing.T) {
 
 	check1 := &PartialResult{
 		Output: "Check1",
-		Perfdata: perfdata.PerfdataList{
-			&perfdata.Perfdata{
+		Perfdata: check.PerfdataList{
+			&check.Perfdata{
 				Label: "foo",
 				Value: 23,
 			},
-			&perfdata.Perfdata{
+			&check.Perfdata{
 				Label: "bar",
 				Value: 42,
 			},
@@ -450,8 +449,8 @@ func TestSubchecksPerfdata(t *testing.T) {
 
 	check2 := &PartialResult{
 		Output: "Check2",
-		Perfdata: perfdata.PerfdataList{
-			&perfdata.Perfdata{
+		Perfdata: check.PerfdataList{
+			&check.Perfdata{
 				Label: "foo2 bar",
 				Value: 46,
 			},
