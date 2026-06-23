@@ -7,7 +7,6 @@ import (
 	"sync"
 
 	"github.com/NETWAYS/go-check"
-	"github.com/NETWAYS/go-check/perfdata"
 )
 
 // The "width" of the indentation which is added on every level
@@ -100,14 +99,14 @@ func (o *Overall) GetOutput() string {
 
 		// Generate indeted output and perfdata for all partialResults
 		for i := range o.PartialResults {
-			output.WriteString(o.PartialResults[i].getOutput(0))
+			output.WriteString(strings.ReplaceAll(o.PartialResults[i].getOutput(0), check.PerfdataSeparatorSymbol, " "))
 			pdata.WriteString(" " + o.PartialResults[i].getPerfdata())
 		}
 
 		pdataString := strings.Trim(pdata.String(), " ")
 
 		if len(pdataString) > 0 {
-			output.WriteString("|" + pdataString + "\n")
+			output.WriteString(check.PerfdataSeparatorSymbol + pdataString + "\n")
 		}
 	}
 
@@ -144,7 +143,7 @@ func (o *Overall) getStatusCount() statusCount {
 
 // PartialResult represents a sub-result for an Overall struct
 type PartialResult struct {
-	Perfdata       perfdata.PerfdataList
+	Perfdata       check.PerfdataList
 	PartialResults []*PartialResult
 	Output         string
 
@@ -183,7 +182,7 @@ func (s *PartialResult) AddSubcheck(subcheck *PartialResult) {
 
 // String returns the status and output of the PartialResult
 func (s *PartialResult) String() string {
-	return fmt.Sprintf("[%s] %s", s.GetStatus(), s.Output)
+	return fmt.Sprintf("[%s] %s", s.GetStatus(), strings.ReplaceAll(s.Output, check.PerfdataSeparatorSymbol, " "))
 }
 
 // SetDefaultState sets a new default state for a PartialResult
@@ -269,7 +268,7 @@ func (o *Overall) getSummary() string {
 	checkState := o.GetStatus()
 
 	if checkState == check.OK && o.OKSummary != "" {
-		return o.OKSummary
+		return strings.ReplaceAll(o.OKSummary, check.PerfdataSeparatorSymbol, " ")
 	}
 
 	if len(o.PartialResults) == 0 {

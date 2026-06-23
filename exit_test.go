@@ -12,6 +12,16 @@ func ExampleExit() {
 	// would exit with code 0
 }
 
+func ExampleExitWithPerfdata() {
+	perfdata := PerfdataList{}
+	perfdata.Add(&Perfdata{Label: "time_duration", Value: 23})
+	perfdata.Add(&Perfdata{Label: "packages_lost", Value: 42})
+
+	ExitWithPerfdata(Critical, perfdata, "Everything is broken", "Do something")
+	// Output: [CRITICAL] - Everything is broken Do something|time_duration=23 packages_lost=42
+	// would exit with code 2
+}
+
 func ExampleExitError() {
 	err := fmt.Errorf("connection to %s has been timed out", "localhost:12345")
 	ExitError(err)

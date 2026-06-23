@@ -15,7 +15,9 @@ var AllowExit = true
 var PrintStack = true
 
 // Exit exits the process with a given return code determined from the given Status
-// and a text representation to stdout.
+// and the provided text output to stdout.
+// To include performance that is recommended to use ExitWithPerfdata instead
+// Note that, the text output is not sanitized and will be printed as is.
 //
 // Example: [OK] - everything is fine
 // exit 0
@@ -29,6 +31,34 @@ func Exit(rc Status, output ...string) {
 	for _, s := range output {
 		text.WriteString(" " + s)
 	}
+
+	text.WriteString("\n")
+
+	_, _ = os.Stdout.WriteString(text.String())
+
+	BaseExit(rc)
+}
+
+// ExitWithPerfdata exits the process with a given return code determined from the Status,
+// the performance data and the text output to stdout.
+//
+// The provided text output will be sanitized to avoid multiple performance data
+// separators (|).
+//
+// Example: [OK] - everything is fine | mylabel=1
+// exit 0
+func ExitWithPerfdata(rc Status, perfdata PerfdataList, output ...string) {
+	var text strings.Builder
+
+	text.WriteString("[" + rc.String() + "] -")
+
+	for _, s := range output {
+		text.WriteString(" " + strings.ReplaceAll(s, PerfdataSeparatorSymbol, " "))
+	}
+
+	text.WriteString(PerfdataSeparatorSymbol)
+
+	text.WriteString(perfdata.String())
 
 	text.WriteString("\n")
 

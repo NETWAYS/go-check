@@ -70,11 +70,20 @@ The `Exit` function can be used to cause an exit with the given status code.
 ```go
 check.Exit(check.OK, fmt.Sprintf("Everything is fine - value=%d", 42)) // OK, 0
 
-// With perfdata
-check.Exit(check.Critical, "CRITICAL", "|", "percent_packet_loss=100") // CRITICAL, 2
+// With critical
+check.Exit(check.Critical, "Everything is broken", "Do something!") // CRITICAL, 2
 ```
 
-`ExitError` can be used to cause an exit with the given error.
+The `ExitWithPerfdata` function can be used to include performance data in the output.
+
+```go
+perfdata := check.PerfdataList{}
+perfdata.Add(&check.Perfdata{Label: "packages_lost", Value: 42})
+
+check.ExitWithPerfdata(check.OK, perfdata, "Everything is fine", "Package loss nominal")
+```
+
+The `ExitError` function can be used to cause an exit with the given error.
 
 ```go
 err := fmt.Errorf("connection to %s has been timed out", "localhost:12345")
@@ -118,9 +127,9 @@ See also: https://www.monitoring-plugins.org/doc/guidelines.html#THRESHOLDFORMAT
 The `Perfdata` object represents monitoring plugin performance data that relates to the actual execution of a host or service check.
 
 ```go
-var pl perfdata.PerfdataList
+var pl check.PerfdataList
 
-pl.Add(&perfdata.Perfdata{
+pl.Add(&check.Perfdata{
     Label: "process.cpu.percent",
     Value: 25,
     Uom:   "%",

@@ -1,18 +1,17 @@
-// Package perfdata provides types and functions to handle check plugin performance data
-package perfdata
+package check
 
 import (
 	"errors"
 	"fmt"
 	"math"
 	"strings"
-
-	"github.com/NETWAYS/go-check"
 )
+
+const PerfdataSeparatorSymbol = "|"
 
 // PerfdataList can store multiple perfdata and implements the fmt.Stringer interface
 // to provide formated output for the performance data
-type PerfdataList []*Perfdata //nolint: revive
+type PerfdataList []*Perfdata
 
 // String returns string representations of all Perfdata added to the list
 func (l *PerfdataList) String() string {
@@ -57,7 +56,7 @@ func formatNumeric(value any) (string, error) {
 			return "", errors.New("Perfdata value is infinite")
 		}
 
-		return check.FormatFloat(v), nil
+		return FormatFloat(v), nil
 	case float32:
 		if math.IsInf(float64(v), 0) {
 			return "", errors.New("Perfdata value is infinite")
@@ -67,7 +66,7 @@ func formatNumeric(value any) (string, error) {
 			return "", errors.New("Perfdata value is infinite")
 		}
 
-		return check.FormatFloat(float64(v)), nil
+		return FormatFloat(float64(v)), nil
 	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
 		return fmt.Sprintf("%d", v), nil
 	default:
@@ -88,8 +87,8 @@ type Perfdata struct {
 	Value any
 	// Uom is the unit-of-measurement, see links above for details.
 	Uom  string
-	Warn *check.Threshold
-	Crit *check.Threshold
+	Warn *Threshold
+	Crit *Threshold
 	Min  any
 	Max  any
 }
@@ -124,7 +123,7 @@ func (p Perfdata) ValidatedString() (string, error) {
 	sb.WriteString(p.Uom)
 
 	// Thresholds
-	for _, value := range []*check.Threshold{p.Warn, p.Crit} {
+	for _, value := range []*Threshold{p.Warn, p.Crit} {
 		sb.WriteString(";")
 
 		if value != nil {

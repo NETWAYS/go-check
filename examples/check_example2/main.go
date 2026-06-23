@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/NETWAYS/go-check"
-	"github.com/NETWAYS/go-check/perfdata"
 	"github.com/NETWAYS/go-check/result"
 )
 
@@ -16,7 +15,7 @@ func main() {
 	check1.Output = "Check1"
 	check1.SetState(check.OK)
 
-	check1.Perfdata.Add(&perfdata.Perfdata{
+	check1.Perfdata.Add(&check.Perfdata{
 		Label: "foo",
 		Value: 23,
 	})
@@ -28,11 +27,11 @@ func main() {
 	check2.Output = "Check2"
 	check2.SetState(check.Warning)
 
-	check2.Perfdata.Add(&perfdata.Perfdata{
+	check2.Perfdata.Add(&check.Perfdata{
 		Label: "bar",
 		Value: 42,
 	})
-	check2.Perfdata.Add(&perfdata.Perfdata{
+	check2.Perfdata.Add(&check.Perfdata{
 		Label: "foo2 bar",
 		Value: 46,
 	})
