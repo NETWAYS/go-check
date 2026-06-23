@@ -12,16 +12,13 @@ func ExampleExit() {
 	// would exit with code 0
 }
 
-func ExampleExit_withVerticalBar() {
-	Exit(Warning, fmt.Sprintf("Something|is|wrong - value=%d", 42))
-	// Output: [WARNING] - Something is wrong - value=42
-	// would exit with code 1
-}
+func ExampleExitWithPerfdata() {
+	perfdata := PerfdataList{}
+	perfdata.Add(&Perfdata{Label: "time_duration", Value: 23})
+	perfdata.Add(&Perfdata{Label: "packages_lost", Value: 42})
 
-// TODO: How to handle this?
-func ExampleExit_withPerfdata() {
-	Exit(Critical, "Everything is broken", "|", "percent_packet_loss=100")
-	// Output: [CRITICAL] - Everything is broken | percent_packet_loss=100
+	ExitWithPerfdata(Critical, perfdata, "Everything is broken", "Do something")
+	// Output: [CRITICAL] - Everything is broken Do something|time_duration=23 packages_lost=42
 	// would exit with code 2
 }
 
