@@ -143,7 +143,7 @@ func (o *Overall) getStatusCount() statusCount {
 
 // PartialResult represents a sub-result for an Overall struct
 type PartialResult struct {
-	Perfdata       check.PerfdataList
+	perfdata       check.PerfdataList
 	PartialResults []*PartialResult
 	Output         string
 
@@ -178,6 +178,14 @@ func (s *PartialResult) AddSubcheck(subcheck *PartialResult) {
 	defer s.mu.Unlock()
 
 	s.PartialResults = append(s.PartialResults, subcheck)
+}
+
+// AddPerfdata adds a Perfdata point to the PartialResult
+func (s *PartialResult) AddPerfdata(perfdata *check.Perfdata) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	s.perfdata.Add(perfdata)
 }
 
 // String returns the status and output of the PartialResult
@@ -233,8 +241,8 @@ func (s *PartialResult) GetStatus() check.Status {
 func (s *PartialResult) getPerfdata() string {
 	var output strings.Builder
 
-	if len(s.Perfdata) > 0 {
-		output.WriteString(s.Perfdata.String())
+	if len(s.perfdata) > 0 {
+		output.WriteString(s.perfdata.String())
 	}
 
 	if s.PartialResults != nil {
