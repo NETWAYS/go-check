@@ -113,6 +113,13 @@ func (o *Overall) GetOutput() string {
 	return output.String()
 }
 
+func (o *Overall) SetOKSummary(summary string) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+
+	o.oKSummary = summary
+}
+
 func (o *Overall) getStatusCount() statusCount {
 	result := statusCount{
 		OK:       0,
@@ -200,11 +207,4 @@ func (o *Overall) getGenericSummary() string {
 	result = "states: " + strings.TrimSpace(result)
 
 	return result
-}
-
-func (o *Overall) SetOKSummary(summary string) {
-	o.mu.Lock()
-	defer o.mu.Unlock()
-
-	o.oKSummary = summary
 }
