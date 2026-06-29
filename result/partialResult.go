@@ -8,7 +8,8 @@ import (
 	"github.com/NETWAYS/go-check"
 )
 
-// PartialResult represents a sub-result for an Overall struct
+// PartialResult represents a sub-result for an Overall struct.
+// Note that, a PartialResult must not be used on its own but always with an Overall.
 type PartialResult struct {
 	perfdata       check.PerfdataList
 	partialResults []*PartialResult
