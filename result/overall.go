@@ -44,7 +44,7 @@ type Overall struct {
 func (o *Overall) Add(state check.Status, output string) {
 	var result PartialResult
 	result.SetState(state)
-	result.Output = output
+	result.SetOutput(output)
 	o.AddSubcheck(&result)
 }
 
@@ -144,8 +144,8 @@ func (o *Overall) getStatusCount() statusCount {
 // PartialResult represents a sub-result for an Overall struct
 type PartialResult struct {
 	perfdata       check.PerfdataList
-	PartialResults []*PartialResult
-	Output         string
+	partialResults []*PartialResult
+	output         string
 
 	// Result state, either set explicitly or derived from partialResults
 	state check.Status
@@ -177,7 +177,7 @@ func (s *PartialResult) AddSubcheck(subcheck *PartialResult) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.PartialResults = append(s.PartialResults, subcheck)
+	s.partialResults = append(s.partialResults, subcheck)
 }
 
 // AddPerfdata adds a Perfdata point to the PartialResult
@@ -190,7 +190,7 @@ func (s *PartialResult) AddPerfdata(perfdata *check.Perfdata) {
 
 // String returns the status and output of the PartialResult
 func (s *PartialResult) String() string {
-	return fmt.Sprintf("[%s] %s", s.GetStatus(), strings.ReplaceAll(s.Output, check.PerfdataSeparatorSymbol, " "))
+	return fmt.Sprintf("[%s] %s", s.GetStatus(), strings.ReplaceAll(s.output, check.PerfdataSeparatorSymbol, " "))
 }
 
 // SetDefaultState sets a new default state for a PartialResult
@@ -220,7 +220,7 @@ func (s *PartialResult) GetStatus() check.Status {
 		return s.state
 	}
 
-	if len(s.PartialResults) == 0 {
+	if len(s.partialResults) == 0 {
 		if s.defaultStateSetExplicitly {
 			return s.defaultState
 		}
@@ -228,13 +228,20 @@ func (s *PartialResult) GetStatus() check.Status {
 		return check.Unknown
 	}
 
-	states := make([]check.Status, len(s.PartialResults))
+	states := make([]check.Status, len(s.partialResults))
 
-	for i := range s.PartialResults {
-		states[i] = s.PartialResults[i].GetStatus()
+	for i := range s.partialResults {
+		states[i] = s.partialResults[i].GetStatus()
 	}
 
 	return check.WorstState(states...)
+}
+
+func (s *PartialResult) SetOutput(output string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	s.output = output
 }
 
 // getPerfdata returns all subsequent perfdata as a concatenated string
@@ -245,8 +252,8 @@ func (s *PartialResult) getPerfdata() string {
 		output.WriteString(s.perfdata.String())
 	}
 
-	if s.PartialResults != nil {
-		for _, ss := range s.PartialResults {
+	if s.partialResults != nil {
+		for _, ss := range s.partialResults {
 			output.WriteString(" " + ss.getPerfdata())
 		}
 	}
@@ -262,8 +269,8 @@ func (s *PartialResult) getOutput(indentLevel int) string {
 	// \_ [OK] My PartialResult
 	output.WriteString(strings.Repeat("  ", indentLevel) + "\\_ " + s.String() + "\n")
 
-	if s.PartialResults != nil {
-		for _, ss := range s.PartialResults {
+	if s.partialResults != nil {
+		for _, ss := range s.partialResults {
 			output.WriteString(ss.getOutput(indentLevel + indentationOffset))
 		}
 	}
@@ -333,16 +340,16 @@ func (o *Overall) getGenericSummary() string {
 }
 
 func (s *PartialResult) getPartialResultFailedOutput() string {
-	if len(s.PartialResults) == 0 {
+	if len(s.partialResults) == 0 {
 		// this is a leave node
-		return s.Output
+		return s.output
 	}
 
 	result := ""
 	worstState := check.OK
 
 	// Get the worst non-ok PartialResults output
-	for _, partRes := range s.PartialResults {
+	for _, partRes := range s.partialResults {
 		if check.Compare(worstState, partRes.GetStatus()) > 0 {
 			result = partRes.getPartialResultFailedOutput()
 			worstState = partRes.GetStatus()

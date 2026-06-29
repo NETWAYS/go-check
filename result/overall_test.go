@@ -149,9 +149,8 @@ func ExampleOverall_GetStatus() {
 func ExampleOverall_withSubchecks() {
 	var overall Overall
 
-	subcheck := &PartialResult{
-		Output: "Subcheck1 Test",
-	}
+	subcheck := NewPartialResult()
+	subcheck.SetOutput("Subcheck1 Test")
 
 	example_perfdata := check.Perfdata{Label: "pd_test", Value: 5, Uom: "s"}
 	subcheck.AddPerfdata(&example_perfdata)
@@ -175,7 +174,7 @@ func ExampleOverall_withVerticalbar() {
 	overall.OKSummary = "unit|test"
 
 	subcheck := &PartialResult{
-		Output: "vertical|bar",
+		output: "vertical|bar",
 	}
 
 	example_perfdata := check.Perfdata{Label: "pd_test", Value: 5, Uom: "s"}
@@ -209,18 +208,16 @@ func TestOverall_withEnhancedSubchecks(t *testing.T) {
 	example_perfdata3 := check.Perfdata{Label: "kl;jr2if;l2rkjasdf", Value: 5, Uom: "m"}
 	example_perfdata4 := check.Perfdata{Label: "asdf", Value: uint64(18446744073709551615), Uom: "B"}
 
-	subcheck := &PartialResult{
-		Output: "Subcheck1 Test",
-	}
+	subcheck := NewPartialResult()
+	subcheck.SetOutput("Subcheck1 Test")
 
 	subcheck.AddPerfdata(&example_perfdata)
 	subcheck.AddPerfdata(&example_perfdata2)
 
 	subcheck.SetState(check.OK)
 
-	subcheck2 := &PartialResult{
-		Output: "Subcheck2 Test",
-	}
+	subcheck2 := NewPartialResult()
+	subcheck2.SetOutput("Subcheck2 Test")
 
 	subcheck2.AddPerfdata(&example_perfdata3)
 	subcheck2.AddPerfdata(&example_perfdata4)
@@ -250,19 +247,17 @@ func TestOverall_withEnhancedSubchecks(t *testing.T) {
 func TestOverall_withSubchecks_Simple_Output(t *testing.T) {
 	var overall Overall
 
-	subcheck2 := &PartialResult{
-		Output: "SubSubcheck",
-	}
+	subcheck2 := NewPartialResult()
+	subcheck2.SetOutput("SubSubcheck")
 
 	subcheck2.SetState(check.OK)
 
-	subcheck := &PartialResult{
-		Output: "PartialResult",
-	}
+	subcheck := NewPartialResult()
+	subcheck.SetOutput("PartialResult")
 
 	subcheck.SetState(check.OK)
 
-	subcheck.PartialResults = append(subcheck.PartialResults, subcheck2)
+	subcheck.AddSubcheck(subcheck2)
 
 	overall.AddSubcheck(subcheck)
 
@@ -281,15 +276,13 @@ func TestOverall_withSubchecks_Simple_Output(t *testing.T) {
 func TestOverall_withSubchecks_Perfdata(t *testing.T) {
 	var overall Overall
 
-	subcheck2 := &PartialResult{
-		Output: "SubSubcheck",
-	}
+	subcheck2 := NewPartialResult()
+	subcheck2.SetOutput("SubSubcheck")
 
 	subcheck2.SetState(check.OK)
 
-	subcheck := &PartialResult{
-		Output: "PartialResult",
-	}
+	subcheck := NewPartialResult()
+	subcheck.SetOutput("PartialResult")
 
 	subcheck.SetState(check.OK)
 
@@ -305,7 +298,7 @@ func TestOverall_withSubchecks_Perfdata(t *testing.T) {
 
 	subcheck2.AddPerfdata(&perf1)
 	subcheck2.AddPerfdata(&perf2)
-	subcheck.PartialResults = append(subcheck.PartialResults, subcheck2)
+	subcheck.AddSubcheck(subcheck2)
 
 	overall.AddSubcheck(subcheck)
 
@@ -327,19 +320,16 @@ func TestOverall_withSubchecks_Perfdata(t *testing.T) {
 func TestOverall_withSubchecks_PartialResult(t *testing.T) {
 	var overall Overall
 
-	subcheck3 := &PartialResult{
-		Output: "SubSubSubcheck",
-	}
+	subcheck3 := NewPartialResult()
+	subcheck3.SetOutput("SubSubSubcheck")
 
 	subcheck3.SetState(check.Critical)
 
-	subcheck2 := &PartialResult{
-		Output: "SubSubcheck",
-	}
+	subcheck2 := NewPartialResult()
+	subcheck2.SetOutput("SubSubcheck")
 
-	subcheck := &PartialResult{
-		Output: "PartialResult",
-	}
+	subcheck := NewPartialResult()
+	subcheck.SetOutput("PartialResult")
 
 	perf1 := check.Perfdata{
 		Label: "foo",
@@ -359,8 +349,8 @@ func TestOverall_withSubchecks_PartialResult(t *testing.T) {
 	subcheck3.AddPerfdata(&perf3)
 	subcheck2.AddPerfdata(&perf1)
 	subcheck2.AddPerfdata(&perf2)
-	subcheck2.PartialResults = append(subcheck.PartialResults, subcheck3)
-	subcheck.PartialResults = append(subcheck.PartialResults, subcheck2)
+	subcheck2.AddSubcheck(subcheck3)
+	subcheck.AddSubcheck(subcheck2)
 
 	overall.AddSubcheck(subcheck)
 
@@ -383,21 +373,18 @@ func TestOverall_withSubchecks_PartialResult(t *testing.T) {
 func TestOverall_withSubchecks_PartialResultStatus(t *testing.T) {
 	var overall Overall
 
-	subcheck := &PartialResult{
-		Output: "Subcheck",
-	}
+	subcheck := NewPartialResult()
+	subcheck.SetOutput("Subcheck")
 
 	subcheck.SetState(check.OK)
 
-	subsubcheck := &PartialResult{
-		Output: "SubSubcheck",
-	}
+	subsubcheck := NewPartialResult()
+	subsubcheck.SetOutput("SubSubcheck")
 
 	subsubcheck.SetState(check.Warning)
 
-	subsubsubcheck := &PartialResult{
-		Output: "SubSubSubcheck",
-	}
+	subsubsubcheck := NewPartialResult()
+	subsubsubcheck.SetOutput("SubSubSubcheck")
 
 	subsubsubcheck.SetState(check.Critical)
 
@@ -423,9 +410,8 @@ func TestOverall_withSubchecks_PartialResultStatus(t *testing.T) {
 func TestSubchecksPerfdata(t *testing.T) {
 	var overall Overall
 
-	check1 := &PartialResult{
-		Output: "Check1",
-	}
+	check1 := NewPartialResult()
+	check1.SetOutput("Check1")
 
 	check1.AddPerfdata(
 		&check.Perfdata{
@@ -443,9 +429,8 @@ func TestSubchecksPerfdata(t *testing.T) {
 
 	check1.SetState(check.OK)
 
-	check2 := &PartialResult{
-		Output: "Check2",
-	}
+	check2 := NewPartialResult()
+	check2.SetOutput("Check2")
 
 	check2.AddPerfdata(
 		&check.Perfdata{
@@ -623,7 +608,7 @@ func TestOverall_AddSubcheck_WithRace(t *testing.T) {
 			defer wg.Done()
 			pr := NewPartialResult()
 			pr.SetState(check.OK)
-			pr.Output = "goroutine"
+			pr.output = "goroutine"
 			o.AddSubcheck(pr)
 		}()
 	}
@@ -679,7 +664,7 @@ func TestPartialResult_SetGet_WithRace(t *testing.T) {
 
 func TestPartialResult_AddSubcheck_WithRace(t *testing.T) {
 	parent := NewPartialResult()
-	parent.Output = "unittest"
+	parent.SetOutput("unittest")
 
 	var wg sync.WaitGroup
 	for range 5 {

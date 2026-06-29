@@ -12,7 +12,7 @@ func main() {
 
 	check1 := result.NewPartialResult()
 
-	check1.Output = "Check1"
+	check1.SetOutput("Check1")
 	check1.SetState(check.OK)
 
 	check1.AddPerfdata(&check.Perfdata{
@@ -24,7 +24,7 @@ func main() {
 
 	check2 := result.NewPartialResult()
 
-	check2.Output = "Check2"
+	check2.SetOutput("Check2")
 	check2.SetState(check.Warning)
 
 	check2.AddPerfdata(&check.Perfdata{
