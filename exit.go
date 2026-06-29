@@ -84,6 +84,9 @@ func BaseExit(rc Status) {
 // The Unknown state is used, since the plugin likely could not determine
 // the actual status of whatever was meant to be checked.
 func ExitError(err error) {
+	// Catches Panic if error is nil and outputs the full stacktrace
+	defer CatchPanic()
+
 	Exit(Unknown, fmt.Sprintf("%s (%T)", err.Error(), err))
 }
 
