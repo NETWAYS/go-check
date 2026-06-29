@@ -31,9 +31,9 @@ type statusCount struct {
 // Warning or Critical.
 type Overall struct {
 	// default summary (first line of output) if everything is ok. Has to be set in a plugin
-	OKSummary string
+	oKSummary string
 	// The results that are associated with this overall
-	PartialResults []*PartialResult
+	partialResults []*PartialResult
 
 	// We use a Mutex to make sure PartialResults can be added and evaluated concurrently
 	mu sync.RWMutex
@@ -44,7 +44,7 @@ type Overall struct {
 func (o *Overall) Add(state check.Status, output string) {
 	var result PartialResult
 	result.SetState(state)
-	result.Output = output
+	result.SetOutput(output)
 	o.AddSubcheck(&result)
 }
 
@@ -54,7 +54,7 @@ func (o *Overall) AddSubcheck(subcheck *PartialResult) {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 
-	o.PartialResults = append(o.PartialResults, subcheck)
+	o.partialResults = append(o.partialResults, subcheck)
 }
 
 // GetStatus returns the current state (ok, warning, critical, unknown) of the Overall.
@@ -94,13 +94,13 @@ func (o *Overall) GetOutput() string {
 
 	output.WriteString(o.getSummary() + "\n")
 
-	if o.PartialResults != nil {
+	if o.partialResults != nil {
 		var pdata strings.Builder
 
 		// Generate indeted output and perfdata for all partialResults
-		for i := range o.PartialResults {
-			output.WriteString(strings.ReplaceAll(o.PartialResults[i].getOutput(0), check.PerfdataSeparatorSymbol, " "))
-			pdata.WriteString(" " + o.PartialResults[i].getPerfdata())
+		for i := range o.partialResults {
+			output.WriteString(strings.ReplaceAll(o.partialResults[i].getOutput(0), check.PerfdataSeparatorSymbol, " "))
+			pdata.WriteString(" " + o.partialResults[i].getPerfdata())
 		}
 
 		pdataString := strings.Trim(pdata.String(), " ")
@@ -113,6 +113,14 @@ func (o *Overall) GetOutput() string {
 	return output.String()
 }
 
+// SetOKSummary sets the summary to the given string
+func (o *Overall) SetOKSummary(summary string) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+
+	o.oKSummary = summary
+}
+
 func (o *Overall) getStatusCount() statusCount {
 	result := statusCount{
 		OK:       0,
@@ -121,11 +129,11 @@ func (o *Overall) getStatusCount() statusCount {
 		Unknown:  0,
 	}
 
-	if len(o.PartialResults) == 0 {
+	if len(o.partialResults) == 0 {
 		return result
 	}
 
-	for _, sc := range o.PartialResults {
+	for _, sc := range o.partialResults {
 		switch sc.GetStatus() {
 		case check.Critical:
 			result.Critical++
@@ -141,137 +149,15 @@ func (o *Overall) getStatusCount() statusCount {
 	return result
 }
 
-// PartialResult represents a sub-result for an Overall struct
-type PartialResult struct {
-	Perfdata       check.PerfdataList
-	PartialResults []*PartialResult
-	Output         string
-
-	// Result state, either set explicitly or derived from partialResults
-	state check.Status
-	// Default result state, if no partial results are available and no state is set explicitly
-	defaultState check.Status
-
-	// stateSetExplicitly indicates that SetState was called directly. When true,
-	// GetStatus returns s.state unconditionally, bypassing PartialResults entirely.
-	stateSetExplicitly bool
-	// defaultStateSetExplicitly indicates that SetDefaultState was called. When true
-	// and no PartialResults exist and no explicit state is set, GetStatus returns
-	// s.defaultState instead of check.Unknown.
-	defaultStateSetExplicitly bool
-
-	mu sync.RWMutex
-}
-
-// NewPartialResult initializer with defaults. It is recommended to use NewPartialResult.
-// The default compared to the nil object is the default state is set to Unknown.
-func NewPartialResult() *PartialResult {
-	return &PartialResult{
-		stateSetExplicitly: false,
-		defaultState:       check.Unknown,
-	}
-}
-
-// AddSubcheck adds a PartialResult to the PartialResult
-func (s *PartialResult) AddSubcheck(subcheck *PartialResult) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	s.PartialResults = append(s.PartialResults, subcheck)
-}
-
-// String returns the status and output of the PartialResult
-func (s *PartialResult) String() string {
-	return fmt.Sprintf("[%s] %s", s.GetStatus(), strings.ReplaceAll(s.Output, check.PerfdataSeparatorSymbol, " "))
-}
-
-// SetDefaultState sets a new default state for a PartialResult
-func (s *PartialResult) SetDefaultState(state check.Status) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	s.defaultState = state
-	s.defaultStateSetExplicitly = true
-}
-
-// SetState sets a state for a PartialResult
-func (s *PartialResult) SetState(state check.Status) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	s.state = state
-	s.stateSetExplicitly = true
-}
-
-// GetStatus returns the current state (ok, warning, critical, unknown) of the PartialResult
-func (s *PartialResult) GetStatus() check.Status {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-
-	if s.stateSetExplicitly {
-		return s.state
-	}
-
-	if len(s.PartialResults) == 0 {
-		if s.defaultStateSetExplicitly {
-			return s.defaultState
-		}
-
-		return check.Unknown
-	}
-
-	states := make([]check.Status, len(s.PartialResults))
-
-	for i := range s.PartialResults {
-		states[i] = s.PartialResults[i].GetStatus()
-	}
-
-	return check.WorstState(states...)
-}
-
-// getPerfdata returns all subsequent perfdata as a concatenated string
-func (s *PartialResult) getPerfdata() string {
-	var output strings.Builder
-
-	if len(s.Perfdata) > 0 {
-		output.WriteString(s.Perfdata.String())
-	}
-
-	if s.PartialResults != nil {
-		for _, ss := range s.PartialResults {
-			output.WriteString(" " + ss.getPerfdata())
-		}
-	}
-
-	return strings.TrimSpace(output.String())
-}
-
-// getOutput generates indented output for all subsequent PartialResults
-func (s *PartialResult) getOutput(indentLevel int) string {
-	var output strings.Builder
-	// The final result will look like this:
-	// [OK] Overall is OK
-	// \_ [OK] My PartialResult
-	output.WriteString(strings.Repeat("  ", indentLevel) + "\\_ " + s.String() + "\n")
-
-	if s.PartialResults != nil {
-		for _, ss := range s.PartialResults {
-			output.WriteString(ss.getOutput(indentLevel + indentationOffset))
-		}
-	}
-
-	return output.String()
-}
-
 // GetSummary returns a text representation of the current state of the Overall
 func (o *Overall) getSummary() string {
 	checkState := o.GetStatus()
 
-	if checkState == check.OK && o.OKSummary != "" {
-		return strings.ReplaceAll(o.OKSummary, check.PerfdataSeparatorSymbol, " ")
+	if checkState == check.OK && o.oKSummary != "" {
+		return strings.ReplaceAll(o.oKSummary, check.PerfdataSeparatorSymbol, " ")
 	}
 
-	if len(o.PartialResults) == 0 {
+	if len(o.partialResults) == 0 {
 		// Oh, we actually don't have those either
 		return "No status information"
 	}
@@ -284,7 +170,7 @@ func (o *Overall) getSummary() string {
 	worstState := check.OK
 
 	// Get the worst non-ok PartialResults output
-	for _, partRes := range o.PartialResults {
+	for _, partRes := range o.partialResults {
 		if check.Compare(worstState, partRes.GetStatus()) > 0 {
 			result = partRes.getPartialResultFailedOutput()
 			worstState = partRes.GetStatus()
@@ -320,26 +206,6 @@ func (o *Overall) getGenericSummary() string {
 	}
 
 	result = "states: " + strings.TrimSpace(result)
-
-	return result
-}
-
-func (s *PartialResult) getPartialResultFailedOutput() string {
-	if len(s.PartialResults) == 0 {
-		// this is a leave node
-		return s.Output
-	}
-
-	result := ""
-	worstState := check.OK
-
-	// Get the worst non-ok PartialResults output
-	for _, partRes := range s.PartialResults {
-		if check.Compare(worstState, partRes.GetStatus()) > 0 {
-			result = partRes.getPartialResultFailedOutput()
-			worstState = partRes.GetStatus()
-		}
-	}
 
 	return result
 }
