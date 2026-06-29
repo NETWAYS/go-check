@@ -31,9 +31,9 @@ type statusCount struct {
 // Warning or Critical.
 type Overall struct {
 	// default summary (first line of output) if everything is ok. Has to be set in a plugin
-	OKSummary string
+	oKSummary string
 	// The results that are associated with this overall
-	PartialResults []*PartialResult
+	partialResults []*PartialResult
 
 	// We use a Mutex to make sure PartialResults can be added and evaluated concurrently
 	mu sync.RWMutex
@@ -54,7 +54,7 @@ func (o *Overall) AddSubcheck(subcheck *PartialResult) {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 
-	o.PartialResults = append(o.PartialResults, subcheck)
+	o.partialResults = append(o.partialResults, subcheck)
 }
 
 // GetStatus returns the current state (ok, warning, critical, unknown) of the Overall.
@@ -94,13 +94,13 @@ func (o *Overall) GetOutput() string {
 
 	output.WriteString(o.getSummary() + "\n")
 
-	if o.PartialResults != nil {
+	if o.partialResults != nil {
 		var pdata strings.Builder
 
 		// Generate indeted output and perfdata for all partialResults
-		for i := range o.PartialResults {
-			output.WriteString(strings.ReplaceAll(o.PartialResults[i].getOutput(0), check.PerfdataSeparatorSymbol, " "))
-			pdata.WriteString(" " + o.PartialResults[i].getPerfdata())
+		for i := range o.partialResults {
+			output.WriteString(strings.ReplaceAll(o.partialResults[i].getOutput(0), check.PerfdataSeparatorSymbol, " "))
+			pdata.WriteString(" " + o.partialResults[i].getPerfdata())
 		}
 
 		pdataString := strings.Trim(pdata.String(), " ")
@@ -121,11 +121,11 @@ func (o *Overall) getStatusCount() statusCount {
 		Unknown:  0,
 	}
 
-	if len(o.PartialResults) == 0 {
+	if len(o.partialResults) == 0 {
 		return result
 	}
 
-	for _, sc := range o.PartialResults {
+	for _, sc := range o.partialResults {
 		switch sc.GetStatus() {
 		case check.Critical:
 			result.Critical++
@@ -145,11 +145,11 @@ func (o *Overall) getStatusCount() statusCount {
 func (o *Overall) getSummary() string {
 	checkState := o.GetStatus()
 
-	if checkState == check.OK && o.OKSummary != "" {
-		return strings.ReplaceAll(o.OKSummary, check.PerfdataSeparatorSymbol, " ")
+	if checkState == check.OK && o.oKSummary != "" {
+		return strings.ReplaceAll(o.oKSummary, check.PerfdataSeparatorSymbol, " ")
 	}
 
-	if len(o.PartialResults) == 0 {
+	if len(o.partialResults) == 0 {
 		// Oh, we actually don't have those either
 		return "No status information"
 	}
@@ -162,7 +162,7 @@ func (o *Overall) getSummary() string {
 	worstState := check.OK
 
 	// Get the worst non-ok PartialResults output
-	for _, partRes := range o.PartialResults {
+	for _, partRes := range o.partialResults {
 		if check.Compare(worstState, partRes.GetStatus()) > 0 {
 			result = partRes.getPartialResultFailedOutput()
 			worstState = partRes.GetStatus()
@@ -200,4 +200,11 @@ func (o *Overall) getGenericSummary() string {
 	result = "states: " + strings.TrimSpace(result)
 
 	return result
+}
+
+func (o *Overall) SetOKSummary(summary string) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+
+	o.oKSummary = summary
 }
