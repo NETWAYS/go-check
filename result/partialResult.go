@@ -105,6 +105,7 @@ func (s *PartialResult) GetStatus() check.Status {
 	return check.WorstState(states...)
 }
 
+// SetOutput sets the output of this PartialResult to the given string
 func (s *PartialResult) SetOutput(output string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
