@@ -9,7 +9,7 @@ See the [documentation on pkg.go.dev](https://pkg.go.dev/github.com/NETWAYS/go-c
 
 ## Simple Example
 
-go-check includes everything to quickly create a CLI monitoring plugin:
+With the `NewConfig` constructor you can quickly create a CLI monitoring plugin:
 
 ```go
 package main
@@ -38,6 +38,8 @@ func main() {
     // [OK] - Everything is fine - answer=42
 }
 ```
+
+However, the go-check library does not require you to use the `Config` type.
 
 ## Return Codes
 
@@ -92,6 +94,9 @@ check.ExitError(err)
 // UNKNOWN, 3
 ```
 
+You can use `defer check.CatchPanic()` to ensure a check plugin will always exit with a proper code,
+even if the code panics.
+
 ## Timeout Handling
 
 HandleTimeout is a helper for a goroutine, to wait for signals and timeout, and exit with a proper code.
@@ -133,7 +138,7 @@ pl.Add(&check.Perfdata{
     Label: "process.cpu.percent",
     Value: 25,
     Uom:   "%",
-    Warn:  &check.Threshold{Lower: check.NegInf, Upper: 50 },
+    Warn:  &check.Threshold{Lower: check.NegInf, Upper: 50},
     Crit:  &check.Threshold{Lower: check.NegInf, Upper: 90},
     Min:   0,
     Max:   100})
@@ -163,13 +168,10 @@ An `Overall` can contain multiple subchecks. The final exit of the `Overall` wil
 o := Overall{}
 o.Add(0, "Something is OK")
 
-pr := PartialResult{
-    Output: "My Subcheck",
-}
+pr := NewPartialResult()
 
-if err := pr.SetState(check.OK); err != nil {
-  fmt.Printf(%s, err)
-}
+pr.SetOutput("Something happened")
+pr.SetState(check.OK)
 
 o.AddSubcheck(pr)
 
@@ -177,14 +179,14 @@ fmt.Println(o.GetOutput())
 
 // states: ok=1
 // [OK] Something is OK
-// \_ [OK] My Subcheck
+// \_ [OK] Something happened
 ```
 
 Overall is concurrency-safe.
 
 ## Human-readable bytes
 
-`ParseBytes` is a helper that can be used to parse string containering IEC or SI bytes into the number of bytes.
+`ParseBytes` is a helper that can be used to parse string containing IEC or SI bytes into the number of bytes.
 
 ```go
 b, err := ParseBytes("2MiB")
