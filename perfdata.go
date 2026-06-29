@@ -10,7 +10,7 @@ import (
 const PerfdataSeparatorSymbol = "|"
 
 // PerfdataList can store multiple perfdata and implements the fmt.Stringer interface
-// to provide formated output for the performance data
+// to provide formatted output for the performance data
 type PerfdataList []*Perfdata
 
 // String returns string representations of all Perfdata added to the list
