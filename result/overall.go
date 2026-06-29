@@ -113,6 +113,7 @@ func (o *Overall) GetOutput() string {
 	return output.String()
 }
 
+// SetOKSummary sets the summary to the given string
 func (o *Overall) SetOKSummary(summary string) {
 	o.mu.Lock()
 	defer o.mu.Unlock()
